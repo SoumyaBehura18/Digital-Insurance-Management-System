@@ -1,15 +1,41 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-100">
-    <div class="p-8 bg-white rounded-lg shadow-lg text-center">
-      <h1 class="text-2xl font-bold text-blue-600">Tailwind is Working!</h1>
-      <p class="mt-4 text-gray-700">This is a basic check div.</p>
-      <button class="mt-6 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-        Click Me
-      </button>
-    </div>
+  <div class="flex h-screen">
+    <SidebarLayout
+      :currentPage="currentRoute"
+      :setCurrentPage="setCurrentPage"
+      :isCollapsed="isCollapsed"
+      :setIsCollapsed="setIsCollapsed"
+      :isDarkMode="isDarkMode"
+      :setIsDarkMode="setIsDarkMode"
+      :onLogout="onLogout"
+    />
+
+    <main class="flex-1 p-6 overflow-auto">
+      <router-view />
+    </main>
   </div>
 </template>
 
-<script setup lang="ts">
-// Nothing needed here for basic check
+<script setup>
+import { ref, computed } from "vue";
+import SidebarLayout from "./components/layout/SidebarLayout.vue";
+import { useRouter, useRoute } from "vue-router";
+
+const router = useRouter();
+const route = useRoute();
+
+const isCollapsed = ref(true);
+const isDarkMode = ref(false);
+
+const setIsCollapsed = (val) => (isCollapsed.value = val);
+const setIsDarkMode = (val) => (isDarkMode.value = val);
+
+const currentRoute = computed(() => route.path); // ✅ now works
+const setCurrentPage = (page) => {
+  router.push(`/${page}`);
+};
+
+const onLogout = () => {
+  console.log("Logout clicked!");
+};  
 </script>
