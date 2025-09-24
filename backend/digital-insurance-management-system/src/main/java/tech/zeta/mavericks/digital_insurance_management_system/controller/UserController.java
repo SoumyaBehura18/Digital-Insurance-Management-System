@@ -1,8 +1,7 @@
-package tech.zeta.mavericks.digital_insurance_management_system.Controller;
+package tech.zeta.mavericks.digital_insurance_management_system.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,13 +11,12 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.LoginRequest;
-import tech.zeta.mavericks.digital_insurance_management_system.Service.JWTService;
-import tech.zeta.mavericks.digital_insurance_management_system.Service.UserService;
-import tech.zeta.mavericks.digital_insurance_management_system.model.UserPrincipal;
-import tech.zeta.mavericks.digital_insurance_management_system.model.Users;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.LoginRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.service.JWTService;
+import tech.zeta.mavericks.digital_insurance_management_system.service.UserService;
+import tech.zeta.mavericks.digital_insurance_management_system.entity.UserPrincipal;
+import tech.zeta.mavericks.digital_insurance_management_system.entity.User;
 
-import javax.naming.AuthenticationException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +39,7 @@ public class UserController{
     private JWTService jwtService;
 
     @PostMapping("/register")
-    public Users register(@RequestBody Users user){
+    public User register(@RequestBody User user){
         return service.register(user);
     }
 

@@ -1,4 +1,4 @@
-package tech.zeta.mavericks.digital_insurance_management_system.Config;
+package tech.zeta.mavericks.digital_insurance_management_system.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
