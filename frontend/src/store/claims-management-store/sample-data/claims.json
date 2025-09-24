@@ -1,0 +1,68 @@
+[
+  {
+    "id": 1,
+    "userPolicyId": 1,
+    "userId": 1,
+    "claimDate": "2024-01-15",
+    "claimAmount": 15000.00,
+    "reason": "Vehicle accident repair claim",
+    "status": "PENDING",
+    "reviewerComment": null,
+    "resolvedDate": null
+  },
+  {
+    "id": 2,
+    "userPolicyId": 2,
+    "userId": 1,
+    "claimDate": "2024-02-10",
+    "claimAmount": 8500.50,
+    "reason": "Medical expenses for surgery",
+    "status": "APPROVED",
+    "reviewerComment": "All documents verified. Claim approved.",
+    "resolvedDate": "2024-02-15"
+  },
+  {
+    "id": 3,
+    "userPolicyId": 3,
+    "userId": 2,
+    "claimDate": "2024-01-20",
+    "claimAmount": 3200.00,
+    "reason": "Dental treatment claim",
+    "status": "REJECTED",
+    "reviewerComment": "Treatment not covered under current policy.",
+    "resolvedDate": "2024-01-25"
+  },
+  {
+    "id": 4,
+    "userPolicyId": 4,
+    "userId": 2,
+    "claimDate": "2024-03-01",
+    "claimAmount": 25000.00,
+    "reason": "Life insurance claim due to hospitalization",
+    "status": "PENDING",
+    "reviewerComment": null,
+    "resolvedDate": null
+  },
+  {
+    "id": 5,
+    "userPolicyId": 5,
+    "userId": 3,
+    "claimDate": "2024-02-28",
+    "claimAmount": 12000.75,
+    "reason": "Vehicle theft insurance claim",
+    "status": "APPROVED",
+    "reviewerComment": "Police report verified. Claim processed.",
+    "resolvedDate": "2024-03-05"
+  },
+  {
+    "id": 6,
+    "userPolicyId": 6,
+    "userId": 3,
+    "claimDate": "2024-03-10",
+    "claimAmount": 5500.00,
+    "reason": "Health checkup and diagnostic tests",
+    "status": "PENDING",
+    "reviewerComment": null,
+    "resolvedDate": null
+  }
+]
