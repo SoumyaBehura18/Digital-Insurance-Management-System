@@ -19,7 +19,7 @@
 
 <script setup>
 import HeaderLayout from "@/components/layout/HeaderLayout.vue";
-import AdminClaims from "@/components/claims-management/AdminClaims.vue";
+import AdminClaims from "@/components/ClaimsManagement/AdminClaims.vue";
 import { ref } from "vue";
 import { useRoute } from "vue-router";
 

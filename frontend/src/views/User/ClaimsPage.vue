@@ -22,8 +22,8 @@
 
 <script setup>
 import HeaderLayout from "@/components/layout/HeaderLayout.vue";
-import ClaimList from "@/components/claims-management/ClaimList.vue";
-import SubmitClaim from "@/components/claims-management/SubmitClaim.vue";
+import ClaimList from "@/components/ClaimsManagement/ClaimList.vue";
+import SubmitClaim from "@/components/ClaimsManagement/SubmitClaim.vue";
 import { ref } from "vue";
 import { useRoute } from "vue-router";
 
