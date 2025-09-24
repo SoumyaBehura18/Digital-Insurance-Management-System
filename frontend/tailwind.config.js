@@ -9,8 +9,7 @@ export default {
       colors: {
         brand: {
           backgroundTheme: "#6c63ff",
-          textTheme:"#717182"
-
+          textTheme:"#717182",
         },
       },
     },
