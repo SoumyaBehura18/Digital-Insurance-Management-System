@@ -44,7 +44,8 @@ const props = defineProps({
   setIsCollapsed: {
     type: Function,
     required: true,
-  },
+  }
+
 });
 
 // const toggleCollapsed = () => {
