@@ -19,7 +19,9 @@
         </div>
       </div>
 
-      <PolicyCatalog v-if="view === 'catalog'" />
+      <PolicyCatalog v-if="view === 'catalog'" @purchase="showPurchaseModal = $event" />
+
+      <MyPolicies v-if="view === 'my-policies'" @renew="showPurchaseModal = $event" />
     </div>
   </div>
 </template>
@@ -28,6 +30,7 @@
 import { ref } from "vue";
 import HeaderLayout from "../components/layout/HeaderLayout.vue";
 import PolicyCatalog from "../components/PoliciesComponents/PolicyCatalog.vue";
+import MyPolicies from "@/components/PoliciesComponents/MyPolicies.vue";
 
 const user = ref({
   name: "John Doe",
