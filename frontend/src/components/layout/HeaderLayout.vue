@@ -1,6 +1,5 @@
 <template>
   <header class="bg-background border-b border-border p-4">
-
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-4">
        <!-- Mobile menu -->

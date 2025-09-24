@@ -38,7 +38,10 @@ module.exports = {
     "vue/first-attribute-linebreak": "off",
     "vue/html-indent": "off",
     "vue/html-closing-bracket-newline":"off",
-    "vue/attribute-hyphenation":"off"
+    "vue/attribute-hyphenation":"off",
+    "vue/require-explicit-emits":"off",
+    "vue/require-default-prop":"off",
+    "vue/html-closing-bracket-spacing":"off"
 
   },
 };
