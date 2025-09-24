@@ -1,4 +1,4 @@
-package tech.zeta.mavericks.digital_insurance_management_system.DTO;
+package tech.zeta.mavericks.digital_insurance_management_system.dto;
 
 import lombok.Data;
 

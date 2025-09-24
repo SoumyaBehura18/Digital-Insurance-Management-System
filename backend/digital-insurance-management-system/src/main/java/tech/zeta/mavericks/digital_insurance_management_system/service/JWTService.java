@@ -1,4 +1,4 @@
-package tech.zeta.mavericks.digital_insurance_management_system.Service;
+package tech.zeta.mavericks.digital_insurance_management_system.service;
 
 
 import io.jsonwebtoken.Claims;
