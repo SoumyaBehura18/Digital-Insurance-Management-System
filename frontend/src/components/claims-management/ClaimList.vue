@@ -1,130 +1,161 @@
 <template>
-  <div class="max-w-6xl mx-auto p-6">
+  <div class="w-full mx-auto p-6">
     <!-- Header -->
-    <div class="flex justify-between items-center pb-6 border-b border-gray-200 mb-8">
-      <h1 class="text-2xl font-semibold text-gray-900">Claims Management</h1>
-      <div class="flex rounded-lg overflow-hidden">
-        <router-link 
-          to="/claims" 
-          class="px-6 py-2 bg-indigo-500 text-white text-sm font-medium hover:bg-indigo-600 transition-colors"
-        >
+    <div class="flex justify-between items-center pb-6 border-b mb-8">
+      <h1 class="text-2xl font-semibold">Claims Management</h1>
+      <div class="flex rounded overflow-hidden">
+        <router-link to="/claims" class="px-4 py-2 bg-brand-backgroundTheme text-white text-sm hover:bg-brand-hover">
           View Claims
         </router-link>
-        <router-link 
-          to="/submit-claim" 
-          class="px-6 py-2 bg-white text-gray-700 border border-l-0 border-gray-300 text-sm font-medium hover:bg-gray-50 transition-colors"
-        >
+        <router-link to="/submit-claim" class="px-4 py-2 border text-sm text-brand-textTheme hover:bg-gray-50">
           Submit Claim
         </router-link>
       </div>
     </div>
 
     <!-- Claims Section -->
-    <div class="bg-white rounded-lg border border-gray-200">
-      <div class="p-6 border-b border-gray-200">
-        <h2 class="text-lg font-semibold text-gray-900">Your Claims</h2>
+    <div class="bg-white rounded border">
+      <div class="p-4 border-b">
+        <h2 class="text-lg font-semibold">Your Claims</h2>
       </div>
 
       <!-- Loading State -->
-      <div v-if="$store.state.loading" class="text-center py-12">
-        <p class="text-gray-500">Loading your claims...</p>
+      <div v-if="$store.state.loading" class="py-12 text-center text-gray-500">
+        Loading your claims...
       </div>
 
       <!-- Error State -->
-      <div v-if="$store.state.error" class="text-center py-12">
-        <p class="text-red-600 mb-4">{{ $store.state.error }}</p>
-        <button 
-          @click="loadClaims" 
-          class="px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition-colors"
-        >
+      <div v-if="$store.state.error" class="py-12 text-center text-red-600">
+        <p class="mb-4">{{ $store.state.error }}</p>
+        <button @click="loadClaims" class="px-4 py-2 bg-brand-backgroundTheme text-white rounded hover:bg-brand-hover">
           Try Again
         </button>
       </div>
 
       <!-- Empty State -->
-      <div v-if="!$store.state.loading && !$store.state.error && $store.state.claims.length === 0" class="text-center py-12">
-        <p class="text-gray-500">You have not submitted any claims yet.</p>
+      <div v-if="!$store.state.loading && !$store.state.error && !$store.state.claims.length" 
+           class="py-12 text-center text-gray-500">
+        You have not submitted any claims yet.
       </div>
 
       <!-- Claims Table -->
-      <div v-if="!$store.state.loading && !$store.state.error && $store.state.claims.length > 0" class="overflow-x-auto">
-        <table class="w-full">
+      <div v-if="!$store.state.loading && !$store.state.error && $store.state.claims.length" class="overflow-x-auto">
+        <table class="w-full text-sm">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Policy Name
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Claim Amount
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Date
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Reason
-              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium uppercase">Policy Name</th>
+              <th class="px-4 py-2 text-left text-xs font-medium uppercase">Claim Amount</th>
+              <th class="px-4 py-2 text-left text-xs font-medium uppercase">Date</th>
+              <th class="px-4 py-2 text-left text-xs font-medium uppercase">Status</th>
+              <th class="px-4 py-2 text-left text-xs font-medium uppercase">Reason</th>
+              <th class="px-4 py-2 text-left text-xs font-medium uppercase">Admin Review</th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="claim in $store.state.claims" :key="claim.id" class="hover:bg-gray-50">
-              <td class="px-6 py-4 text-sm font-medium text-gray-900">
-                {{ getPolicyName(claim.userPolicyId) }}
-              </td>
-              <td class="px-6 py-4 text-sm font-semibold text-green-600">
-                ${{ formatAmount(claim.claimAmount) }}
-              </td>
-              <td class="px-6 py-4 text-sm text-gray-500">
-                {{ formatDate(claim.claimDate) }}
-              </td>
-              <td class="px-6 py-4 text-sm">
-                <span 
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium uppercase"
+          <tbody>
+            <tr v-for="claim in $store.state.claims" :key="claim.id" class="hover:bg-gray-50 border-b border-gray-100">
+              <td class="px-4 py-4 font-medium">{{ getPolicyName(claim.userPolicyId) }}</td>
+              <td class="px-4 py-4 font-semibold text-green-600">₹{{ formatAmount(claim.claimAmount) }}</td>
+              <td class="px-4 py-4 text-gray-500">{{ formatDate(claim.claimDate) }}</td>
+              <td class="px-4 py-4">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs"
                   :class="{
                     'bg-yellow-100 text-yellow-800': claim.status === 'PENDING',
                     'bg-green-100 text-green-800': claim.status === 'APPROVED',
                     'bg-red-100 text-red-800': claim.status === 'REJECTED'
-                  }"
-                >
-                  <span 
-                    class="w-1.5 h-1.5 rounded-full mr-1.5"
+                  }">
+                  <span class="w-2 h-2 rounded-full mr-1"
                     :class="{
                       'bg-yellow-600': claim.status === 'PENDING',
                       'bg-green-600': claim.status === 'APPROVED',
                       'bg-red-600': claim.status === 'REJECTED'
-                    }"
-                  ></span>
+                    }"></span>
                   {{ claim.status }}
                 </span>
               </td>
-              <td class="px-6 py-4 text-sm text-gray-700 max-w-xs truncate">
-                {{ claim.reason }}
+              <td class="px-4 py-4 truncate max-w-xs">{{ claim.reason }}</td>
+              <td class="px-4 py-4">
+                <button v-if="claim.reviewerComment" @click="showCommentModal(claim)"
+                  class="px-2 py-1 text-xs text-brand-backgroundTheme bg-purple-50 rounded hover:bg-purple-100">
+                  View Comment
+                </button>
+                <span v-else class="text-xs text-gray-400 italic">No comments yet</span>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
+
+    <!-- Comment Modal -->
+    <div v-if="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click="closeModal">
+      <div class="bg-white rounded p-6 max-w-lg w-full mx-4" @click.stop>
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <h3 class="text-lg font-semibold">Admin Review</h3>
+            <p class="text-sm text-gray-600">Claim #{{ selectedClaim?.id }}</p>
+          </div>
+          <button @click="closeModal" class="text-gray-400 hover:text-gray-600">✕</button>
+        </div>
+
+        <div class="mb-4 bg-gray-50 rounded p-4">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-3 h-3 rounded-full"
+              :class="{
+                'bg-green-400': selectedClaim?.status === 'APPROVED',
+                'bg-red-400': selectedClaim?.status === 'REJECTED'
+              }"></div>
+            <span class="text-sm font-medium">
+              {{ selectedClaim?.status === 'APPROVED' ? 'Approved' : 'Rejected' }}
+            </span>
+          </div>
+          <p class="text-sm">{{ selectedClaim?.reviewerComment }}</p>
+        </div>
+
+        <div class="flex justify-between text-xs text-gray-500">
+          <span v-if="selectedClaim?.resolvedDate">Reviewed on {{ formatDate(selectedClaim.resolvedDate) }}</span>
+          <span>Claim Amount: ₹{{ formatAmount(selectedClaim?.claimAmount) }}</span>
+        </div>
+
+        <div class="mt-6 flex justify-end">
+          <button @click="closeModal" class="px-4 py-2 bg-brand-backgroundTheme text-white rounded hover:bg-brand-hover">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
+
 
 <script>
 export default {
   name: 'ClaimList',
-  props: {
-    userId: {
-      type: Number,
-      default: 1
+  data() {
+    return {
+      showModal: false,
+      selectedClaim: null
+    };
+  },
+  computed: {
+    userId() {
+      return parseInt(localStorage.getItem('userId')) || null;
     }
   },
   async mounted() {
     await this.$store.dispatch('fetchPolicies');
     await this.loadClaims();
   },
+  
+  beforeUnmount() {
+    // Restore body scroll if component is destroyed while modal is open
+    document.body.style.overflow = 'auto';
+  },
   methods: {
     async loadClaims() {
+      if (!this.userId) {
+        console.error('User not authenticated');
+        return;
+      }
       await this.$store.dispatch('fetchClaims', this.userId);
     },
 
@@ -139,15 +170,27 @@ export default {
     },
 
     formatAmount(amount) {
-      return amount.toLocaleString('en-US', { 
-        minimumFractionDigits: 0, 
-        maximumFractionDigits: 0 
-      });
+      if (!amount) return '0';
+      return new Intl.NumberFormat('en-IN').format(amount);
     },
 
     getPolicyName(policyId) {
       const policy = this.$store.state.policies.find(p => p.id === policyId);
       return policy ? policy.name : `Policy ${policyId}`;
+    },
+
+    showCommentModal(claim) {
+      this.selectedClaim = claim;
+      this.showModal = true;
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+    },
+
+    closeModal() {
+      this.showModal = false;
+      this.selectedClaim = null;
+      // Restore body scroll
+      document.body.style.overflow = 'auto';
     }
   }
 };

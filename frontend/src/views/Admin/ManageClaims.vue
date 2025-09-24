@@ -10,11 +10,8 @@
 
     <!-- Page Content -->
     <main class="flex-1 p-6 overflow-auto">
-      <template v-if="route.path === '/claims'">
-        <ClaimList />
-      </template>
-      <template v-else-if="route.path === '/submit-claim'">
-        <SubmitClaim />
+      <template v-if="route.path === '/admin/claims'">
+        <AdminClaims />
       </template>
     </main>
   </div>
@@ -22,12 +19,9 @@
 
 <script setup>
 import HeaderLayout from "@/components/layout/HeaderLayout.vue";
-import ClaimList from "@/components/claims-management/ClaimList.vue";
-import SubmitClaim from "@/components/claims-management/SubmitClaim.vue";
+import AdminClaims from "@/components/claims-management/AdminClaims.vue";
 import { ref } from "vue";
 import { useRoute } from "vue-router";
-
-const route = useRoute();
 
 const isCollapsed = ref(true);
 
@@ -39,4 +33,6 @@ const user = ref({
   name: "John Doe",
   email: "john.doe@example.com",
 });
+
+const route = useRoute(); 
 </script>
