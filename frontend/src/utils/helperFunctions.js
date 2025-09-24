@@ -14,7 +14,7 @@ export const getStatusClassIcon = (status) => {
   if (status === "OPEN") return MessageCircle;
   else if (status === "RESOLVED") return CheckCircle;
   else if (status === "CLOSED") return XCircle;
-  else return AlertCircle;
+  else return XCircle;
 };
 
 export const formatDate = (date) => {

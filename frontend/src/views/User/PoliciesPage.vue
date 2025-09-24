@@ -7,163 +7,165 @@
       class="w-full"
     />
     <div class="space-y-6 p-6">
-    <!-- Header with View Buttons -->
-    <div class="flex items-center justify-between">
-      <h1>{{ view === "catalog" ? "Policy Catalog" : "My Policies" }}</h1>
-      <div class="flex gap-2">
-        <button
-          :class="
-            view === 'catalog'
-              ? 'bg-brand-backgroundTheme text-white px-4 py-2 rounded-xl'
-              : 'border border-gray-300 px-4 py-2 rounded-xl'
-          "
-          @click="view = 'catalog'"
-        >
-          Browse Policies
-        </button>
-        <button
-          :class="
-            view === 'my-policies'
-              ? 'bg-brand-backgroundTheme text-white px-4 py-2 rounded-xl'
-              : 'border border-gray-300 px-4 py-2 rounded-xl'
-          "
-          @click="view = 'my-policies'"
-        >
-          My Policies
-        </button>
-      </div>
-    </div>
-
-    <!-- Catalog View -->
-    <div v-if="view === 'catalog'">
-      <!-- Filter -->
-      <div class="flex items-center gap-4">
-        <div class="flex items-center gap-2">
-          <Funnel class="w-6 h-6 text-brand-textTheme" />
-          <select
-            v-model="filter"
-            class="border border-gray-300 rounded-lg bg-gray-200 px-2 py-1"
-          >
-            <option value="All">All Types</option>
-            <option value="Life">Life</option>
-            <option value="Health">Health</option>
-            <option value="Vehicle">Vehicle</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Policy Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
-        <div
-          v-for="(policy, index) in filteredPolicies"
-          :key="index"
-          class="border rounded-xl shadow p-4 space-y-4"
-        >
-          <div class="flex justify-between items-center">
-            <h2 class="font-bold">{{ policy.name }}</h2>
-            <span class="border border-gray-300 px-2 py-1 rounded-lg text-sm">{{
-              policy.type
-            }}</span>
-          </div>
-          <div class="space-y-2">
-            <div class="flex justify-between">
-              <span class="text-sm text-gray-500">Coverage</span>
-              <span class="font-medium"
-                >Rs.{{ policy.coverageAmount.toLocaleString() }}</span
-              >
-            </div>
-            <div class="flex justify-between">
-              <span class="text-sm text-gray-500">Premium</span>
-              <span class="font-medium">Rs.{{ policy.premium }}/year</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-sm text-gray-500">Duration</span>
-              <span class="font-medium">{{ policy.duration }}</span>
-            </div>
-          </div>
+      <!-- Header with View Buttons -->
+      <div class="flex items-center justify-between">
+        <h1>{{ view === "catalog" ? "Policy Catalog" : "My Policies" }}</h1>
+        <div class="flex gap-2">
           <button
-            class="w-full bg-brand-backgroundTheme text-white py-2 rounded-xl"
-            @click="showPurchaseModal = policy"
+            :class="
+              view === 'catalog'
+                ? 'bg-brand-backgroundTheme text-white px-4 py-2 rounded-xl'
+                : 'border border-gray-300 px-4 py-2 rounded-xl'
+            "
+            @click="view = 'catalog'"
           >
-            Purchase Policy
+            Browse Policies
+          </button>
+          <button
+            :class="
+              view === 'my-policies'
+                ? 'bg-brand-backgroundTheme text-white px-4 py-2 rounded-xl'
+                : 'border border-gray-300 px-4 py-2 rounded-xl'
+            "
+            @click="view = 'my-policies'"
+          >
+            My Policies
           </button>
         </div>
       </div>
-    </div>
 
-    <!-- My Policies View -->
-    <div v-if="view === 'my-policies'" class="mt-4">
-      <div class="border rounded-lg shadow">
-        <div class="p-4 border-b">
-          <h2 class="font-bold">Your Active Policies</h2>
+      <!-- Catalog View -->
+      <div v-if="view === 'catalog'">
+        <!-- Filter -->
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2">
+            <Funnel class="w-6 h-6 text-brand-textTheme" />
+            <select
+              v-model="filter"
+              class="border border-gray-300 rounded-lg bg-gray-200 px-2 py-1"
+            >
+              <option value="All">All Types</option>
+              <option value="Life">Life</option>
+              <option value="Health">Health</option>
+              <option value="Vehicle">Vehicle</option>
+            </select>
+          </div>
         </div>
-        <div class="p-4 overflow-x-auto">
-          <table class="w-full table-auto">
-            <thead>
-              <tr class="bg-gray-100">
-                <th class="px-4 py-2 text-left">Policy Name</th>
-                <th class="px-4 py-2 text-left">Type</th>
-                <th class="px-4 py-2 text-left">Start Date</th>
-                <th class="px-4 py-2 text-left">End Date</th>
-                <th class="px-4 py-2 text-left">Status</th>
-                <th class="px-4 py-2 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="policy in userPolicies"
-                :key="policy.id"
-                class="border-b"
+
+        <!-- Policy Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+          <div
+            v-for="(policy, index) in filteredPolicies"
+            :key="index"
+            class="border rounded-xl shadow p-4 space-y-4"
+          >
+            <div class="flex justify-between items-center">
+              <h2 class="font-bold">{{ policy.name }}</h2>
+              <span
+                class="border border-gray-300 px-2 py-1 rounded-lg text-sm"
+                >{{ policy.type }}</span
               >
-                <td class="px-4 py-2 font-medium">{{ policy.name }}</td>
-                <td class="px-4 py-2">{{ policy.type }}</td>
-                <td class="px-4 py-2">{{ formatDate(policy.startDate) }}</td>
-                <td class="px-4 py-2">{{ formatDate(policy.endDate) }}</td>
-                <td class="px-4 py-2">
-                  <span
-                    :class="
-                      policy.status === 'ACTIVE'
-                        ? 'bg-green-100 text-green-800 px-2 py-1 rounded text-sm'
-                        : 'bg-gray-100 text-gray-600 px-2 py-1 rounded text-sm'
-                    "
-                  >
-                    {{ policy.status }}
-                  </span>
-                </td>
-                <td class="px-4 py-2">
-                  <button
-                    v-if="canRenew(policy)"
-                    class="border px-2 py-1 rounded text-sm"
-                    @click="showPurchaseModal = policy"
-                  >
-                    Renew
-                    <span v-if="policy.status === 'EXPIRED'">
-                      ({{ 15 - daysSinceExpiry(policy) }} days left to renew)
-                    </span>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            </div>
+            <div class="space-y-2">
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-500">Coverage</span>
+                <span class="font-medium"
+                  >Rs.{{ policy.coverageAmount.toLocaleString() }}</span
+                >
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-500">Premium</span>
+                <span class="font-medium">Rs.{{ policy.premium }}/year</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-500">Duration</span>
+                <span class="font-medium">{{ policy.duration }}</span>
+              </div>
+            </div>
+            <button
+              class="w-full bg-brand-backgroundTheme text-white py-2 rounded-xl"
+              @click="showPurchaseModal = policy"
+            >
+              Purchase Policy
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="space-y-6">
-      <!-- Header and Views ... same as before -->
 
-      <!-- Use the new PurchaseModal component -->
-      <PurchaseModal
-        :policy="showPurchaseModal"
-        @close="showPurchaseModal = null"
-        @purchase="purchasePolicy"
-      />
+      <!-- My Policies View -->
+      <div v-if="view === 'my-policies'" class="mt-4">
+        <div class="border rounded-lg shadow">
+          <div class="p-4 border-b">
+            <h2 class="font-bold">Your Active Policies</h2>
+          </div>
+          <div class="p-4 overflow-x-auto">
+            <table class="w-full table-auto">
+              <thead>
+                <tr class="bg-gray-100">
+                  <th class="px-4 py-2 text-left">Policy Name</th>
+                  <th class="px-4 py-2 text-left">Type</th>
+                  <th class="px-4 py-2 text-left">Start Date</th>
+                  <th class="px-4 py-2 text-left">End Date</th>
+                  <th class="px-4 py-2 text-left">Status</th>
+                  <th class="px-4 py-2 text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="policy in userPolicies"
+                  :key="policy.id"
+                  class="border-b"
+                >
+                  <td class="px-4 py-2 font-medium">{{ policy.name }}</td>
+                  <td class="px-4 py-2">{{ policy.type }}</td>
+                  <td class="px-4 py-2">{{ formatDate(policy.startDate) }}</td>
+                  <td class="px-4 py-2">{{ formatDate(policy.endDate) }}</td>
+                  <td class="px-4 py-2">
+                    <span
+                      :class="
+                        policy.status === 'ACTIVE'
+                          ? 'bg-green-100 text-green-800 px-2 py-1 rounded text-sm'
+                          : 'bg-gray-100 text-gray-600 px-2 py-1 rounded text-sm'
+                      "
+                    >
+                      {{ policy.status }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-2">
+                    <button
+                      v-if="canRenew(policy)"
+                      class="border px-2 py-1 rounded text-sm"
+                      @click="showPurchaseModal = policy"
+                    >
+                      Renew
+                      <span v-if="policy.status === 'EXPIRED'">
+                        ({{ 15 - daysSinceExpiry(policy) }} days left to renew)
+                      </span>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="space-y-6">
+        <!-- Header and Views ... same as before -->
+
+        <!-- Use the new PurchaseModal component -->
+        <PurchaseModal
+          :policy="showPurchaseModal"
+          @close="showPurchaseModal = null"
+          @purchase="purchasePolicy"
+        />
+      </div>
     </div>
   </div>
 </template>
 <script setup>
 import { ref, computed } from "vue";
 import { Funnel } from "lucide-vue-next";
-import PurchaseModal from "@/components/PurchaseModal.vue";
+import PurchaseModal from "@/components/PoliciesComponents/PurchaseModal.vue";
 import HeaderLayout from "@/components/layout/HeaderLayout.vue";
 const user = ref({
   name: "John Doe",
@@ -236,9 +238,7 @@ const view = ref("catalog");
 const showPurchaseModal = ref(null);
 
 const filteredPolicies = computed(() =>
-  availablePolicies.value.filter(
-    (p) => filter.value === "All" || p.type === filter.value
-  )
+  availablePolicies.value.filter((p) => p.value === "All" || p.type === p.value)
 );
 
 // Purchase handler called when modal emits "purchase"
