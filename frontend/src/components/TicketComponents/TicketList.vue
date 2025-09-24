@@ -1,12 +1,10 @@
 <template>
   <div class="bg-gray-50 rounded-lg shadow">
-    <!-- Section Header -->
     <div class="px-6 py-4 border-b border-gray-200">
       <h3 class="text-lg text-gray-900">Your Support Tickets</h3>
     </div>
 
     <div class="p-6">
-      <!-- Empty State -->
       <div v-if="tickets.length === 0" class="text-center py-12">
         <div class="mb-4">
           <svg
@@ -31,7 +29,6 @@
         </BaseButton>
       </div>
 
-      <!-- Tickets List -->
       <div v-else class="space-y-4">
         <div
           v-for="ticket in tickets"
@@ -49,6 +46,10 @@
                   class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                   :class="getStatusClasses(ticket.status)"
                 >
+                  <component
+                    :is="getStatusClassIcon(ticket.status)"
+                    class="w-3 h-3 mr-1"
+                  />
                   {{ ticket.status }}
                 </span>
                 <span class="text-xs text-gray-500">{{
@@ -56,11 +57,12 @@
                 }}</span>
               </div>
             </div>
+
             <div class="flex gap-2 mt-5">
               <BaseButton
                 variant="theme"
                 size="sm"
-                @click="$emit('view-ticket', ticket.id)"
+                @click="handleViewTicket(ticket)"
                 class="flex items-center"
               >
                 <Eye class="h-5" />
@@ -80,12 +82,27 @@
         </div>
       </div>
     </div>
+
+    <TicketDetailsModal
+      :is-open="isModalOpen"
+      :ticket="selectedTicket"
+      @close="handleCloseModal"
+      @update-ticket="handleUpdateTicket"
+      @resolve-ticket="handleResolveTicket"
+    />
   </div>
 </template>
 
 <script setup>
+import { ref } from "vue";
 import BaseButton from "@/components/BaseButton.vue";
-import { Pencil, Eye } from "lucide-vue-next";
+import TicketDetailsModal from "@/components/TicketComponents/TicketDetailsModal.vue";
+import { Pencil, Eye, AlertCircle, CheckCircle, X } from "lucide-vue-next";
+import {
+  getStatusClassIcon,
+  getStatusClasses,
+  formatDate,
+} from "@/utils/helperFunctions";
 
 // Props
 const props = defineProps({
@@ -96,24 +113,34 @@ const props = defineProps({
 });
 
 // Emits
-const emit = defineEmits(["create-first-ticket", "view-ticket"]);
+const emit = defineEmits([
+  "create-first-ticket",
+  "view-ticket",
+  "update-ticket",
+  "resolve-ticket",
+]);
+
+// Modal state
+const isModalOpen = ref(false);
+const selectedTicket = ref(null);
 
 // Methods
-const getStatusClasses = (status) => {
-  const statusClasses = {
-    OPEN: "bg-green-100 text-green-800",
-    "in-progress": "bg-yellow-100 text-yellow-800",
-    CLOSED: "bg-gray-100 text-gray-800",
-    RESOLVED: "bg-blue-100 text-blue-800",
-  };
-  return statusClasses[status] || "bg-gray-100 text-gray-800";
+const handleViewTicket = (ticket) => {
+  selectedTicket.value = ticket;
+  isModalOpen.value = true;
+  emit("view-ticket", ticket.id);
 };
 
-const formatDate = (date) => {
-  return new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(new Date(date));
+const handleCloseModal = () => {
+  isModalOpen.value = false;
+  selectedTicket.value = null;
+};
+
+const handleUpdateTicket = (ticket) => {
+  emit("update-ticket", ticket);
+};
+
+const handleResolveTicket = (ticket) => {
+  emit("resolve-ticket", ticket);
 };
 </script>

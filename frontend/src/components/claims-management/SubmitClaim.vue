@@ -124,6 +124,17 @@ export default {
       }
     };
   },
+  watch: {
+    'form.userPolicyId'() {
+      this.$store.dispatch('clearMessages');
+    },
+    'form.claimAmount'() {
+      this.$store.dispatch('clearMessages');
+    },
+    'form.reason'() {
+      this.$store.dispatch('clearMessages');
+    }
+  },
   async mounted() {
     await this.$store.dispatch('fetchPolicies');
   },
@@ -156,16 +167,6 @@ export default {
       }
     }
   },
-  watch: {
-    'form.userPolicyId'() {
-      this.$store.dispatch('clearMessages');
-    },
-    'form.claimAmount'() {
-      this.$store.dispatch('clearMessages');
-    },
-    'form.reason'() {
-      this.$store.dispatch('clearMessages');
-    }
-  }
+  
 };
 </script>
