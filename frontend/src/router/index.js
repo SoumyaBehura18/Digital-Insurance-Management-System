@@ -4,9 +4,10 @@ import PoliciesPage from "../views/PoliciesPage.vue";
 import ClaimsPage from "../views/ClaimsPage.vue";
 import ChatbotPage from "../views/ChatbotPage.vue";
 import TicketsPage from "../views/TicketsPage.vue";
+import LandingPage from "@/views/LandingPage.vue";
 
 const routes = [
-  { path: "/", redirect: "/dashboard" },
+  { path: "/", component:LandingPage },
   { path: "/dashboard", component: DashboardPage },
   { path: "/policies", component: PoliciesPage },
   { path: "/claims", component: ClaimsPage },
