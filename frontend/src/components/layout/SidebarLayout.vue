@@ -1,20 +1,15 @@
 <template>
-  <div
-    :class="[
-      'flex flex-col h-full border-r transition-all duration-300 bg-gray-100',
-      isCollapsed ? 'w-16' : 'w-64'
-    ]"
-  >
+  <div :class="[
+    'flex flex-col h-full border-r transition-all duration-300 bg-gray-100',
+    isCollapsed ? 'w-16' : 'w-64'
+  ]">
     <!-- Header -->
     <div class="p-4 border-b flex items-center justify-between">
       <div v-if="!isCollapsed" class="flex items-center gap-2">
-        <Shield class="w-6 h-6 text-purple-600" />
+        <Shield class="w-6 h-6 text-brand-backgroundTheme" />
         <span class="font-semibold text-gray-900">InsureCore</span>
       </div>
-      <button
-        class="p-2 rounded hover:bg-gray-200 text-gray-900"
-        @click="setIsCollapsed(!isCollapsed)"
-      >
+      <button class="p-2 rounded hover:bg-gray-200 text-gray-900" @click="setIsCollapsed(!isCollapsed)">
         <ChevronRight v-if="isCollapsed" class="w-4 h-4" />
         <ChevronLeft v-else class="w-4 h-4" />
       </button>
@@ -23,26 +18,18 @@
     <!-- Navigation -->
     <nav class="flex-1 p-4 bg-gray-100">
       <div class="space-y-2">
-        <button
-          v-for="item in sidebarItems"
-          :key="item.id"
-          @click="handleClick(item.id)"
-          :class="[
-            'w-full flex items-center justify-start rounded transition py-2',
-            isCollapsed ? 'px-2' : 'px-4',
-            currentPage === item.id
-              ? 'text-purple'
-              : 'text-gray-900 hover:bg-gray-200'
-          ]"
-          :style="currentPage === item.id ? { backgroundColor: 'color-putple-800' } : {}"
-        >
-          <component
-            :is="item.icon"
-            :class="[
-              'w-4 h-4 shrink-0',
-              currentPage === item.id ? 'text-white' : 'text-gray-900'
-            ]"
-          />
+        <button v-for="item in sidebarItems" :key="item.id" @click="handleClick(item.id)" :class="[
+          'w-full flex items-center justify-start rounded transition py-2',
+          isCollapsed ? 'px-2' : 'px-4',
+          currentPage === `/${item.id}`
+            ? 'bg-brand-backgroundTheme text-white'
+            : 'text-gray-900 hover:bg-gray-200'
+
+        ]">
+          <component :is="item.icon" :class="[
+            'w-4 h-4 shrink-0',
+            currentPage === `/${item.id}` ? 'text-white' : 'text-gray-900'
+          ]" />
           <span v-if="!isCollapsed" class="ml-2 truncate">{{ item.label }}</span>
         </button>
       </div>
@@ -56,33 +43,22 @@
           <Sun class="w-4 h-4 text-gray-900" />
           <span class="text-sm text-gray-900">Dark Mode</span>
         </div>
-        <input
-          type="checkbox"
-          class="toggle"
-          v-model="darkModeLocal"
-          @change="setIsDarkMode(darkModeLocal)"
-        />
+        <input type="checkbox" class="toggle" v-model="darkModeLocal" @change="setIsDarkMode(darkModeLocal)" />
       </div>
 
       <div v-else class="flex justify-center">
-        <button
-          class="p-2 rounded hover:bg-gray-200 text-gray-900"
-          @click="setIsDarkMode(!isDarkMode)"
-        >
+        <button class="p-2 rounded hover:bg-gray-200 text-gray-900" @click="setIsDarkMode(!isDarkMode)">
           <Sun v-if="isDarkMode" class="w-4 h-4" />
           <Moon v-else class="w-4 h-4" />
         </button>
       </div>
 
       <!-- Logout -->
-      <button
-        @click="onLogout"
-        :class="[
-          'w-full flex items-center justify-start rounded transition-colors py-2',
-          isCollapsed ? 'px-2' : 'px-4',
-          'text-gray-900 hover:bg-gray-200'
-        ]"
-      >
+      <button @click="onLogout" :class="[
+        'w-full flex items-center justify-start rounded transition-colors py-2',
+        isCollapsed ? 'px-2' : 'px-4',
+        'text-gray-900 hover:bg-gray-200'
+      ]">
         <LogOut class="w-4 h-4 shrink-0" />
         <span v-if="!isCollapsed" class="ml-2">Logout</span>
       </button>
@@ -151,9 +127,11 @@ const handleClick = (id) => {
   cursor: pointer;
   transition: background 0.3s;
 }
+
 .toggle:checked {
   background: #4f46e5;
 }
+
 .toggle::after {
   content: '';
   width: 0.875rem;
@@ -165,6 +143,7 @@ const handleClick = (id) => {
   left: 0.0625rem;
   transition: transform 0.3s;
 }
+
 .toggle:checked::after {
   transform: translateX(1rem);
 }
