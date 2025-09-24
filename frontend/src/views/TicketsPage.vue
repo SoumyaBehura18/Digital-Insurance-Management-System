@@ -20,7 +20,12 @@
 
     <main class="max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
       <div class="flex justify-between items-center mb-8">
-        <div>
+        <div class="flex items-center gap-3">
+          <ArrowLeft
+            v-if="activeView === 'create'"
+            @click="activeView = 'tickets'"
+            class="cursor-pointer h-5 text-gray-600 hover:bg-gray-200 rounded-full h-6 w-6 p-1"
+          />
           <p class="text-lg text-gray-900">Support Tickets</p>
         </div>
         <div class="flex gap-3">
@@ -45,7 +50,8 @@
         v-if="activeView === 'tickets'"
         :tickets="tickets"
         @create-first-ticket="setActiveView('create')"
-        @view-ticket="handleViewTicket"
+        @update-ticket="handleUpdateTicket"
+        @resolve-ticket="handleResolveTicket"
       />
 
       <CreateTicketForm
@@ -62,6 +68,7 @@ import { ref, computed } from "vue";
 import BaseButton from "@/components/BaseButton.vue";
 import TicketsList from "@/components/TicketComponents/TicketList.vue";
 import CreateTicketForm from "@/components/TicketComponents/SupportForm.vue";
+import { ArrowLeft } from "lucide-vue-next";
 
 // Reactive data
 const user = ref({
@@ -103,9 +110,20 @@ const setActiveView = (view) => {
   activeView.value = view;
 };
 
-const handleViewTicket = (ticketId) => {
-  console.log("View ticket:", ticketId);
-  // Handle view individual ticket
+const handleUpdateTicket = (ticket) => {
+  console.log("Update ticket:", ticket);
+  // Handle ticket update logic here
+  // You could open an edit form, navigate to update page, etc.
+};
+
+const handleResolveTicket = (ticket) => {
+  // Find and update the ticket in the array
+  const ticketIndex = tickets.value.findIndex((t) => t.id === ticket.id);
+  if (ticketIndex !== -1) {
+    tickets.value[ticketIndex].status = "RESOLVED";
+    tickets.value[ticketIndex].updatedAt = new Date();
+  }
+  console.log("Ticket resolved:", ticket.id);
 };
 
 const handleTicketCreated = (newTicket) => {
