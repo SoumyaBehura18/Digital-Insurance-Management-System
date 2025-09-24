@@ -6,7 +6,7 @@
       <div class="flex items-center gap-2">
         <Funnel class="w-6 h-6 text-brand-textTheme" />
         <select v-model="filter" class="border border-gray-300 rounded-lg bg-gray-200 px-2 py-1">
-          <option value="All">All Typess</option>
+          <option value="All">All Types</option>
           <option value="Life">Life</option>
           <option value="Health">Health</option>
           <option value="Vehicle">Vehicle</option>
@@ -36,6 +36,7 @@
           </div>
         </div>
         <button class="w-full bg-brand-backgroundTheme text-white py-2 rounded-xl" @click="$emit('purchase', policy)">
+          Purchase Policy
         </button>
       </div>
     </div>
@@ -59,5 +60,7 @@ const filter = ref("All");
 const filteredPolicies = computed(() =>
   availablePolicies.value.filter(p => filter.value === "All" || p.type === filter.value)
 );
+
+
 
 </script>
