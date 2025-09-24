@@ -21,10 +21,10 @@
 
                         <!-- Auth Buttons -->
                         <div class="flex items-center gap-2">
-                            <button class="btn-ghost px-4 py-2 rounded" @click="showAuth">
+                            <button class="btn-ghost px-4 py-2 rounded" @click="goToLogin">
                                 Login
                             </button>
-                            <button class="btn px-4 py-2 rounded-xl bg-brand-backgroundTheme text-white" @click="showAuth">
+                            <button class="btn px-4 py-2 rounded-xl bg-brand-backgroundTheme text-white" @click="goToRegister">
                                 Register
                             </button>
                         </div>
@@ -45,7 +45,7 @@
                     Protecting what matters most with modern, digital-first insurance management.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <button class="text-lg px-8 py-3 rounded-xl bg-brand-backgroundTheme text-white" @click="showAuth">
+                    <button class="text-lg px-8 py-3 rounded-xl bg-brand-backgroundTheme text-white" @click="goToLogin">
                         Get Started Today
                     </button>
                     <button class="text-lg px-8 py-3 rounded-xl border border-black">
@@ -245,7 +245,7 @@
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4 justify-center">
                         <button class="text-lg px-8 py-3 rounded-xl bg-brand-backgroundTheme text-white"
-                            @click="showAuth">
+                           @click="goToRegister">
                             Create Account
                         </button>
                         <button class="text-lg px-8 py-3 rounded-xl order border-black  ">
@@ -303,6 +303,7 @@
     </div>
 </template>
 <script setup>
+
 import { ref } from "vue";
 import CardComponent from "@/components/UI/CardComponent.vue";
 import SwitchComponent from "@/components/UI/SwitchComponent.vue";
@@ -318,6 +319,16 @@ import {
     Sun,
     Moon,
 } from "lucide-vue-next";
+import { useRouter } from "vue-router";
+const router = useRouter();
+
+const goToLogin = () => {
+  router.push("/login");
+};
+
+const goToRegister = () => {
+  router.push("/register");
+};
 
 // Dark mode state
 const isDarkMode = ref(false);
