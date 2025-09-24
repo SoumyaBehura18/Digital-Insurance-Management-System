@@ -54,11 +54,14 @@
       </div>
 
       <!-- Logout -->
-      <button @click="onLogout" :class="[
-        'w-full flex items-center justify-start rounded transition-colors py-2',
-        isCollapsed ? 'px-2' : 'px-4',
-        'text-gray-900 hover:bg-gray-200'
-      ]">
+      <button
+        @click="handleLogout()"
+        :class="[
+          'w-full flex items-center justify-start rounded transition-colors py-2',
+          isCollapsed ? 'px-2' : 'px-4',
+          'text-gray-900 hover:bg-gray-200'
+        ]"
+      >
         <LogOut class="w-4 h-4 shrink-0" />
         <span v-if="!isCollapsed" class="ml-2">Logout</span>
       </button>
@@ -68,6 +71,7 @@
 
 <script setup>
 import { ref, watch } from "vue";
+import router from "@/router";
 import {
   LayoutDashboard,
   Shield,
@@ -109,6 +113,11 @@ watch(
     darkModeLocal.value = val;
   }
 );
+const handleLogout = () => {
+
+  localStorage.removeItem("token"); 
+  router.push("/");
+};
 
 const handleClick = (id) => {
   props.setCurrentPage(id);
