@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router';
 import './assets/main.css'
-import claimsStore from './store/claims-management-store/index.js' 
+import claimsStore from './store/ClaimsManagementStore/index.js' 
 
 const app = createApp(App);
 app.use(router);
