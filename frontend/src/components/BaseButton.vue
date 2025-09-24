@@ -58,7 +58,7 @@ const variantClasses = computed(() => {
     case "ghost":
       return "bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-gray-500";
     case "theme":
-      return "bg-theme text-white hover:bg-theme-hover";
+      return "bg-brand-backgroundTheme text-white hover:bg-brand-hover";
     default: // primary
       return "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500";
   }
