@@ -1,3 +1,4 @@
+
 // tailwind.config.js
 export default {
   content: [
@@ -10,7 +11,6 @@ export default {
         brand: {
           backgroundTheme: "#6c63ff",
           textTheme:"#717182"
-
         },
       },
     },

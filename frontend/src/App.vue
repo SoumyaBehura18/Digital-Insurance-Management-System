@@ -10,7 +10,7 @@
       :onLogout="onLogout"
     />
 
-    <main class="flex-1 p-6 overflow-auto">
+    <main class="flex-1 overflow-auto">
       <router-view />
     </main>
   </div>
@@ -37,5 +37,5 @@ const setCurrentPage = (page) => {
 
 const onLogout = () => {
   console.log("Logout clicked!");
-};  
+};
 </script>
