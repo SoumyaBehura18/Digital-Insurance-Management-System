@@ -112,6 +112,8 @@ const setActiveView = (view) => {
 
 const handleUpdateTicket = (ticket) => {
   console.log("Update ticket:", ticket);
+  setActiveView("create");
+
   // Handle ticket update logic here
   // You could open an edit form, navigate to update page, etc.
 };
