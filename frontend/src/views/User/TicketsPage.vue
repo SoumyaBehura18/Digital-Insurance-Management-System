@@ -45,7 +45,6 @@
         </div>
       </div>
 
-      <!-- Dynamic Component Rendering -->
       <TicketsList
         v-if="activeView === 'tickets'"
         :tickets="tickets"
@@ -95,7 +94,6 @@ const tickets = ref([
   },
 ]);
 
-// Computed properties
 const userInitials = computed(() => {
   return user.value.name
     .split(" ")
@@ -105,7 +103,6 @@ const userInitials = computed(() => {
     .substring(0, 2);
 });
 
-// Methods
 const setActiveView = (view) => {
   activeView.value = view;
 };
@@ -114,8 +111,6 @@ const handleUpdateTicket = (ticket) => {
   console.log("Update ticket:", ticket);
   setActiveView("create");
 
-  // Handle ticket update logic here
-  // You could open an edit form, navigate to update page, etc.
 };
 
 const handleResolveTicket = (ticket) => {

@@ -17,7 +17,7 @@
 </template>
 
 <script setup>
-import HeaderLayout from "../components/layout/HeaderLayout.vue";
+import HeaderLayout from "@/components/layout/HeaderLayout.vue";
 import { ref } from "vue";
 
 const isCollapsed = ref(true);

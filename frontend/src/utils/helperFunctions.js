@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle, X } from "lucide-vue-next";
+import { CheckCircle, XCircle, MessageCircle } from "lucide-vue-next";
 
 export const getStatusClasses = (status) => {
   const statusClasses = {
@@ -11,9 +11,9 @@ export const getStatusClasses = (status) => {
 };
 
 export const getStatusClassIcon = (status) => {
-  if (status === "OPEN") return AlertCircle;
+  if (status === "OPEN") return MessageCircle;
   else if (status === "RESOLVED") return CheckCircle;
-  else if (status === "CLOSED") return X;
+  else if (status === "CLOSED") return XCircle;
   else return AlertCircle;
 };
 
