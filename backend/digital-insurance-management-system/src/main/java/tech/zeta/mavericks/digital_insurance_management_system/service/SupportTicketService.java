@@ -1,0 +1,115 @@
+//package tech.zeta.mavericks.digital_insurance_management_system.Service;
+//
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.stereotype.Service;
+//
+//import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.SupportTicketRequestDTO;
+//import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.SupportTicketUpdateDTO;
+//import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.SupportTicketResponseDTO;
+//import tech.zeta.mavericks.digital_insurance_management_system.exception.ClaimNotFoundException;
+//import tech.zeta.mavericks.digital_insurance_management_system.exception.PolicyNotFoundException;
+//import tech.zeta.mavericks.digital_insurance_management_system.exception.TicketNotFoundException;
+//import tech.zeta.mavericks.digital_insurance_management_system.exception.UserNotFoundException;
+//import tech.zeta.mavericks.digital_insurance_management_system.model.*;
+//import tech.zeta.mavericks.digital_insurance_management_system.repo.*;
+//
+//import java.sql.Date;
+//import java.time.LocalDate;
+//import java.util.List;
+//import java.util.stream.Collectors;
+//
+//@Service
+//public class SupportTicketService {
+//
+//    @Autowired
+//    private SupportTicketRepository supportTicketRepository;
+//
+//    @Autowired
+//    private UserRepo userRepository;
+//
+//    @Autowired
+//    private PolicyRepository policyRepository;
+//
+//    @Autowired
+//    private ClaimRepository claimRepository;
+//
+//    public SupportTicketResponseDTO createSupportTicket(SupportTicketRequestDTO requestDTO) {
+//        Users user = userRepository.findById(requestDTO.getUserId())
+//                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + requestDTO.getUserId()));
+//
+//        Policy policy = null;
+//        if (requestDTO.getPolicyId() != null) {
+//            policy = policyRepository.findById(requestDTO.getPolicyId())
+//                    .orElseThrow(() -> new PolicyNotFoundException("Policy not found with id: " + requestDTO.getPolicyId()));
+//        }
+//
+//        Claim claim = null;
+//        if (requestDTO.getClaimId() != null) {
+//            claim = claimRepository.findById(requestDTO.getClaimId())
+//                    .orElseThrow(() -> new ClaimNotFoundException("Claim not found with id: " + requestDTO.getClaimId()));
+//        }
+//
+//        SupportTicket ticket = new SupportTicket();
+//        ticket.setUser(user);
+//        ticket.setPolicy(policy);
+//        ticket.setClaim(claim);
+//        ticket.setSubject(requestDTO.getSubject());
+//        ticket.setDescription(requestDTO.getDescription());
+//        ticket.setStatus(TicketStatus.OPEN);
+//        ticket.setCreatedAt(Date.valueOf(LocalDate.now()));
+//
+//        SupportTicket saved = supportTicketRepository.save(ticket);
+//
+//        return mapToResponseDTO(saved);
+//    }
+//
+//    /**
+//     * Get all tickets submitted by a user
+//     */
+//    public List<SupportTicketResponseDTO> getTicketsByUserId(Long userId) {
+//        List<SupportTicket> tickets = supportTicketRepository.findAll().stream()
+//                .filter(ticket -> ticket.getUser().getId().equals(userId))
+//                .collect(Collectors.toList());
+//
+//        return tickets.stream()
+//                .map(this::mapToResponseDTO)
+//                .collect(Collectors.toList());
+//    }
+//
+//    /**
+//     * Update ticket with admin response and status
+//     */
+//    public SupportTicketResponseDTO updateSupportTicket(Long ticketId, SupportTicketUpdateDTO updateDTO) {
+//        SupportTicket ticket = supportTicketRepository.findById(ticketId)
+//                .orElseThrow(() -> new TicketNotFoundException("Ticket not found with id: " + ticketId));
+//
+//        ticket.setResponse(updateDTO.getResponse());
+//        ticket.setStatus(TicketStatus.valueOf(updateDTO.getStatus().toUpperCase()));
+//
+//        if ("RESOLVED".equalsIgnoreCase(updateDTO.getStatus())) {
+//            ticket.setResolvedAt(Date.valueOf(LocalDate.now()));
+//        }
+//
+//        SupportTicket updated = supportTicketRepository.save(ticket);
+//        return mapToResponseDTO(updated);
+//    }
+//
+//    /**
+//     * Mapper: Entity → DTO
+//     */
+//    private SupportTicketResponseDTO mapToResponseDTO(SupportTicket ticket) {
+//        SupportTicketResponseDTO dto = new SupportTicketResponseDTO();
+//        dto.setId(ticket.getId());
+//        dto.setUserId(ticket.getUser().getId());
+//        dto.setPolicyId(ticket.getPolicy() != null ? ticket.getPolicy().getId() : null);
+//        dto.setClaimId(ticket.getClaim() != null ? ticket.getClaim().getId() : null);
+//        dto.setSubject(ticket.getSubject());
+//        dto.setDescription(ticket.getDescription());
+//        dto.setStatus(ticket.getStatus());
+//        dto.setResponse(ticket.getResponse());
+//        dto.setCreatedAt(ticket.getCreatedAt());
+//        dto.setResolvedAt(ticket.getResolvedAt());
+//        return dto;
+//    }
+//}
+//
