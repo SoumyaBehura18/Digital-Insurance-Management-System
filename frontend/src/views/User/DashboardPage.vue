@@ -17,38 +17,46 @@
 
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="bg-white rounded-lg shadow p-6 flex justify-between items-center">
+        <div
+          class="bg-white rounded-lg shadow p-6 flex justify-between items-center"
+        >
           <div>
             <p class="text-sm text-brand-textTheme">Active Policies</p>
             <p class="text-2xl font-bold">{{ activePolicies.length }}</p>
           </div>
-          <Shield class="w-8 h-8 text-brand-backgroundTheme"/>
+          <Shield class="w-8 h-8 text-brand-backgroundTheme" />
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6 flex justify-between items-center">
+        <div
+          class="bg-white rounded-lg shadow p-6 flex justify-between items-center"
+        >
           <div>
             <p class="text-sm text-brand-textTheme">Total Claims</p>
             <p class="text-2xl font-bold">{{ claims.length }}</p>
           </div>
-          <FileText class="w-8 h-8 text-brand-backgroundTheme"/>
+          <FileText class="w-8 h-8 text-brand-backgroundTheme" />
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6 flex justify-between items-center">
+        <div
+          class="bg-white rounded-lg shadow p-6 flex justify-between items-center"
+        >
           <div>
             <p class="text-sm text-brand-textTheme">Pending Tickets</p>
             <p class="text-2xl font-bold">{{ pendingTickets.length }}</p>
           </div>
-          <Ticket class="w-8 h-8 text-brand-backgroundTheme"/>
+          <Ticket class="w-8 h-8 text-brand-backgroundTheme" />
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6 flex justify-between items-center">
+        <div
+          class="bg-white rounded-lg shadow p-6 flex justify-between items-center"
+        >
           <div>
             <p class="text-sm text-brand-textTheme">Total Coverage</p>
             <p class="text-2xl font-bold">
               ${{ totalCoverage.toLocaleString() }}
             </p>
           </div>
-          <TrendingUp class="w-8 h-8 text-brand-backgroundTheme"/>
+          <TrendingUp class="w-8 h-8 text-brand-backgroundTheme" />
         </div>
       </div>
 
@@ -57,7 +65,9 @@
         <!-- Policy Distribution Pie Chart -->
         <div class="bg-white rounded-lg shadow p-4">
           <h2 class="font-semibold mb-2">Policy Distribution</h2>
-          <h3 class="mb-2 text-brand-textTheme">Distribution of your insurance policy</h3>
+          <h3 class="mb-2 text-brand-textTheme">
+            Distribution of your insurance policy
+          </h3>
           <div id="policyPie" class="h-64"></div>
         </div>
 
@@ -86,14 +96,14 @@
           @click="goToPage('policies')"
           class="flex items-center gap-2 bg-brand-backgroundTheme text-white px-4 py-2 rounded"
         >
-          <Plus class="w-4 h-4"/>
+          <Plus class="w-4 h-4" />
           Purchase Policy
         </button>
         <button
           @click="goToPage('claims')"
           class="flex items-center gap-2 border px-4 py-2 rounded"
         >
-          <FileText class="w-4 h-4"/>
+          <FileText class="w-4 h-4" />
           Raise Claim
         </button>
       </div>
@@ -107,7 +117,7 @@
             :key="policy.id"
             class="flex items-center gap-4 p-4 border rounded-lg"
           >
-            <Shield class="w-6 h-6 text-brand-backgroundTheme"/>
+            <Shield class="w-6 h-6 text-brand-backgroundTheme" />
             <div class="flex-1">
               <p class="font-medium">{{ policy.name }}</p>
               <p class="text-sm text-brand-textTheme">
@@ -119,7 +129,7 @@
                 'px-2 py-1 rounded text-sm font-medium',
                 policy.status === 'ACTIVE'
                   ? 'bg-brand-backgroundTheme text-white'
-                  : 'bg-gray-200 text-gray-700'
+                  : 'bg-gray-200 text-gray-700',
               ]"
             >
               {{ policy.status }}
@@ -132,8 +142,8 @@
 </template>
 
 <script setup>
-import HeaderLayout from "../components/layout/HeaderLayout.vue";
-import { ref, onMounted, watchEffect} from "vue";
+import HeaderLayout from "@/components/layout/HeaderLayout.vue";
+import { ref, onMounted, watchEffect } from "vue";
 import ApexCharts from "apexcharts";
 import { Shield, FileText, Ticket, TrendingUp, Plus } from "lucide-vue-next";
 import { useRouter } from "vue-router";
@@ -168,9 +178,27 @@ const coverageData = ref([]);
 const generateData = () => {
   // Hardcoded Active Policies
   activePolicies.value = [
-    { id: 1, name: "Life Protect", type: "Life", status: "ACTIVE", coverageAmount: 500000 },
-    { id: 2, name: "Health Shield", type: "Health", status: "ACTIVE", coverageAmount: 200000 },
-    { id: 3, name: "Car Secure", type: "Vehicle", status: "ACTIVE", coverageAmount: 150000 },
+    {
+      id: 1,
+      name: "Life Protect",
+      type: "Life",
+      status: "ACTIVE",
+      coverageAmount: 500000,
+    },
+    {
+      id: 2,
+      name: "Health Shield",
+      type: "Health",
+      status: "ACTIVE",
+      coverageAmount: 200000,
+    },
+    {
+      id: 3,
+      name: "Car Secure",
+      type: "Vehicle",
+      status: "ACTIVE",
+      coverageAmount: 150000,
+    },
   ];
 
   // Hardcoded Pending Tickets
@@ -180,7 +208,10 @@ const generateData = () => {
   ];
 
   // Hardcoded Total Coverage
-  totalCoverage.value = activePolicies.value.reduce((sum, p) => sum + p.coverageAmount, 0);
+  totalCoverage.value = activePolicies.value.reduce(
+    (sum, p) => sum + p.coverageAmount,
+    0
+  );
 
   // Hardcoded Policy Distribution
   policyDistributionData.value = [
@@ -220,33 +251,36 @@ const generateData = () => {
   ];
 };
 
-
-
 onMounted(() => {
   generateData(); // populate all data first
 });
 
 watchEffect(() => {
-  console.log(policyDistributionData.value.length)
+  console.log(policyDistributionData.value.length);
   // Policy Pie
-  if (policyDistributionData.value.length && document.querySelector("#policyPie")) {
+  if (
+    policyDistributionData.value.length &&
+    document.querySelector("#policyPie")
+  ) {
     new ApexCharts(document.querySelector("#policyPie"), {
       chart: { type: "pie", height: 250 },
-      labels: policyDistributionData.value.map(d => d.name),
-      series: policyDistributionData.value.map(d => d.value),
-      colors: ["#6C63FF","#8B7EFF","#A599FF"]
+      labels: policyDistributionData.value.map((d) => d.name),
+      series: policyDistributionData.value.map((d) => d.value),
+      colors: ["#6C63FF", "#8B7EFF", "#A599FF"],
     }).render();
   }
 
-  console.log(premiumData.value.length)
+  console.log(premiumData.value.length);
   // Premium Line
   if (premiumData.value.length && document.querySelector("#premiumLine")) {
     new ApexCharts(document.querySelector("#premiumLine"), {
       chart: { type: "line", height: 250 },
-      series: [{ name: "Premium", data: premiumData.value.map(d => d.amount) }],
-      xaxis: { categories: premiumData.value.map(d => d.month) },
-      stroke: { curve: 'smooth', width: 3 },
-      colors: ["#6C63FF"]
+      series: [
+        { name: "Premium", data: premiumData.value.map((d) => d.amount) },
+      ],
+      xaxis: { categories: premiumData.value.map((d) => d.month) },
+      stroke: { curve: "smooth", width: 3 },
+      colors: ["#6C63FF"],
     }).render();
   }
 
@@ -254,9 +288,9 @@ watchEffect(() => {
   if (claimsStatusData.value.length && document.querySelector("#claimsBar")) {
     new ApexCharts(document.querySelector("#claimsBar"), {
       chart: { type: "bar", height: 250 },
-      series: [{ data: claimsStatusData.value.map(d => d.count) }],
-      xaxis: { categories: claimsStatusData.value.map(d => d.status) },
-      colors: ["#FFA500","#6C63FF","#EF4444"]
+      series: [{ data: claimsStatusData.value.map((d) => d.count) }],
+      xaxis: { categories: claimsStatusData.value.map((d) => d.status) },
+      colors: ["#FFA500", "#6C63FF", "#EF4444"],
     }).render();
   }
 
@@ -264,11 +298,10 @@ watchEffect(() => {
   if (coverageData.value.length && document.querySelector("#coverageBar")) {
     new ApexCharts(document.querySelector("#coverageBar"), {
       chart: { type: "bar", height: 250 },
-      series: [{ data: coverageData.value.map(d => d.coverage) }],
-      xaxis: { categories: coverageData.value.map(d => d.type) },
-      colors: ["#6C63FF","#8B7EFF","#A599FF"]
+      series: [{ data: coverageData.value.map((d) => d.coverage) }],
+      xaxis: { categories: coverageData.value.map((d) => d.type) },
+      colors: ["#6C63FF", "#8B7EFF", "#A599FF"],
     }).render();
   }
 });
 </script>
-
