@@ -10,6 +10,7 @@ const routes = [
   { path: "/dashboard", component: DashboardPage },
   { path: "/policies", component: PoliciesPage },
   { path: "/claims", component: ClaimsPage },
+  { path: "/submit-claim", component: ClaimsPage },
   { path: "/chatbot", component: ChatbotPage },
   { path: "/tickets", component: TicketsPage },
 ];
