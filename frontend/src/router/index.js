@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+
 import DashboardPage from "../views/DashboardPage.vue";
 import PoliciesPage from "../views/PoliciesPage.vue";
 import ClaimsPage from "../views/ClaimsPage.vue";
@@ -14,6 +15,7 @@ const routes = [
   { path: "/submit-claim", component: ClaimsPage },
   { path: "/chatbot", component: ChatbotPage },
   { path: "/tickets", component: TicketsPage },
+  { path: "/admin/tickets", component: SupportTickets },
 ];
 
 const router = createRouter({

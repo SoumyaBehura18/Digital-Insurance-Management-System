@@ -17,7 +17,7 @@
             for="subject"
             class="block text-sm font-medium text-gray-900 mb-2"
           >
-            Subject
+            Title
           </label>
           <input
             id="subject"
