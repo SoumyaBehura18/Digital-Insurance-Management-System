@@ -1,6 +1,8 @@
 <template>
   <div class="flex h-screen">
+    <!-- Only show Sidebar if route is not "/" -->
     <SidebarLayout
+      v-if="currentRoute !== '/'"
       :currentPage="currentRoute"
       :setCurrentPage="setCurrentPage"
       :isCollapsed="isCollapsed"
@@ -30,7 +32,7 @@ const isDarkMode = ref(false);
 const setIsCollapsed = (val) => (isCollapsed.value = val);
 const setIsDarkMode = (val) => (isDarkMode.value = val);
 
-const currentRoute = computed(() => route.path); // ✅ now works
+const currentRoute = computed(() => route.path); 
 const setCurrentPage = (page) => {
   router.push(`/${page}`);
 };
