@@ -53,8 +53,10 @@ const isAdmin = computed(() => userRole.value === 'admin');
 
 // Function to update authentication state
 const updateAuthState = () => {
-  const token = localStorage.getItem('token');
-  const role = localStorage.getItem('role');
+  const storedUser = localStorage.getItem('currentUser');
+ const user = storedUser ? JSON.parse(storedUser) : null;
+  const token = user?.token;
+  const role = user?.role;
   
   isAuthenticated.value = !!token;
   userRole.value = role || '';
