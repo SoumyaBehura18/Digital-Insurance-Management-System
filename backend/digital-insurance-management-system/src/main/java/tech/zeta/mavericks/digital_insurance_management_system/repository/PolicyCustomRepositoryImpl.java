@@ -1,24 +1,19 @@
-package tech.zeta.mavericks.digital_insurance_management_system.repository.implementations;
+package tech.zeta.mavericks.digital_insurance_management_system.repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
 import org.springframework.stereotype.Repository;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.PolicyWithPremiumDTO;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.HealthPolicyPremium;
-import tech.zeta.mavericks.digital_insurance_management_system.entity.LifePolicyPremium;
-import tech.zeta.mavericks.digital_insurance_management_system.entity.VehiclePolicyPremium;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.HealthCondition;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.VehicleType;
-import tech.zeta.mavericks.digital_insurance_management_system.repository.interfaces.PolicyCustomRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Repository
-public class PolicyCustomRepositoryImpl implements PolicyCustomRepository {
+public class PolicyCustomRepositoryImpl implements PolicyRepository.PolicyCustomRepository {
 
     @PersistenceContext
     private EntityManager em;
