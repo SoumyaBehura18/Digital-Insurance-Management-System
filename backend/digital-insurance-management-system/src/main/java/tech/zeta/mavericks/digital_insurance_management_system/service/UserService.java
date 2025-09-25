@@ -6,7 +6,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.User;
-import tech.zeta.mavericks.digital_insurance_management_system.repository.UserRepo;
+import tech.zeta.mavericks.digital_insurance_management_system.repository.UserRepository;
 
 @Service
 public class UserService {
@@ -18,7 +18,7 @@ public class UserService {
     AuthenticationManager authManager;
 
     @Autowired
-    private UserRepo repo;
+    private UserRepository repo;
 
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 

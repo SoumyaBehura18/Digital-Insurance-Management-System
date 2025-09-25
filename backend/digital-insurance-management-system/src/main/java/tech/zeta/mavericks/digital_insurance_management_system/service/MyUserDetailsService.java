@@ -7,13 +7,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.UserPrincipal;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.User;
-import tech.zeta.mavericks.digital_insurance_management_system.repository.UserRepo;
+import tech.zeta.mavericks.digital_insurance_management_system.repository.UserRepository;
 
 @Service
 public class MyUserDetailsService implements UserDetailsService {
 
     @Autowired
-    private UserRepo userRepo;
+    private UserRepository userRepo;
 
 
     @Override
