@@ -8,11 +8,11 @@ import LandingPage from "@/views/LandingPage.vue";
 import SupportTickets from "@/views/Admin/SupportTickets.vue";
 import LoginPage from "../views/LoginPage.vue";
 import RegisterPage from "../views/RegisterPage.vue";
-
+import NotFound from "@/views/NotFound.vue";
 
 const routes = [
-    { path: "/", component: LandingPage },
- { path: "/register", component: RegisterPage },
+  { path: "/", component: LandingPage },
+  { path: "/register", component: RegisterPage },
   { path: "/login", component: LoginPage },
   { path: "/dashboard", component: DashboardPage },
   { path: "/policies", component: PoliciesPage },
@@ -21,6 +21,7 @@ const routes = [
   { path: "/chatbot", component: ChatbotPage },
   { path: "/tickets", component: TicketsPage },
   { path: "/admin/tickets", component: SupportTickets },
+  { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound },
 ];
 
 const router = createRouter({
