@@ -24,6 +24,7 @@ public class UserService {
 
     public User register(User user) {
         user.setEmail(user.getEmail());  // ← Add this
+        System.out.println("Password:"+user.getPassword());
         user.setPassword(encoder.encode(user.getPassword()));
         repo.save(user);
         return user;

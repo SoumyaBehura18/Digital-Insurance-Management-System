@@ -24,7 +24,6 @@ public class User {
     private String phone;
     private RoleType roleType;
     private String address;
-    @JsonIgnore
     private String password;
     private Boolean smokingDrinking;
     @ElementCollection(fetch = FetchType.EAGER)
