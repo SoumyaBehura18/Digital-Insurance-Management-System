@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class SupportTicketUpdateDTO {
-    private String response;  // Admin's reply
-    private String status;    // RESOLVED or CLOSED
+    private String status;   // e.g., OPEN, IN_PROGRESS, RESOLVED, CLOSED
 }
+
 

@@ -5,6 +5,7 @@ import lombok.Data;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.TicketStatus;
 
 import java.sql.Date;
+import java.util.List;
 
 @Data
 @Entity
@@ -40,8 +41,8 @@ public class SupportTicket {
     @Column(nullable = false, length = 20)
     private TicketStatus status;
 
-    @Column(columnDefinition = "TEXT")
-    private String response;
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Message> responses;
 
     @Column(nullable = false)
     private Date createdAt;
