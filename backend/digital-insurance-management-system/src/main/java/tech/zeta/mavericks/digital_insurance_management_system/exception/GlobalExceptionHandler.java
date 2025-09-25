@@ -26,4 +26,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
     public ResponseEntity<String> handleTicketNotFoundException(TicketNotFoundException exception){
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(UserPolicyNotFoundException.class)
+    public ResponseEntity<String> handleUserPolicyNotFoundException(UserPolicyNotFoundException exception){
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
+    }
 }

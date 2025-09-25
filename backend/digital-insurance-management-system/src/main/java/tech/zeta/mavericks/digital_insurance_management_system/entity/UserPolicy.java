@@ -6,6 +6,7 @@ import tech.zeta.mavericks.digital_insurance_management_system.enums.PolicyStatu
 
 import java.time.LocalDate;
 
+@Data
 @Entity
 @Data
 @Table(name = "user_policies")
@@ -25,14 +26,13 @@ public class UserPolicy {
     @JoinColumn(name = "policy_id", nullable = false)
     private Policy policy;
 
-    @Column(nullable = false)
     private LocalDate startDate;
 
-    @Column(nullable = false)
     private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private PolicyStatus status;
+
 
 }
