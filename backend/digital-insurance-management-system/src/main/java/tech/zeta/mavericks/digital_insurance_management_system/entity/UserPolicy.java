@@ -1,11 +1,13 @@
 package tech.zeta.mavericks.digital_insurance_management_system.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.PolicyStatus;
 
 import java.time.LocalDate;
 
 @Entity
+@Data
 @Table(name = "user_policies")
 public class UserPolicy {
 
@@ -32,6 +34,5 @@ public class UserPolicy {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private PolicyStatus status;
-
 
 }

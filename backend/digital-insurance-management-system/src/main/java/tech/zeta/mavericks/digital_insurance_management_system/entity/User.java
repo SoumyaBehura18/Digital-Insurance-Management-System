@@ -1,5 +1,6 @@
 package tech.zeta.mavericks.digital_insurance_management_system.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.HealthCondition;
@@ -23,6 +24,7 @@ public class User {
     private String phone;
     private RoleType roleType;
     private String address;
+    @JsonIgnore
     private String password;
     private Boolean smokingDrinking;
     @ElementCollection(fetch = FetchType.EAGER)

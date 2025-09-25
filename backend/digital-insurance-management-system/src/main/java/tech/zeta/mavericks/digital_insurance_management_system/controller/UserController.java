@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import tech.zeta.mavericks.digital_insurance_management_system.DTO.LoginRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.enums.RoleType;
 import tech.zeta.mavericks.digital_insurance_management_system.service.JWTService;
 import tech.zeta.mavericks.digital_insurance_management_system.service.UserService;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.UserPrincipal;
@@ -67,6 +68,8 @@ public class UserController{
 
         Map<String, String> response = new HashMap<>();
         response.put("token", jwtToken);
+        response.put("role", userPrincipal.getRole().toLowerCase());
+        response.put("userId", String.valueOf(userPrincipal.getId()));
         return ResponseEntity.ok(response);
 
     }
