@@ -3,8 +3,10 @@ package tech.zeta.mavericks.digital_insurance_management_system.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.MessageRequestDTO;
 import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.SupportTicketRequestDTO;
 import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.SupportTicketUpdateDTO;
+import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.MessageResponseDTO;
 import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.SupportTicketResponseDTO;
 import tech.zeta.mavericks.digital_insurance_management_system.exception.ClaimNotFoundException;
 import tech.zeta.mavericks.digital_insurance_management_system.exception.PolicyNotFoundException;
@@ -79,6 +81,13 @@ public class SupportTicketService {
                 .collect(Collectors.toList());
     }
 
+    public SupportTicketResponseDTO getTicketByTicketId(Long ticketId) {
+        SupportTicket ticket = supportTicketRepository.findById(ticketId)
+                .orElseThrow(() -> new TicketNotFoundException("Ticket not found with id: " + ticketId));
+
+        return mapToResponseDTO(ticket);
+    }
+
     /**
      * Update ticket with admin response and status
      */
@@ -86,15 +95,39 @@ public class SupportTicketService {
         SupportTicket ticket = supportTicketRepository.findById(ticketId)
                 .orElseThrow(() -> new TicketNotFoundException("Ticket not found with id: " + ticketId));
 
-        ticket.setResponse(updateDTO.getResponse());
-        ticket.setStatus(TicketStatus.valueOf(updateDTO.getStatus().toUpperCase()));
+        TicketStatus newStatus = TicketStatus.valueOf(updateDTO.getStatus().toUpperCase());
+        ticket.setStatus(newStatus);
 
-        if ("RESOLVED".equalsIgnoreCase(updateDTO.getStatus())) {
+        if (newStatus == TicketStatus.RESOLVED || newStatus == TicketStatus.CLOSED) {
             ticket.setResolvedAt(Date.valueOf(LocalDate.now()));
         }
 
         SupportTicket updated = supportTicketRepository.save(ticket);
         return mapToResponseDTO(updated);
+    }
+
+    public MessageResponseDTO addMessage(Long ticketId, MessageRequestDTO request) {
+        SupportTicket ticket = supportTicketRepository.findById(ticketId)
+                .orElseThrow(() -> new TicketNotFoundException("Ticket not found with id: " + ticketId));
+
+        User author = userRepository.findById(request.getAuthorId())
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + request.getAuthorId()));
+
+        Message message = new Message();
+        message.setTicket(ticket);
+        message.setAuthor(author);
+        message.setContent(request.getContent());
+        message.setTimestamp(Date.valueOf(LocalDate.now()));
+
+        ticket.getResponses().add(message);
+        supportTicketRepository.save(ticket);
+
+        return new MessageResponseDTO(
+                message.getId(),
+                author.getId(),
+                message.getContent(),
+                message.getTimestamp()
+        );
     }
 
     /**
@@ -109,10 +142,23 @@ public class SupportTicketService {
         dto.setSubject(ticket.getSubject());
         dto.setDescription(ticket.getDescription());
         dto.setStatus(ticket.getStatus());
-        dto.setResponse(ticket.getResponse());
         dto.setCreatedAt(ticket.getCreatedAt());
         dto.setResolvedAt(ticket.getResolvedAt());
+
+        // map messages
+        List<MessageResponseDTO> messages = ticket.getResponses().stream().map(m -> {
+            MessageResponseDTO messageResponseDTO = new MessageResponseDTO();
+            messageResponseDTO.setId(m.getId());
+            messageResponseDTO.setAuthorId(m.getAuthor().getId());
+            messageResponseDTO.setContent(m.getContent());
+            messageResponseDTO.setTimestamp(m.getTimestamp());
+            return messageResponseDTO;
+        }).toList();
+
+        dto.setMessages(messages);
+
         return dto;
     }
+
 }
 
