@@ -17,6 +17,9 @@ const props = defineProps({
 });
 
 const initials = computed(() => {
+  if(props.userName === undefined || props.userName === null) {
+    return "";
+  }
   return props.userName
     .split(" ")
     .map((word) => word.charAt(0))
