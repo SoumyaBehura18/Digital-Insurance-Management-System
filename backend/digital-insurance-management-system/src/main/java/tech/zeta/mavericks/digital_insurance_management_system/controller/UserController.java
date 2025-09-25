@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import tech.zeta.mavericks.digital_insurance_management_system.dto.LoginRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.DTO.LoginRequest;
 import tech.zeta.mavericks.digital_insurance_management_system.service.JWTService;
 import tech.zeta.mavericks.digital_insurance_management_system.service.UserService;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.UserPrincipal;

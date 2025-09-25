@@ -1,7 +1,7 @@
 package tech.zeta.mavericks.digital_insurance_management_system.DTO.response;
 
 import lombok.Data;
-import tech.zeta.mavericks.digital_insurance_management_system.model.TicketStatus;
+import tech.zeta.mavericks.digital_insurance_management_system.entity.TicketStatus;
 
 import java.sql.Date;
 
