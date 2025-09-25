@@ -8,7 +8,6 @@ import java.time.LocalDate;
 
 @Data
 @Entity
-@Data
 @Table(name = "user_policies")
 public class UserPolicy {
 
@@ -34,5 +33,5 @@ public class UserPolicy {
     @Column(nullable = false, length = 20)
     private PolicyStatus status;
 
-
+    private Double premiumPaid;
 }
