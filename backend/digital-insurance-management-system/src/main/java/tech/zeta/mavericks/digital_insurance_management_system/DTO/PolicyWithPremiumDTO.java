@@ -1,4 +1,4 @@
-package tech.zeta.mavericks.digital_insurance_management_system.dto;
+package tech.zeta.mavericks.digital_insurance_management_system.DTO;
 
 import tech.zeta.mavericks.digital_insurance_management_system.enums.PolicyType;
 

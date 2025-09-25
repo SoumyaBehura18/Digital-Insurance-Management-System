@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.ClaimRequestDto;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.ClaimResponseDto;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.ClaimListResponseDto;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.Claim;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.UserPolicy;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.ClaimStatus;
@@ -17,6 +18,7 @@ import tech.zeta.mavericks.digital_insurance_management_system.repository.UserPo
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -103,6 +105,38 @@ public class ClaimService {
         return responseDto;
     }
 
+    public List<ClaimListResponseDto> getAllClaimsDto() {
+        List<Claim> claims = claimRepository.findAll();
+        return claims.stream()
+                .map(this::convertToClaimListResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<ClaimListResponseDto> getClaimsByUserIdDto(Long userId) {
+        List<Claim> claims = claimRepository.findByUserPolicy_User_Id(userId);
+        return claims.stream()
+                .map(this::convertToClaimListResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    private ClaimListResponseDto convertToClaimListResponseDto(Claim claim) {
+        ClaimListResponseDto dto = new ClaimListResponseDto();
+        dto.setId(claim.getId());
+        dto.setUserPolicyId(claim.getUserPolicy().getId());
+        dto.setUserId(claim.getUserPolicy().getUser().getId());
+        dto.setUserName(claim.getUserPolicy().getUser().getName());
+        dto.setUserEmail(claim.getUserPolicy().getUser().getEmail());
+        dto.setPolicyName(claim.getUserPolicy().getPolicy().getName());
+        dto.setClaimDate(claim.getClaimDate());
+        dto.setClaimAmount(claim.getClaimAmount());
+        dto.setReason(claim.getReason());
+        dto.setStatus(claim.getStatus());
+        dto.setReviewerComment(claim.getReviewerComment());
+        dto.setResolvedDate(claim.getResolvedDate());
+        return dto;
+    }
+
+    // Keep existing methods for backward compatibility
     public List<Claim> getAllClaims() {
         return claimRepository.findAll();
     }

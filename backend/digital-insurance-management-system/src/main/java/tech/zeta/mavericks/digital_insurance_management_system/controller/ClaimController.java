@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.ClaimReviewDTO;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.ClaimRequestDto;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.ClaimResponseDto;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.ClaimListResponseDto;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.Claim;
 import tech.zeta.mavericks.digital_insurance_management_system.service.ClaimService;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.ClaimStatus;
@@ -31,14 +32,14 @@ public class ClaimController {
     }
 
     @GetMapping("/claims")
-    public ResponseEntity<?> getAllClaims() {
-        List<Claim> response = claimService.getAllClaims();
+    public ResponseEntity<List<ClaimListResponseDto>> getAllClaims() {
+        List<ClaimListResponseDto> response = claimService.getAllClaimsDto();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getClaimsByUserId(@PathVariable Long userId) {
-        List<Claim> response = claimService.getClaimsByUserId(userId);
+    public ResponseEntity<List<ClaimListResponseDto>> getClaimsByUserId(@PathVariable Long userId) {
+        List<ClaimListResponseDto> response = claimService.getClaimsByUserIdDto(userId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
