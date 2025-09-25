@@ -5,6 +5,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -20,8 +21,8 @@ import java.util.function.Function;
 @Service
 public class JWTService {
 
-
-    private String secretkey = "your-256-bit-secret-your-256-bit-secret";
+    @Value("${spring.app.jwtSecret}")
+    private String secretkey;
 
     public JWTService() {
 
