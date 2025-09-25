@@ -2,10 +2,10 @@ package tech.zeta.mavericks.digital_insurance_management_system.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import tech.zeta.mavericks.digital_insurance_management_system.enums.HealthCondition;
+import lombok.ToString;
 
-import java.util.Set;
-
+import java.util.ArrayList;
+import java.util.List;
 @Data
 @Entity
 @Table(name = "health_policy_premium")
@@ -16,6 +16,7 @@ public class HealthPolicyPremium {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "policy_id", nullable = false)
+    @ToString.Exclude
     private Policy policy;
 
     private Double premiumRate;
@@ -27,13 +28,4 @@ public class HealthPolicyPremium {
     private Integer endAge;
 
     private Boolean smokingDrinking;
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(
-            name = "health_preexisting_conditions",
-            joinColumns = @JoinColumn(name = "health_premium_id")
-    )
-    @Enumerated(EnumType.STRING)
-    @Column(name = "condition")
-    private Set<HealthCondition> preexistingDiseases;
-
 }
