@@ -24,11 +24,12 @@ public class User {
     private RoleType roleType;
     private String address;
     private String password;
-    private Boolean smoking;
+    private Boolean smokingDrinking;
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_preexisting_conditions", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "condition")
     private Set<HealthCondition> preexistingConditions;
     @Enumerated(EnumType.STRING)
     private VehicleType vehicleType;
+    private Integer vehicleAge;
 }

@@ -8,7 +8,7 @@ import java.util.Set;
 
 @Data
 @Entity
-@Table(name = "health_policy_premiums")
+@Table(name = "health_policy_premium")
 public class HealthPolicyPremium {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
