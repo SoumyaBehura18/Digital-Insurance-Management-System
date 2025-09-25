@@ -3,6 +3,7 @@ package tech.zeta.mavericks.digital_insurance_management_system.entity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import tech.zeta.mavericks.digital_insurance_management_system.enums.RoleType;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -48,5 +49,16 @@ public class UserPrincipal implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public String getRole() {
+        if(user.getRoleType() == RoleType.ADMIN){
+            return RoleType.ADMIN.name();
+        }
+        return   RoleType.USER.name();
+    }
+
+    public Long getId() {
+        return user.getId();
     }
 }

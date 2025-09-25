@@ -81,20 +81,20 @@ const handleLogin = async () => {
   isLoading.value = true
 
   try {
-    // const response = await axios.post('http://localhost:8080/login', {
-    //   email: email.value,
-    //   password: password.value
-    // })
+    const response = await axios.post('http://localhost:9090/login', {
+      email: email.value,
+      password: password.value
+    })
     
     // below structure is for testing without backend.
 
-    const response = {
-      data: {
-        token: 'dummy-jwt-token',
-        role: 'admin', // Change this to 'user' to test user redirection
-        userId: 1
-      }
-    }
+    // const response = {
+    //   data: {
+    //     token: 'dummy-jwt-token',
+    //     role: 'admin', // Change this to 'user' to test user redirection
+    //     userId: 1
+    //   }
+    // }
 
     // Save JWT token
     localStorage.setItem('token', response.data.token)
