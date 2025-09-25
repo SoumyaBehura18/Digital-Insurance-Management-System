@@ -3,11 +3,13 @@ import { createStore } from 'vuex'
 // Mock data imports (need to be replaced with real API calls later)
 import claimsData from './sample-data/claims.json'
 import policiesData from './sample-data/policies.json'
+import adminClaimsData from './sample-data/admin-claims.json'
 
 export default createStore({
   state: {
     policies: [],
     claims: [],
+    adminClaims: [],
     loading: false,
     error: null,
     successMessage: null
@@ -20,6 +22,9 @@ export default createStore({
     SET_CLAIMS(state, claims) {
       state.claims = claims
     },
+    SET_ADMIN_CLAIMS(state, adminClaims) {
+      state.adminClaims = adminClaims
+    },
     ADD_CLAIM(state, claim) {
       state.claims.push(claim)
     },
@@ -27,6 +32,12 @@ export default createStore({
       const index = state.claims.findIndex(claim => claim.id === updatedClaim.id)
       if (index !== -1) {
         state.claims[index] = { ...state.claims[index], ...updatedClaim }
+      }
+    },
+    UPDATE_ADMIN_CLAIM(state, updatedClaim) {
+      const index = state.adminClaims.findIndex(claim => claim.id === updatedClaim.id)
+      if (index !== -1) {
+        state.adminClaims[index] = { ...state.adminClaims[index], ...updatedClaim }
       }
     },
     SET_LOADING(state, loading) {
@@ -101,6 +112,32 @@ export default createStore({
       }
     },
 
+    async fetchAdminClaims({ commit }) {
+      try {
+        commit('SET_LOADING', true)
+        const response = await claimService.getAllAdminClaims()
+        commit('SET_ADMIN_CLAIMS', response.data)
+      } catch (error) {
+        commit('SET_ERROR', 'Failed to load admin claims')
+      } finally {
+        commit('SET_LOADING', false)
+      }
+    },
+
+    async updateAdminClaimStatus({ commit }, { claimId, status, reviewerComment }) {
+      try {
+        commit('SET_LOADING', true)
+        const response = await claimService.updateAdminClaimStatus(claimId, status, reviewerComment)
+        commit('UPDATE_ADMIN_CLAIM', response.data)
+        commit('SET_SUCCESS_MESSAGE', `Claim ${status.toLowerCase()} successfully`)
+      } catch (error) {
+        commit('SET_ERROR', `Failed to ${status.toLowerCase()} claim`)
+        throw error
+      } finally {
+        commit('SET_LOADING', false)
+      }
+    },
+
     clearMessages({ commit }) {
       commit('CLEAR_MESSAGES')
     }
@@ -109,7 +146,13 @@ export default createStore({
   getters: {
     pendingClaims: (state) => state.claims.filter(claim => claim.status === 'PENDING'),
     approvedClaims: (state) => state.claims.filter(claim => claim.status === 'APPROVED'),
-    rejectedClaims: (state) => state.claims.filter(claim => claim.status === 'REJECTED')
+    rejectedClaims: (state) => state.claims.filter(claim => claim.status === 'REJECTED'),
+    
+    // Admin getters
+    adminPendingClaims: (state) => state.adminClaims.filter(claim => claim.status === 'PENDING'),
+    adminApprovedClaims: (state) => state.adminClaims.filter(claim => claim.status === 'APPROVED'),
+    adminRejectedClaims: (state) => state.adminClaims.filter(claim => claim.status === 'REJECTED'),
+    adminClaimsByPriority: (state) => (priority) => state.adminClaims.filter(claim => claim.priority === priority)
   }
 })
 
@@ -119,6 +162,7 @@ export default createStore({
 ------------------------------------ */
 let claims = [...claimsData]
 let policies = [...policiesData]
+let adminClaims = [...adminClaimsData]
 
 const delay = (ms = 500) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -179,5 +223,30 @@ export const claimService = {
     const policy = policies.find(p => p.id === policyId)
     if (!policy) throw { data: null, status: 404, message: 'Policy not found' }
     return { data: policy, status: 200, message: 'Policy retrieved successfully' }
+  },
+
+  // Admin Claims Methods
+  async getAllAdminClaims() {
+    await delay()
+    return { data: adminClaims, status: 200, message: 'Admin claims retrieved successfully' }
+  },
+
+  async updateAdminClaimStatus(claimId, status, reviewerComment = null) {
+    await delay()
+    const idx = adminClaims.findIndex(c => c.id === claimId)
+    if (idx === -1) throw { data: null, status: 404, message: 'Claim not found' }
+
+    adminClaims[idx].status = status
+    adminClaims[idx].reviewerComment = reviewerComment
+    adminClaims[idx].resolvedDate = status !== 'PENDING' ? new Date().toISOString().split('T')[0] : null
+
+    return { data: adminClaims[idx], status: 200, message: 'Admin claim status updated successfully' }
+  },
+
+  async getAdminClaimById(claimId) {
+    await delay()
+    const claim = adminClaims.find(c => c.id === claimId)
+    if (!claim) throw { data: null, status: 404, message: 'Admin claim not found' }
+    return { data: claim, status: 200, message: 'Admin claim retrieved successfully' }
   }
 }

@@ -85,15 +85,30 @@ const handleLogin = async () => {
       email: email.value,
       password: password.value
     })
+    
+    // below structure is for testing without backend.
+
+    // const response = {
+    //   data: {
+    //     token: 'dummy-jwt-token',
+    //     role: 'admin', // Change this to 'user' to test user redirection
+    //     userId: 1
+    //   }
+    // }
 
     // Save JWT token
     localStorage.setItem('token', response.data.token)
+    localStorage.setItem('role', response.data.role)
+    localStorage.setItem('userId', response.data.userId)
+    
     alert('Login successful!')
 
-    // Navigate after a small delay to ensure reactivity
-    setTimeout(() => {
+    // Role-based redirection with new route structure
+    if (response.data.role === 'admin') {
+      router.push('/admin/dashboard')
+    } else {
       router.push('/dashboard')
-    }, 50)
+    }
 
   } catch (error) {
     console.error('Login failed:', error.response?.data || error.message)

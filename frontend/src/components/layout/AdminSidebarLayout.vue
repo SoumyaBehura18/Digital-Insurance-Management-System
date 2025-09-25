@@ -7,7 +7,7 @@
     <div class="p-4 border-b flex items-center justify-between">
       <div v-if="!isCollapsed" class="flex items-center gap-2">
         <Shield class="w-6 h-6 text-brand-backgroundTheme" />
-        <span class="font-semibold text-gray-900">InsureCore</span>
+        <span class="font-semibold text-gray-900">InsureCore Admin</span>
       </div>
       <button class="p-2 rounded hover:bg-gray-200 text-gray-900" @click="setIsCollapsed(!isCollapsed)">
         <ChevronRight v-if="isCollapsed" class="w-4 h-4" />
@@ -18,17 +18,17 @@
     <!-- Navigation -->
     <nav class="flex-1 p-4 bg-gray-100">
       <div class="space-y-2">
-        <button v-for="item in sidebarItems" :key="item.id" @click="handleClick(item.id)" :class="[
+        <button v-for="item in adminSidebarItems" :key="item.id" @click="handleClick(item.id)" :class="[
           'w-full flex items-center justify-start rounded transition py-2',
           isCollapsed ? 'px-2' : 'px-4',
-          currentPage === `/${item.id}`
+          currentPage === `/admin/${item.id}`
             ? 'bg-brand-backgroundTheme text-white'
             : 'text-gray-900 hover:bg-gray-200'
 
         ]">
           <component :is="item.icon" :class="[
             'w-4 h-4 shrink-0',
-            currentPage === `/${item.id}` ? 'text-white' : 'text-gray-900'
+            currentPage === `/admin/${item.id}` ? 'text-white' : 'text-gray-900'
           ]" />
           <span v-if="!isCollapsed" class="ml-2 truncate">{{ item.label }}</span>
         </button>
@@ -76,8 +76,8 @@ import {
   LayoutDashboard,
   Shield,
   FileText,
-  MessageSquare,
-  Ticket,
+  HeadphonesIcon,
+  Users,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -96,13 +96,13 @@ const props = defineProps({
   setIsCollapsed: { type: Function, required: true },
 });
 
-// User Sidebar items
-const sidebarItems = [
+// Admin Sidebar items
+const adminSidebarItems = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "policies", label: "My Policies", icon: Shield },
-  { id: "claims", label: "Claims", icon: FileText },
-  { id: "chatbot", label: "Chatbot", icon: MessageSquare },
-  { id: "tickets", label: "Support Tickets", icon: Ticket },
+  { id: "policies", label: "Manage Policies", icon: Shield },
+  { id: "claims", label: "Manage Claims", icon: FileText },
+  { id: "tickets", label: "Support Tickets", icon: HeadphonesIcon },
+  { id: "users", label: "Users", icon: Users },
 ];
 
 // Local dark mode sync
@@ -113,10 +113,9 @@ watch(
     darkModeLocal.value = val;
   }
 );
-const handleLogout = () => {
 
-  localStorage.removeItem("token"); 
-  router.push("/");
+const handleLogout = () => {
+  props.onLogout();
 };
 
 const handleClick = (id) => {
