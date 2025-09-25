@@ -4,7 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.TicketStatus;
 
-import java.time.LocalDateTime;
+import java.sql.Date;
+
 @Data
 @Entity
 @Table(name = "support_tickets")
@@ -43,8 +44,8 @@ public class SupportTicket {
     private String response;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private Date createdAt;
 
-    private LocalDateTime resolvedAt;
+    private Date resolvedAt;
 
 }
