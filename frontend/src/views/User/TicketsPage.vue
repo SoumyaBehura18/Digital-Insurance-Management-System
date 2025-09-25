@@ -1,22 +1,11 @@
 <template>
   <div class="min-h-screen">
-    <header class="bg-white shadow-sm border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-end items-center h-16">
-          <div class="flex items-center gap-3 justify-end text-right">
-            <div>
-              <div class="font-semibold text-gray-900">{{ user.name }}</div>
-              <div class="text-sm text-gray-500">{{ user.email }}</div>
-            </div>
-            <div
-              class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center"
-            >
-              <span class="text-gray-600 font-medium">{{ userInitials }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
+    <HeaderLayout
+      :user="user"
+      :isCollapsed="isCollapsed"
+      :setIsCollapsed="setIsCollapsed"
+      class="w-full"
+    />
 
     <main class="max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
       <div class="flex justify-between items-center mb-8">
@@ -68,8 +57,11 @@ import BaseButton from "@/components/BaseButton.vue";
 import TicketsList from "@/components/TicketComponents/TicketList.vue";
 import CreateTicketForm from "@/components/TicketComponents/SupportForm.vue";
 import { ArrowLeft } from "lucide-vue-next";
+import HeaderLayout from "@/components/layout/HeaderLayout.vue";
 
-// Reactive data
+const isCollapsed = ref(true);
+const setIsCollapsed = (val) => (isCollapsed.value = val);
+
 const user = ref({
   name: "John Doe",
   email: "somethin@mail.com",
@@ -94,15 +86,6 @@ const tickets = ref([
   },
 ]);
 
-const userInitials = computed(() => {
-  return user.value.name
-    .split(" ")
-    .map((word) => word.charAt(0))
-    .join("")
-    .toUpperCase()
-    .substring(0, 2);
-});
-
 const setActiveView = (view) => {
   activeView.value = view;
 };
@@ -110,7 +93,6 @@ const setActiveView = (view) => {
 const handleUpdateTicket = (ticket) => {
   console.log("Update ticket:", ticket);
   setActiveView("create");
-
 };
 
 const handleResolveTicket = (ticket) => {

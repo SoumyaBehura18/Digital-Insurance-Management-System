@@ -20,7 +20,6 @@ public class UserService {
     @Autowired
     private UserRepo repo;
 
-
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
     public User register(User user) {

@@ -1,33 +1,21 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50">
-    <div class="text-center">
-      <div class="text-9xl font-bold text-gray-300 mb-4">404</div>
-      <h1 class="text-2xl font-bold text-gray-900 mb-2">Page Not Found</h1>
-      <p class="text-gray-600 mb-8">The page you're looking for doesn't exist.</p>
-      <button 
-        @click="goHome"
-        class="bg-brand-backgroundTheme text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-      >
-        Go Home
-      </button>
+  <div
+    class="min-h-screen flex items-center justify-center bg-gray-100 text-center"
+  >
+    <div>
+      <div class="grid items-center justify-center m-5">
+        <h1 class="text-9xl font-bold text-indigo-600">404</h1>
+        <p class="text-xl mt-4 text-gray-700">Page Not Found</p>
+      </div>
+      <div class="w-full flex justify-center mt-6">
+        <BaseButton variant="primary" @click="this.$router.push('/dashboard')">
+          Go Back Home</BaseButton
+        >
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
-
-const goHome = () => {
-  const userRole = localStorage.getItem('role')
-  
-  if (userRole === 'admin') {
-    router.push('/admin/dashboard')
-  } else if (userRole === 'user') {
-    router.push('/dashboard')
-  } else {
-    router.push('/')
-  }
-}
+import BaseButton from "@/components/BaseButton.vue";
 </script>
