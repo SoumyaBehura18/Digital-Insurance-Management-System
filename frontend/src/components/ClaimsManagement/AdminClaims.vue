@@ -85,16 +85,8 @@
       </button>
     </div>
 
-    <!-- Empty State -->
-    <div v-else-if="filteredClaims.length === 0" class="text-center py-12">
-      <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-      </svg>
-      <p class="text-gray-500">No {{ activeFilter === 'all' ? '' : activeFilter }} claims to review at the moment</p>
-    </div>
-
-    <!-- Claims Table -->
-    <div v-else class="bg-white rounded-lg border border-gray-200 shadow-sm">
+  <!-- Claims Table + Filters (always visible) -->
+  <div v-else class="bg-white rounded-lg border border-gray-200 shadow-sm">
       <!-- Table Header with Filters -->
       <div class="p-6 border-b border-gray-200">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
@@ -165,7 +157,14 @@
         </div>
       </div>
       
-      <div class="overflow-x-auto">
+      <div v-if="filteredClaims.length === 0" class="text-center py-12">
+        <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <p class="text-gray-500">No {{ activeFilter === 'all' ? '' : activeFilter }} claims to review at the moment</p>
+      </div>
+
+      <div v-else class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead class="bg-gray-50">
             <tr>
@@ -183,7 +182,7 @@
             <tr v-for="claim in filteredClaims" :key="claim.id" class="hover:bg-gray-50">
               <td class="px-6 py-4 font-medium text-gray-900">#{{ claim.id }}</td>
               <td class="px-6 py-4 text-gray-900">{{ claim.userName }}</td>
-              <td class="px-6 py-4 text-gray-900">{{ claim.policyType }}</td>
+              <td class="px-6 py-4 text-gray-900">{{ claim.policyName || '-' }}</td>
               <td class="px-6 py-4 font-semibold text-gray-900">${{ formatAmount(claim.claimAmount) }}</td>
               <td class="px-6 py-4 text-gray-700 max-w-xs truncate">{{ claim.reason }}</td>
               <td class="px-6 py-4 text-gray-500">{{ formatDate(claim.claimDate) }}</td>
@@ -244,7 +243,7 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Policy</label>
-            <p class="text-gray-900">{{ selectedClaim?.policyType }}</p>
+            <p class="text-gray-900">{{ selectedClaim?.policyName || '-' }}</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Claim Amount</label>
@@ -367,7 +366,7 @@ export default {
           claim.id.toString().includes(query) ||
           claim.userName.toLowerCase().includes(query) ||
           claim.reason.toLowerCase().includes(query) ||
-          claim.policyType.toLowerCase().includes(query)
+          (claim.policyName || '').toLowerCase().includes(query)
         );
       }
       
@@ -376,15 +375,24 @@ export default {
   },
   async mounted() {
     console.log('AdminClaims mounted, loading data...');
+    console.log('Initial store state:', this.$store.state);
+    console.log('Available store actions:', Object.keys(this.$store._actions || {}));
+    
     await this.loadAdminClaims();
+    
+    console.log('Final store state after loading:', this.$store.state);
     console.log('Admin claims loaded:', this.$store.state.adminClaims);
+    console.log('Admin claims length:', this.$store.state.adminClaims?.length);
   },
   methods: {
     async loadAdminClaims() {
       console.log('Loading admin claims...');
       try {
-        await this.$store.dispatch('fetchAdminClaims');
+        console.log('Dispatching fetchAllClaims action...');
+        await this.$store.dispatch('fetchAllClaims');
         console.log('Admin claims fetched successfully');
+        console.log('Store state after fetch:', this.$store.state);
+        console.log('Admin claims data:', this.$store.state.adminClaims);
       } catch (error) {
         console.error('Error loading admin claims:', error);
       }
@@ -409,10 +417,10 @@ export default {
       }
 
       try {
-        await this.$store.dispatch('updateAdminClaimStatus', {
+        await this.$store.dispatch('reviewClaim', {
           claimId: claim.id,
           status: newStatus,
-          reviewerComment: claim.tempComment.trim()
+          reviewComments: claim.tempComment.trim()
         });
         
         // Show success message

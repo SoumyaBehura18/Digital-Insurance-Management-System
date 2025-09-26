@@ -1,8 +1,7 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gray-50">
     <div class="bg-white shadow-md rounded-xl w-full max-w-md p-8">
-
-      <!-- Logo & Title -->
+<!-- Logo & Title -->
       <div class="flex items-center justify-center mb-6">
         <Shield class="w-8 h-8 text-blue-600 rounded-full mr-2" />
         <h1 class="text-xl font-semibold">InsureCore</h1>
@@ -14,8 +13,7 @@
 
       <!-- Form -->
       <form @submit.prevent="handleLogin" class="space-y-4">
-
-        <!-- Email -->
+<!-- Email -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
           <input 
@@ -54,8 +52,7 @@
         New user? 
         <a href="/register" class="text-blue-600 font-medium hover:underline">Register</a>
       </p>
-
-    </div>
+</div>
   </div>
 </template>
 <script setup>
@@ -81,20 +78,20 @@ const handleLogin = async () => {
   isLoading.value = true
 
   try {
-    const response = await axios.post('http://localhost:9090/login', {
-      email: email.value,
-      password: password.value
-    })
+    // const response = await axios.post('http://localhost:9090/login', {
+    //   email: email.value,
+    //   password: password.value
+    // })
     
     // below structure is for testing without backend.
 
-    // const response = {
-    //   data: {
-    //     token: 'dummy-jwt-token',
-    //     role: 'admin', // Change this to 'user' to test user redirection
-    //     userId: 1
-    //   }
-    // }
+    const response = {
+      data: {
+        token: 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJodXNzYWluMUBnbWFpbC5jb20iLCJpYXQiOjE3NTg4MjMzNjcsImV4cCI6MTc2MTQxNTM2N30.Pm58MXAkqC3jlVK2FIZkuelxpbxcd-P6VsaIoJ42uk4',
+        role: 'admin', // Change this to 'user' to test user redirection
+        userId: 1
+      }
+    }
 
     // Save JWT token
     localStorage.setItem('token', response.data.token)

@@ -53,7 +53,7 @@
           </thead>
           <tbody>
             <tr v-for="claim in $store.state.claims" :key="claim.id" class="hover:bg-gray-50 border-b border-gray-100">
-              <td class="px-4 py-4 font-medium">{{ getPolicyName(claim.userPolicyId) }}</td>
+              <td class="px-4 py-4 font-medium">{{ claim.policyName || getPolicyLabel(claim.userPolicyId) }}</td>
               <td class="px-4 py-4 font-semibold text-green-600">₹{{ formatAmount(claim.claimAmount) }}</td>
               <td class="px-4 py-4 text-gray-500">{{ formatDate(claim.claimDate) }}</td>
               <td class="px-4 py-4">
@@ -174,9 +174,10 @@ export default {
       return new Intl.NumberFormat('en-IN').format(amount);
     },
 
-    getPolicyName(policyId) {
-      const policy = this.$store.state.policies.find(p => p.id === policyId);
-      return policy ? policy.name : `Policy ${policyId}`;
+    getPolicyLabel(userPolicyId) {
+      const policy = this.$store.state.policies.find(p => p.id === userPolicyId);
+      if (!policy) return `Policy ${userPolicyId}`;
+      return policy.policyType || `Policy ${userPolicyId}`;
     },
 
     showCommentModal(claim) {

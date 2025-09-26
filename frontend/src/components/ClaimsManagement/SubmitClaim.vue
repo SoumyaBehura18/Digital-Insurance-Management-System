@@ -47,6 +47,19 @@
             <p class="mt-1 text-xs text-gray-500">Select the policy you want to claim against</p>
           </div>
 
+          <!-- Claim Date -->
+          <div>
+            <label for="claimDate" class="block text-sm font-medium mb-1">Claim Date *</label>
+            <input
+              id="claimDate"
+              type="date"
+              v-model="form.claimDate"
+              required
+              class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-brand-backgroundTheme"
+            />
+            <p class="mt-1 text-xs text-gray-500">Select the date of the incident/expense</p>
+          </div>
+
           <!-- Policy Details -->
           <div v-if="selectedPolicy" class="bg-blue-50 border rounded p-4">
             <div class="flex items-center mb-2">
@@ -80,6 +93,7 @@
                 required 
                 min="1" 
                 :max="selectedPolicy ? selectedPolicy.availableAmount : 1000000"
+                @input="enforceMax"
                 class="w-full pl-7 pr-3 py-2 border rounded focus:ring-2 focus:ring-brand-backgroundTheme"
                 placeholder="Enter claim amount"
               />
@@ -100,12 +114,13 @@
               v-model="form.reason" 
               required 
               rows="4"
+              minlength="15"
               maxlength="500"
               class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-brand-backgroundTheme resize-y"
               placeholder="Please provide detailed reason for your claim"
             ></textarea>
             <div class="flex justify-between mt-1 text-xs text-gray-500">
-              <p>Provide a detailed explanation</p>
+              <p>Provide a detailed explanation (min 15 characters)</p>
               <p class="text-gray-400">{{ form.reason.length }}/500</p>
             </div>
           </div>
@@ -159,6 +174,7 @@ export default {
     return {
       form: {
         userPolicyId: '',
+  claimDate: new Date().toISOString().slice(0, 10),
         claimAmount: '',
         reason: ''
       }
@@ -173,6 +189,17 @@ export default {
       return this.$store.state.policies.find(policy => policy.id === parseInt(this.form.userPolicyId));
     }
   },
+  watch: {
+    'form.userPolicyId'() {
+      this.$store.dispatch('clearMessages');
+    },
+    'form.claimAmount'() {
+      this.$store.dispatch('clearMessages');
+    },
+    'form.reason'() {
+      this.$store.dispatch('clearMessages');
+    }
+  },
   async mounted() {
     await this.$store.dispatch('fetchPolicies');
   },
@@ -180,6 +207,17 @@ export default {
     formatAmount(amount) {
       if (!amount) return '0';
       return new Intl.NumberFormat('en-IN').format(amount);
+    },
+    enforceMax() {
+      if (!this.selectedPolicy) return;
+      const max = this.selectedPolicy.availableAmount;
+      const current = parseFloat(this.form.claimAmount);
+      if (!isNaN(current) && current > max) {
+        this.form.claimAmount = max;
+      }
+      if (current < 0) {
+        this.form.claimAmount = 0;
+      }
     },
     async submitClaim() {
       try {
@@ -195,10 +233,16 @@ export default {
           return;
         }
 
+        // Validate reason length
+        if (!this.form.reason || this.form.reason.trim().length < 15) {
+          this.$store.commit('SET_ERROR', 'Reason must be at least 15 characters long.');
+          return;
+        }
+
         const claimData = {
           userPolicyId: parseInt(this.form.userPolicyId),
-          userId: this.userId,
-          claimAmount: parseInt(this.form.claimAmount),
+          claimDate: this.form.claimDate,
+          claimAmount: parseFloat(this.form.claimAmount),
           reason: this.form.reason
         };
 
@@ -206,6 +250,7 @@ export default {
         
         this.form = {
           userPolicyId: '',
+          claimDate: new Date().toISOString().slice(0, 10),
           claimAmount: '',
           reason: ''
         };
@@ -219,17 +264,6 @@ export default {
       } catch (error) {
         console.error('Failed to submit claim:', error);
       }
-    }
-  },
-  watch: {
-    'form.userPolicyId'() {
-      this.$store.dispatch('clearMessages');
-    },
-    'form.claimAmount'() {
-      this.$store.dispatch('clearMessages');
-    },
-    'form.reason'() {
-      this.$store.dispatch('clearMessages');
     }
   }
 };
