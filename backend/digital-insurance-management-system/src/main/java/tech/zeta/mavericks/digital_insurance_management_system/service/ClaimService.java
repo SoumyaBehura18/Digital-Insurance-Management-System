@@ -154,7 +154,30 @@ public class ClaimService {
         if (status == ClaimStatus.APPROVED || status == ClaimStatus.REJECTED) {
             claim.setResolvedDate(LocalDate.now());
         }
-
         claimRepository.save(claim);
+    }
+
+    public List<UserPolicy> getUserPoliciesByUserId(Long userId) {
+        return userPolicyRepository.findByUser_Id(userId);
+    }
+
+    public Double getRemainingCoverageAmount(Long userPolicyId) {
+        UserPolicy userPolicy = userPolicyRepository.findById(userPolicyId)
+                .orElseThrow(() -> new UserPolicyNotFoundException("User policy with ID " + userPolicyId + " not found"));
+
+        // Get total approved claim amounts for THIS specific user policy only
+        Double totalClaimedAmount = claimRepository.findByUserPolicy_Id(userPolicyId).stream()
+                .filter(claim -> claim.getStatus() == ClaimStatus.APPROVED)
+                .mapToDouble(claim -> claim.getClaimAmount().doubleValue())
+                .sum();
+
+        // Get coverage amount from the policy (note: it's coverageAmt, not coverageAmount)
+        Double coverageAmount = userPolicy.getPolicy().getCoverageAmt();
+
+        return coverageAmount - totalClaimedAmount;
+    }
+
+    public List<UserPolicy> getAllUserPolicies() {
+        return userPolicyRepository.findAll();
     }
 }

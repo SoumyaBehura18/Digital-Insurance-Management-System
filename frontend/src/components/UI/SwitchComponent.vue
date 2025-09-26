@@ -20,13 +20,13 @@ import { ref, watch } from "vue";
 
 export default {
   name: "SwitchComponent",
-  emits: ["update:modelValue"],
   props: {
     modelValue: {
       type: Boolean,
       default: false,
     },
   },
+  emits: ["update:modelValue"],
   setup(props, { emit }) {
     const checked = ref(props.modelValue);
 

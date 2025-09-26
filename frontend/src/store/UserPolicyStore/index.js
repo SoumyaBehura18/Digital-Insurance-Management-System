@@ -1,4 +1,4 @@
-import { makeRequestWithToken } from '@/utils/requests'
+import { requestWithAuth } from '@/utils/requests'
 
 const state = {
   policies: [],       // list of UserPolicyResponse
@@ -30,7 +30,7 @@ async fetchUserPolicies({ commit }, userId) {
   console.log("Action fired with userId:", userId);
   commit('SET_LOADING', true);
   try {
-    const response = await makeRequestWithToken('GET', `/user/policies/${userId}`);
+  const response = await requestWithAuth('GET', `/user/policies/${userId}`);
     console.log("API Response:", response.data);
     commit('SET_POLICIES', response.data);
     commit('SET_ERROR', null);
@@ -47,7 +47,7 @@ async fetchUserPolicies({ commit }, userId) {
   async fetchPolicyById({ commit }, policyId) {
     commit('SET_LOADING', true)
     try {
-      const response = await makeRequestWithToken('GET', `/user/policy/${policyId}`)
+  const response = await requestWithAuth('GET', `/user/policy/${policyId}`)
       // Optionally update the store
       const index = state.policies.findIndex(p => p.id === policyId)
       if (index !== -1) state.policies[index] = response.data
@@ -64,7 +64,7 @@ async fetchUserPolicies({ commit }, userId) {
   async createPolicy({ commit, state }, policyData) {
     commit('SET_LOADING', true)
     try {
-      const response = await makeRequestWithToken('POST', '/user/policy/purchase', policyData)
+  const response = await requestWithAuth('POST', '/user/policy/purchase', policyData)
       commit('SET_POLICIES', [...state.policies, response.data])
       commit('SET_ERROR', null)
     } catch (error) {

@@ -9,6 +9,7 @@ import tech.zeta.mavericks.digital_insurance_management_system.dto.ClaimRequestD
 import tech.zeta.mavericks.digital_insurance_management_system.dto.ClaimResponseDto;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.ClaimListResponseDto;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.Claim;
+import tech.zeta.mavericks.digital_insurance_management_system.entity.UserPolicy;
 import tech.zeta.mavericks.digital_insurance_management_system.service.ClaimService;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.ClaimStatus;
 
@@ -47,5 +48,26 @@ public class ClaimController {
     public ResponseEntity<?> reviewClaim(@Valid @RequestBody ClaimReviewDTO claimReviewDTO, @PathVariable Long claimId) {
         claimService.updateCalimStatusAndReviewerComment(claimId, claimReviewDTO.getStatus(), claimReviewDTO.getReviewComments());
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/policy/{policyId}")
+    public ResponseEntity<?> getPoliciesByPolicyId(@PathVariable Long policyId) {
+        List<UserPolicy> response = claimService.getUserPoliciesByUserId(policyId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/policy/remaining-amount/{policyId}")
+    public ResponseEntity<?> getRemainingClaimAmount(@PathVariable Long policyId) {
+        Double remainingAmount = claimService.getRemainingCoverageAmount(policyId);
+        Map<String, Object> response = new HashMap<>();
+        response.put("policyId", policyId);
+        response.put("remainingClaimAmount", remainingAmount);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/policies")
+    public ResponseEntity<?> getAllPolicies() {
+        List<UserPolicy> response = claimService.getAllUserPolicies();
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
