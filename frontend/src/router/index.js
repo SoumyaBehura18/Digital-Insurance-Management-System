@@ -97,10 +97,14 @@ const router = createRouter({
 });
  
 // Global Navigation Guard
+// Global Navigation Guard
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token');
-  const userRole = localStorage.getItem('role');
-  
+  // Get full user object from localStorage
+  const storedUser = localStorage.getItem('currentUser');
+  const user = storedUser ? JSON.parse(storedUser) : null;
+  const token = user?.token;
+  const userRole = user?.role;
+
   // Check if route requires authentication
   if (to.meta.requiresAuth) {
     if (!token) {
@@ -108,7 +112,7 @@ router.beforeEach((to, from, next) => {
       next('/login');
       return;
     }
-    
+
     // Check role-based access
     if (to.meta.role && to.meta.role !== userRole) {
       // Wrong role, redirect based on user's actual role
@@ -122,21 +126,21 @@ router.beforeEach((to, from, next) => {
       return;
     }
   }
-  
+
   // If user is already logged in and tries to access login page
   if (to.path === '/login' && token) {
     if (userRole === 'admin') {
       next('/admin/dashboard');
-    } else {
+    } else if (userRole === 'user') {
       next('/dashboard');
     }
     return;
   }
-  
+
   // Allow navigation
   next();
 });
- 
+
 export default router;
  
  

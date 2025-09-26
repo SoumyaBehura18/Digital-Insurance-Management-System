@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gray-50">
     <div class="bg-white shadow-md rounded-xl w-full max-w-md p-8">
-<!-- Logo & Title -->
+      <!-- Logo & Title -->
       <div class="flex items-center justify-center mb-6">
         <Shield class="w-8 h-8 text-blue-600 rounded-full mr-2" />
         <h1 class="text-xl font-semibold">InsureCore</h1>
@@ -13,7 +13,7 @@
 
       <!-- Form -->
       <form @submit.prevent="handleLogin" class="space-y-4">
-<!-- Email -->
+        <!-- Email -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
           <input 
@@ -52,14 +52,16 @@
         New user? 
         <a href="/register" class="text-blue-600 font-medium hover:underline">Register</a>
       </p>
-</div>
+    </div>
   </div>
 </template>
 <script setup>
 import { ref } from 'vue'
-import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { Shield } from 'lucide-vue-next'
+import { useStore } from 'vuex'
+
+const store = useStore()
 
 const email = ref('')
 const password = ref('')
@@ -67,9 +69,7 @@ const isLoading = ref(false)
 const router = useRouter()
 
 const handleLogin = async () => {
-  // Prevent multiple calls
   if (isLoading.value) return
-
   if (!email.value || !password.value) {
     alert('Please enter email and password')
     return
@@ -78,44 +78,32 @@ const handleLogin = async () => {
   isLoading.value = true
 
   try {
-    // const response = await axios.post('http://localhost:9090/login', {
-    //   email: email.value,
-    //   password: password.value
-    // })
-    
-    // below structure is for testing without backend.
+    // Call Vuex action instead of axios directly
+    await store.dispatch('user/loginUser', { email: email.value, password: password.value })
 
-    const response = {
-      data: {
-        token: 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJodXNzYWluMUBnbWFpbC5jb20iLCJpYXQiOjE3NTg4MjMzNjcsImV4cCI6MTc2MTQxNTM2N30.Pm58MXAkqC3jlVK2FIZkuelxpbxcd-P6VsaIoJ42uk4',
-        role: 'user', // Change this to 'user' to test user redirection
-        userId: 1
-      }
+
+    const user = store.getters['user/getCurrentUser']
+
+    if (!user) {
+      alert('Login failed. Please try again.')
+      return
     }
 
-    // Save JWT token
-    localStorage.setItem('token', response.data.token)
-    localStorage.setItem('role', response.data.role)
-    localStorage.setItem('userId', response.data.userId)
-    
     alert('Login successful!')
-
-    // Role-based redirection with new route structure
-    if (response.data.role === 'admin') {
+    console.log('User Role:', user.role)
+    // Role-based redirection
+    if (user.role === 'admin') {
       router.push('/admin/dashboard')
     } else {
       router.push('/dashboard')
     }
 
   } catch (error) {
-    console.error('Login failed:', error.response?.data || error.message)
-    if (error.response?.data?.error) {
-      alert(`Login failed: ${error.response.data.error}`)
-    } else {
-      alert('Login failed. Please try again.')
-    }
+    console.error('Login failed:', error)
+    alert('Login failed. Please try again.')
   } finally {
     isLoading.value = false
   }
+
 }
 </script>
