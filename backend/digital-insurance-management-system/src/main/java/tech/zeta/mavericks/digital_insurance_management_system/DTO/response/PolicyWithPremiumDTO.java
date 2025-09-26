@@ -15,5 +15,6 @@ public class PolicyWithPremiumDTO {
     private Double premiumRate;
     private Double renewalRate;
     private Integer duration;
+    private Double coverage;
 
 }
