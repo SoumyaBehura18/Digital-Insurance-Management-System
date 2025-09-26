@@ -11,4 +11,6 @@ import java.util.List;
 @Repository
 public interface UserPolicyRepository extends JpaRepository<UserPolicy, Long> {
     List<UserPolicy> findByUser_Id(Long userId);
+
+    List<UserPolicy> findByUserId(Long userId);
 }

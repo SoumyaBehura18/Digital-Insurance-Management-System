@@ -88,7 +88,7 @@ const handleLogin = async () => {
     const response = {
       data: {
         token: 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJodXNzYWluMUBnbWFpbC5jb20iLCJpYXQiOjE3NTg4MjMzNjcsImV4cCI6MTc2MTQxNTM2N30.Pm58MXAkqC3jlVK2FIZkuelxpbxcd-P6VsaIoJ42uk4',
-        role: 'admin', // Change this to 'user' to test user redirection
+        role: 'user', // Change this to 'user' to test user redirection
         userId: 1
       }
     }
