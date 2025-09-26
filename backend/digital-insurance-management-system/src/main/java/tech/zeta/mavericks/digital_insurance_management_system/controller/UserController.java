@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import tech.zeta.mavericks.digital_insurance_management_system.DTO.LoginRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.LoginResponse;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.RoleType;
 import tech.zeta.mavericks.digital_insurance_management_system.service.JWTService;
 import tech.zeta.mavericks.digital_insurance_management_system.service.UserService;
@@ -24,7 +25,7 @@ import java.util.Map;
 
 
 
-@CrossOrigin(origins = "http://localhost:8082") // allow your frontend
+@CrossOrigin(origins = "http://localhost:8081") // allow your frontend
 @RestController
 
 
@@ -48,31 +49,33 @@ public class UserController{
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
         Authentication authentication;
-        try{
-            authentication = authenticationManager
-                    .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(),loginRequest.getPassword()));
-        }catch(Exception e){
-            Map<String, Object> map = new HashMap<>();
-            map.put("error",e.getMessage());
-            map.put("status", false);
-
-            return new ResponseEntity<Object>(map, HttpStatus.NOT_FOUND);
-
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("status", false, "error", e.getMessage()));
         }
-
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-        String jwtToken = this.jwtService.generateToken(userPrincipal.getUsername());
+        String jwtToken = jwtService.generateToken(userPrincipal.getUsername());
 
-        Map<String, String> response = new HashMap<>();
-        response.put("token", jwtToken);
-        response.put("role", userPrincipal.getRole().toLowerCase());
-        response.put("userId", String.valueOf(userPrincipal.getId()));
-        return ResponseEntity.ok(response);
+        LoginResponse responseDTO = new LoginResponse(
+                userPrincipal.getId(),
+                userPrincipal.getRole().toLowerCase(),
+                jwtToken,
+                userPrincipal.getUser().getSmokingDrinking(),
+                userPrincipal.getUser().getVehicleType(),
+                userPrincipal.getUser().getVehicleAge(),
+                userPrincipal.getUser().getPreexistingConditions()
+        );
 
+        return ResponseEntity.ok(responseDTO);
     }
+
 
 
 }

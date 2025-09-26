@@ -34,4 +34,7 @@ public class UserPolicy {
     private PolicyStatus status;
 
     private Double premiumPaid;
+
+    private Boolean noClaimBonus;
+
 }

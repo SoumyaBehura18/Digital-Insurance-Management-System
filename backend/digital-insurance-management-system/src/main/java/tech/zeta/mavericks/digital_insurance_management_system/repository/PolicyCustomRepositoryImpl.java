@@ -3,7 +3,7 @@ package tech.zeta.mavericks.digital_insurance_management_system.repository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.PolicyWithPremiumDTO;
+import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.PolicyWithPremiumDTO;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.HealthPolicyPremium;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.HealthPreexistingCondition;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.LifePolicyPremium;
@@ -47,7 +47,8 @@ public class PolicyCustomRepositoryImpl implements PolicyRepository.PolicyCustom
                         v.getPolicy().getName(),
                         v.getPolicy().getType(),
                         v.getPremiumRate(),
-                        v.getRenewalRate()))
+                        v.getRenewalRate(),
+                        v.getPolicy().getDurationMonths()))
                 .collect(Collectors.toList());
         return dtos;
     }
@@ -68,7 +69,8 @@ public class PolicyCustomRepositoryImpl implements PolicyRepository.PolicyCustom
                         l.getPolicy().getName(),
                         l.getPolicy().getType(),
                         l.getPremiumRate(),
-                        l.getRenewalRate()))
+                        l.getRenewalRate(),
+                        l.getPolicy().getDurationMonths()))
                 .collect(Collectors.toList());
 
         return  dtos;
@@ -95,8 +97,13 @@ public class PolicyCustomRepositoryImpl implements PolicyRepository.PolicyCustom
 
                     // Sum only premiums for the conditions the user has
                     double additionalPremium = 0.0;
+                    double additionalRenewal=0.0;
                     if (policyConditions != null && preexistingConditions != null) {
                         additionalPremium = policyConditions.stream()
+                                .filter(cond -> preexistingConditions.contains(cond.getCondition()))
+                                .mapToDouble(HealthPreexistingCondition::getAdditionalPremium)
+                                .sum();
+                        additionalRenewal=policyConditions.stream()
                                 .filter(cond -> preexistingConditions.contains(cond.getCondition()))
                                 .mapToDouble(HealthPreexistingCondition::getAdditionalPremium)
                                 .sum();
@@ -104,6 +111,7 @@ public class PolicyCustomRepositoryImpl implements PolicyRepository.PolicyCustom
 
                     // Total premium = base + additional
                     double totalPremium = basePremium + additionalPremium;
+                    double totalRenewalPremium=renewalRate+additionalRenewal;
 
                     // Create DTO
                     return new PolicyWithPremiumDTO(
@@ -111,7 +119,8 @@ public class PolicyCustomRepositoryImpl implements PolicyRepository.PolicyCustom
                             h.getPolicy().getName(),
                             h.getPolicy().getType(),
                             totalPremium,
-                            renewalRate
+                            totalRenewalPremium,
+                            h.getPolicy().getDurationMonths()
                     );
                 })
                 .collect(Collectors.toList());

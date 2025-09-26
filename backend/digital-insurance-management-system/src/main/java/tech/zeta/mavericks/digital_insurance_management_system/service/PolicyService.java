@@ -1,7 +1,7 @@
 package tech.zeta.mavericks.digital_insurance_management_system.service;
 
 import org.springframework.stereotype.Service;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.PolicyWithPremiumDTO;
+import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.PolicyWithPremiumDTO;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.User;
 import tech.zeta.mavericks.digital_insurance_management_system.repository.PolicyRepository;
 

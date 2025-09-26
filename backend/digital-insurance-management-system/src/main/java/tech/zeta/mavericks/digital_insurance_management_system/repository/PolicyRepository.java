@@ -1,7 +1,7 @@
 package tech.zeta.mavericks.digital_insurance_management_system.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.PolicyWithPremiumDTO;
+import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.PolicyWithPremiumDTO;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.Policy;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.HealthCondition;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.VehicleType;

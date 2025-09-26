@@ -34,6 +34,7 @@ public class UserPolicyService {
         userPolicy.setEndDate(request.getEndDate());
         userPolicy.setStatus(PolicyStatus.valueOf(request.getStatus()));
         userPolicy.setPremiumPaid(request.getPremiumPaid());
+        userPolicy.setNoClaimBonus(false);
 
         UserPolicy saved = userPolicyRepository.save(userPolicy);
 
@@ -56,6 +57,35 @@ public class UserPolicyService {
         return mapToResponse(userPolicy);
     }
 
+    public UserPolicyResponse updateUserPolicyById(Long id) {
+        // Fetch existing policy
+        UserPolicy userPolicy = userPolicyRepository.findById(id)
+                .orElseThrow(() -> new PolicyNotFoundException("UserPolicy not found with id: " + id));
+
+        // Update the noClaimBonus field
+        userPolicy.setNoClaimBonus(true);
+
+        // Save the updated policy
+        UserPolicy updated = userPolicyRepository.save(userPolicy);
+
+        // Return mapped response
+        return mapToResponse(updated);
+    }
+
+    public UserPolicyResponse updateUserPolicyStatusById(Long id, PolicyStatus policyStatus){
+        UserPolicy userPolicy = userPolicyRepository.findById(id)
+                .orElseThrow(() -> new PolicyNotFoundException("UserPolicy not found with id: " + id));
+
+        userPolicy.setStatus(policyStatus);
+        UserPolicy updated = userPolicyRepository.save(userPolicy);
+
+        // Return mapped response
+        return mapToResponse(updated);
+
+    }
+
+
+
     private UserPolicyResponse mapToResponse(UserPolicy entity) {
         return new UserPolicyResponse(
                 entity.getId(),
@@ -64,7 +94,10 @@ public class UserPolicyService {
                 entity.getStartDate(),
                 entity.getEndDate(),
                 entity.getStatus().name(),
-                entity.getPremiumPaid()
+                entity.getPremiumPaid(),
+                entity.getPolicy().getName(),
+                entity.getPolicy().getType(),
+                entity.getNoClaimBonus()
         );
     }
 }
