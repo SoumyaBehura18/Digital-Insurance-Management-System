@@ -32,6 +32,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
+<<<<<<< HEAD
         return http
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
@@ -40,6 +41,11 @@ public class SecurityConfig {
                         .requestMatchers("/login", "/register", "/policies/**").permitAll()
                         // Allow preflight requests to pass through
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+=======
+        return http.csrf(customizer -> customizer.disable()).
+                authorizeHttpRequests(request -> request
+                        .requestMatchers("/login", "/register").permitAll()
+>>>>>>> c72848addc57ed9c0d7795a01b016a362adb860c
                         .anyRequest().authenticated()
                 )
                 // Do NOT use httpBasic when using JWT, it causes browsers to challenge with 401
