@@ -1,20 +1,24 @@
-import axios from "axios"
- 
-const base_url = "http://localhost:9090"
- 
-export async function makeRequestWithoutToken(type, endpoint, body) {
+import axios from "axios";
+
+const base_url = "http://localhost:9090";
+
+export async function makeRequestWithoutToken(type, endpoint, body = null) {
     const url = base_url + endpoint;
     let response = null;
- 
-    switch (type) {
+
+    switch (type.toUpperCase()) {
         case "GET":
             response = await axios.get(url);
             break;
         case "POST":
-            response = await axios.post(url, body);
+            response = await axios.post(url, body, {
+                headers: { 'Content-Type': 'application/json' }
+            });
             break;
         case "PATCH":
-            response = await axios.patch(url, body);
+            response = await axios.patch(url, body, {
+                headers: { 'Content-Type': 'application/json' }
+            });
             break;
         case "DELETE":
             response = await axios.delete(url);
@@ -22,11 +26,11 @@ export async function makeRequestWithoutToken(type, endpoint, body) {
         default:
             throw new Error(`Unsupported request type: ${type}`);
     }
- 
+
     return response;
 }
- 
-export async function makeRequestWithToken(type, endpoint, body) {
+
+export async function makeRequestWithToken(type, endpoint, body = null) {
     const url = base_url + endpoint;
 
     // Get the token from localStorage.user.token
@@ -38,11 +42,14 @@ export async function makeRequestWithToken(type, endpoint, body) {
     }
 
     const config = {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
     };
 
     let response = null;
-    switch (type) {
+    switch (type.toUpperCase()) {
         case "GET":
             response = await axios.get(url, config);
             break;
