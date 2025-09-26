@@ -24,5 +24,6 @@ public class VehiclePolicyPremium {
 
     private Double idv; // Insured Declared Value
 
+
 }
 

@@ -1,6 +1,8 @@
 package tech.zeta.mavericks.digital_insurance_management_system.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.premium.ConditionPremiumDTO;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.*;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.HealthCondition;
 import tech.zeta.mavericks.digital_insurance_management_system.repository.*;
@@ -11,11 +13,11 @@ import java.util.Set;
 @Service
 public class PolicyServiceAdmin {
 
-    private final PolicyRepository policyRepository;
-    private final HealthPolicyPremiumRepository healthRepo;
-    private final LifePolicyPremiumRepository lifeRepo;
-    private final VehiclePolicyPremiumRepository vehicleRepo;
-    private final HealthPreexistingConditionRepository healthPreCondRepo;
+    @Autowired private PolicyRepository policyRepository;
+   @Autowired private final HealthPolicyPremiumRepository healthRepo;
+   @Autowired final LifePolicyPremiumRepository lifeRepo;
+   @Autowired private final VehiclePolicyPremiumRepository vehicleRepo;
+   @Autowired private final HealthPreexistingConditionRepository healthPreCondRepo;
 
     public PolicyServiceAdmin(PolicyRepository policyRepository,
                          HealthPolicyPremiumRepository healthRepo,
@@ -31,51 +33,108 @@ public class PolicyServiceAdmin {
 
     // Create a new policy
     public Policy createPolicy(Policy policy) {
+
         return policyRepository.save(policy);
     }
-
     // Add Health Premium
-    public double addHealthPremium(Long policyId, Set<HealthCondition> conditions, boolean smokingDrinking) {
+    public double addHealthPremium(Long policyId, Set<ConditionPremiumDTO> conditions,
+                                   Double premiumRate, Double renewalRate) {
         double total = 0.0;
 
-        // base premium
-        HealthPolicyPremium base = healthRepo.findFirstByPolicyId(policyId)
-                .orElseThrow(() -> new RuntimeException("Base premium not found"));
-        total += base.getPremiumRate();
+        // fetch base policy
+        Policy policy = policyRepository.findById(policyId)
+                .orElseThrow(() -> new RuntimeException("Policy not found with id: " + policyId));
 
-        // smoking surcharge
-        if (smokingDrinking) {
-            total += 1000.0;
+        // Non-smoker premium
+        HealthPolicyPremium baseFalse = new HealthPolicyPremium();
+        baseFalse.setPolicy(policy);
+        baseFalse.setPremiumRate(premiumRate);
+        baseFalse.setRenewalRate(renewalRate);
+        baseFalse.setSmokingDrinking(false);
+        healthRepo.save(baseFalse);
+
+        // Smoker premium
+        HealthPolicyPremium baseTrue = new HealthPolicyPremium();
+        baseTrue.setPolicy(policy);
+        baseTrue.setPremiumRate(premiumRate + 1000);
+        baseTrue.setRenewalRate(renewalRate + 1000);
+        baseTrue.setSmokingDrinking(true);
+        healthRepo.save(baseTrue);
+
+        // Save pre-existing conditions
+        addPreexistingCondition(policyId, conditions);
+
+        return total;
+    }
+
+
+    public double addPreexistingCondition(Long policyId, Set<ConditionPremiumDTO> conditionPremiums) {
+        double total = 0.0;
+
+        Policy policy = policyRepository.findById(policyId)
+                .orElseThrow(() -> new RuntimeException("Policy not found"));
+
+        for (ConditionPremiumDTO dto : conditionPremiums) {
+            HealthPreexistingCondition preexisting = new HealthPreexistingCondition();
+            preexisting.setPolicy(policy);
+            preexisting.setCondition(HealthCondition.valueOf(dto.getCondition().toString().toUpperCase())); // enum
+            preexisting.setAdditionalPremium(dto.getExtraPremium());
+            healthPreCondRepo.save(preexisting);
         }
 
-        // disease-specific premiums from DB
-        List<HealthPreexistingCondition> dbConditions =
-                healthPreCondRepo.findByPolicyId(policyId);
-
-        for (HealthPreexistingCondition dbCond : dbConditions) {
-            if (conditions.contains(dbCond.getCondition())) {
-                total += dbCond.getAdditionalPremium();
-            }
-        }
-        base.setTotalPremium(total);
-        healthRepo.save(base);
         return total;
     }
 
 
     // Add Life Premium
-    public LifePolicyPremium addLifePremium(Long policyId, LifePolicyPremium premium) {
+    public double addLifePremium(Long policyId, Double premiumRate, Double renewalRate) {
+        double total = 0.0;
+
+        // fetch base premium from DB
         Policy policy = policyRepository.findById(policyId)
-                .orElseThrow(() -> new RuntimeException("Policy not found"));
-        premium.setPolicy(policy);
-        return lifeRepo.save(premium);
+                .orElseThrow(() -> new RuntimeException("Policy not found with id: " + policyId));
+
+        // create base premium for non-smokers
+       LifePolicyPremium baseFalse1 = new LifePolicyPremium();
+        baseFalse1.setPolicy(policy);                 // set policyId
+        baseFalse1.setPremiumRate(premiumRate);       // set premium rate
+        baseFalse1.setRenewalRate(renewalRate);       // set renewal rate
+        baseFalse1.setSmokingDrinking(false);
+
+        LifePolicyPremium baseTrue1 = new LifePolicyPremium();
+        baseTrue1.setPolicy(policy);                 // set policyId
+        baseTrue1.setPremiumRate(premiumRate+1000);       // set premium rate
+        baseTrue1.setRenewalRate(renewalRate+1000);       // set renewal rate
+        baseTrue1.setSmokingDrinking(true);
+        // save it
+        lifeRepo.save(baseFalse1);
+        lifeRepo.save(baseTrue1);
+
+
+        return total;
     }
 
+
     // Add Vehicle Premium
-    public VehiclePolicyPremium addVehiclePremium(Long policyId, VehiclePolicyPremium premium) {
+    public double addVehiclePremium(Long policyId, Double premiumRate, Double renewalRate) {
+        double total = 0.0;
+
+        // fetch base policy
         Policy policy = policyRepository.findById(policyId)
-                .orElseThrow(() -> new RuntimeException("Policy not found"));
-        premium.setPolicy(policy);
-        return vehicleRepo.save(premium);
+                .orElseThrow(() -> new RuntimeException("Policy not found with id: " + policyId));
+
+        // vehicle age <= 5 years
+        VehiclePolicyPremium base = new VehiclePolicyPremium();
+        base.setPolicy(policy);
+        base.setPremiumRate(premiumRate);
+        base.setRenewalRate(renewalRate);
+        base.setVehicleAge(5);  // mark max age in this slab
+        vehicleRepo.save(base);
+
+
+
+        return total;
     }
+
+
 }
