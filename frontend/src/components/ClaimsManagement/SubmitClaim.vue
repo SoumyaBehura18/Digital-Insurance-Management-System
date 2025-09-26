@@ -40,7 +40,7 @@
               class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-brand-backgroundTheme"
             >
               <option value="" class="text-gray-500">Choose an active policy</option>
-              <option v-for="policy in $store.state.policies" :key="policy.id" :value="policy.id">
+              <option v-for="policy in ($store.state.claims?.policies || [])" :key="policy.id" :value="policy.id">
                 {{ policy.policyNumber }} - {{ policy.policyType }} 
               </option>
             </select>
@@ -126,11 +126,11 @@
           </div>
 
           <!-- Success & Error Messages -->
-          <div v-if="$store.state.successMessage" class="p-3 bg-green-100 border text-green-700 rounded">
-            {{ $store.state.successMessage }}
+          <div v-if="$store.state.claims?.successMessage" class="p-3 bg-green-100 border text-green-700 rounded">
+            {{ $store.state.claims.successMessage }}
           </div>
-          <div v-if="$store.state.error" class="p-3 bg-red-100 border text-red-700 rounded">
-            {{ $store.state.error }}
+          <div v-if="$store.state.claims?.error" class="p-3 bg-red-100 border text-red-700 rounded">
+            {{ $store.state.claims.error }}
           </div>
 
           <!-- Claim Guidelines -->
@@ -154,10 +154,10 @@
           <div>
             <button 
               type="submit" 
-              :disabled="$store.state.loading"
+              :disabled="$store.state.claims?.loading"
               class="w-full px-6 py-2 bg-brand-backgroundTheme text-white rounded hover:bg-brand-hover disabled:opacity-50"
             >
-              {{ $store.state.loading ? 'Submitting...' : 'Submit Claim' }}
+              {{ $store.state.claims?.loading ? 'Submitting...' : 'Submit Claim' }}
             </button>
           </div>
         </form>
@@ -186,22 +186,30 @@ export default {
     },
     selectedPolicy() {
       if (!this.form.userPolicyId) return null;
-      return this.$store.state.policies.find(policy => policy.id === parseInt(this.form.userPolicyId));
+      const list = this.$store?.state?.claims?.policies || []
+      return list.find(policy => policy.id === parseInt(this.form.userPolicyId));
     }
   },
   watch: {
     'form.userPolicyId'() {
-      this.$store.dispatch('clearMessages');
+      if (this.$store._actions['claims/clearMessages']) this.$store.dispatch('claims/clearMessages');
+      else if (this.$store._actions['clearMessages']) this.$store.dispatch('clearMessages');
     },
     'form.claimAmount'() {
-      this.$store.dispatch('clearMessages');
+      if (this.$store._actions['claims/clearMessages']) this.$store.dispatch('claims/clearMessages');
+      else if (this.$store._actions['clearMessages']) this.$store.dispatch('clearMessages');
     },
     'form.reason'() {
-      this.$store.dispatch('clearMessages');
+      if (this.$store._actions['claims/clearMessages']) this.$store.dispatch('claims/clearMessages');
+      else if (this.$store._actions['clearMessages']) this.$store.dispatch('clearMessages');
     }
   },
   async mounted() {
-    await this.$store.dispatch('fetchPolicies');
+    if (this.$store._actions['claims/fetchPolicies']) {
+      await this.$store.dispatch('claims/fetchPolicies')
+    } else if (this.$store._actions['fetchPolicies']) {
+      await this.$store.dispatch('fetchPolicies')
+    }
   },
   methods: {
     formatAmount(amount) {
@@ -223,19 +231,22 @@ export default {
       try {
         // Validate user authentication
         if (!this.userId) {
-          this.$store.commit('SET_ERROR', 'User not authenticated. Please log in again.');
+          if (this.$store._mutations['claims/SET_ERROR']) this.$store.commit('claims/SET_ERROR', 'User not authenticated. Please log in again.');
+          else if (this.$store._mutations['SET_ERROR']) this.$store.commit('SET_ERROR', 'User not authenticated. Please log in again.');
           return;
         }
 
         // Validate claim amount doesn't exceed available amount
         if (this.selectedPolicy && parseInt(this.form.claimAmount) > this.selectedPolicy.availableAmount) {
-          this.$store.commit('SET_ERROR', `Claim amount cannot exceed available amount of ₹${this.formatAmount(this.selectedPolicy.availableAmount)}`);
+          if (this.$store._mutations['claims/SET_ERROR']) this.$store.commit('claims/SET_ERROR', `Claim amount cannot exceed available amount of ₹${this.formatAmount(this.selectedPolicy.availableAmount)}`);
+          else if (this.$store._mutations['SET_ERROR']) this.$store.commit('SET_ERROR', `Claim amount cannot exceed available amount of ₹${this.formatAmount(this.selectedPolicy.availableAmount)}`);
           return;
         }
 
         // Validate reason length
         if (!this.form.reason || this.form.reason.trim().length < 15) {
-          this.$store.commit('SET_ERROR', 'Reason must be at least 15 characters long.');
+          if (this.$store._mutations['claims/SET_ERROR']) this.$store.commit('claims/SET_ERROR', 'Reason must be at least 15 characters long.');
+          else if (this.$store._mutations['SET_ERROR']) this.$store.commit('SET_ERROR', 'Reason must be at least 15 characters long.');
           return;
         }
 
@@ -246,7 +257,11 @@ export default {
           reason: this.form.reason
         };
 
-        await this.$store.dispatch('submitClaim', claimData);
+        if (this.$store._actions['claims/submitClaim']) {
+          await this.$store.dispatch('claims/submitClaim', claimData)
+        } else if (this.$store._actions['submitClaim']) {
+          await this.$store.dispatch('submitClaim', claimData)
+        }
         
         this.form = {
           userPolicyId: '',

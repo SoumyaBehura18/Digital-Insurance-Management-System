@@ -9,11 +9,11 @@
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
       <!-- Total Claims -->
-      <div class="bg-white rounded-lg border border-gray-200 p-6">
+  <div class="bg-white rounded-lg border border-gray-200 p-6">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-brand-textTheme text-sm">Total Claims</p>
-            <p class="text-3xl font-bold text-brand-backgroundTheme">{{ $store.state.adminClaims.length }}</p>
+    <p class="text-3xl font-bold text-brand-backgroundTheme">{{ ($store.state.claims?.adminClaims || []).length }}</p>
           </div>
           <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
             <svg class="w-6 h-6 text-brand-backgroundTheme" fill="currentColor" viewBox="0 0 20 20">
@@ -28,7 +28,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-brand-textTheme text-sm">Pending</p>
-            <p class="text-3xl font-bold text-yellow-600">{{ $store.getters.adminPendingClaims.length }}</p>
+            <p class="text-3xl font-bold text-yellow-600">{{ ($store.getters['claims/adminPendingClaims'] || []).length }}</p>
           </div>
           <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
             <svg class="w-6 h-6 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
@@ -43,7 +43,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-brand-textTheme text-sm">Approved</p>
-            <p class="text-3xl font-bold text-green-600">{{ $store.getters.adminApprovedClaims.length }}</p>
+            <p class="text-3xl font-bold text-green-600">{{ ($store.getters['claims/adminApprovedClaims'] || []).length }}</p>
           </div>
           <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
             <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
@@ -58,7 +58,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-brand-textTheme text-sm">Rejected</p>
-            <p class="text-3xl font-bold text-red-600">{{ $store.getters.adminRejectedClaims.length }}</p>
+            <p class="text-3xl font-bold text-red-600">{{ ($store.getters['claims/adminRejectedClaims'] || []).length }}</p>
           </div>
           <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
             <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
@@ -103,7 +103,7 @@
                   : 'text-brand-textTheme hover:text-gray-900 hover:bg-brand-hover hover:text-white'
               ]"
             >
-              All Claims ({{ $store.state.adminClaims.length }})
+              All Claims ({{ ($store.state.claims?.adminClaims || []).length }})
             </button>
             <button 
               @click="activeFilter = 'pending'"
@@ -114,7 +114,7 @@
                   : 'text-brand-textTheme hover:text-gray-900 hover:bg-brand-hover hover:text-white'
               ]"
             >
-              Pending ({{ $store.getters.adminPendingClaims.length }})
+              Pending ({{ ($store.getters['claims/adminPendingClaims'] || []).length }})
             </button>
             <button 
               @click="activeFilter = 'approved'"
@@ -125,7 +125,7 @@
                   : 'text-brand-textTheme hover:text-gray-900 hover:bg-brand-hover hover:text-white'
               ]"
             >
-              Approved ({{ $store.getters.adminApprovedClaims.length }})
+              Approved ({{ ($store.getters['claims/adminApprovedClaims'] || []).length }})
             </button>
             <button 
               @click="activeFilter = 'rejected'"
@@ -136,7 +136,7 @@
                   : 'text-brand-textTheme hover:text-gray-900 hover:bg-brand-hover hover:text-white'
               ]"
             >
-              Rejected ({{ $store.getters.adminRejectedClaims.length }})
+              Rejected ({{ ($store.getters['claims/adminRejectedClaims'] || []).length }})
             </button>
           </div>
         </div>
@@ -346,17 +346,25 @@ export default {
   },
   computed: {
     filteredClaims() {
+      // Safely pull from namespaced claims module
+      const all = (this.$store.state.claims && Array.isArray(this.$store.state.claims.adminClaims))
+        ? this.$store.state.claims.adminClaims
+        : []
+      const pending = this.$store.getters['claims/adminPendingClaims'] || []
+      const approved = this.$store.getters['claims/adminApprovedClaims'] || []
+      const rejected = this.$store.getters['claims/adminRejectedClaims'] || []
+
       let claims = [];
       
       // Filter by status first
       if (this.activeFilter === 'pending') {
-        claims = this.$store.getters.adminPendingClaims;
+        claims = pending;
       } else if (this.activeFilter === 'approved') {
-        claims = this.$store.getters.adminApprovedClaims;
+        claims = approved;
       } else if (this.activeFilter === 'rejected') {
-        claims = this.$store.getters.adminRejectedClaims;
+        claims = rejected;
       } else {
-        claims = this.$store.state.adminClaims;
+        claims = all;
       }
       
       // Then filter by search query
@@ -375,24 +383,24 @@ export default {
   },
   async mounted() {
     console.log('AdminClaims mounted, loading data...');
-    console.log('Initial store state:', this.$store.state);
-    console.log('Available store actions:', Object.keys(this.$store._actions || {}));
+  console.log('Initial store state (claims module):', this.$store.state.claims);
+  console.log('Available store actions:', Object.keys(this.$store._actions || {}));
     
     await this.loadAdminClaims();
     
-    console.log('Final store state after loading:', this.$store.state);
-    console.log('Admin claims loaded:', this.$store.state.adminClaims);
-    console.log('Admin claims length:', this.$store.state.adminClaims?.length);
+  console.log('Final claims module state after loading:', this.$store.state.claims);
+  console.log('Admin claims loaded:', this.$store.state.claims?.adminClaims);
+  console.log('Admin claims length:', (this.$store.state.claims?.adminClaims || []).length);
   },
   methods: {
     async loadAdminClaims() {
       console.log('Loading admin claims...');
       try {
-        console.log('Dispatching fetchAllClaims action...');
-        await this.$store.dispatch('fetchAllClaims');
+    const actionName = this.$store._actions['claims/fetchAllClaims'] ? 'claims/fetchAllClaims' : 'fetchAllClaims'
+    console.log('Dispatching action:', actionName);
+    await this.$store.dispatch(actionName);
         console.log('Admin claims fetched successfully');
-        console.log('Store state after fetch:', this.$store.state);
-        console.log('Admin claims data:', this.$store.state.adminClaims);
+    console.log('Claims module state after fetch:', this.$store.state.claims);
       } catch (error) {
         console.error('Error loading admin claims:', error);
       }
@@ -417,10 +425,12 @@ export default {
       }
 
       try {
-        await this.$store.dispatch('reviewClaim', {
+  const actionName = this.$store._actions['claims/reviewClaim'] ? 'claims/reviewClaim' : 'reviewClaim'
+  await this.$store.dispatch(actionName, {
           claimId: claim.id,
           status: newStatus,
-          reviewComments: claim.tempComment.trim()
+          reviewComments: claim.tempComment.trim(),
+          userPolicyId: claim.userPolicyId
         });
         
         // Show success message

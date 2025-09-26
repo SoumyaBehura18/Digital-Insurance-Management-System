@@ -20,26 +20,26 @@
       </div>
 
       <!-- Loading State -->
-      <div v-if="$store.state.loading" class="py-12 text-center text-gray-500">
+  <div v-if="$store.state.claims?.loading" class="py-12 text-center text-gray-500">
         Loading your claims...
       </div>
 
       <!-- Error State -->
-      <div v-if="$store.state.error" class="py-12 text-center text-red-600">
-        <p class="mb-4">{{ $store.state.error }}</p>
+      <div v-if="$store.state.claims?.error" class="py-12 text-center text-red-600">
+        <p class="mb-4">{{ $store.state.claims.error }}</p>
         <button @click="loadClaims" class="px-4 py-2 bg-brand-backgroundTheme text-white rounded hover:bg-brand-hover">
           Try Again
         </button>
       </div>
 
       <!-- Empty State -->
-      <div v-if="!$store.state.loading && !$store.state.error && !$store.state.claims.length" 
+  <div v-if="!$store.state.claims?.loading && !$store.state.claims?.error && !($store.state.claims?.claims || []).length" 
            class="py-12 text-center text-gray-500">
         You have not submitted any claims yet.
       </div>
 
       <!-- Claims Table -->
-      <div v-if="!$store.state.loading && !$store.state.error && $store.state.claims.length" class="overflow-x-auto">
+  <div v-if="!$store.state.claims?.loading && !$store.state.claims?.error && ($store.state.claims?.claims || []).length" class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead class="bg-gray-50">
             <tr>
@@ -52,7 +52,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="claim in $store.state.claims" :key="claim.id" class="hover:bg-gray-50 border-b border-gray-100">
+            <tr v-for="claim in ($store.state.claims?.claims || [])" :key="claim.id" class="hover:bg-gray-50 border-b border-gray-100">
               <td class="px-4 py-4 font-medium">{{ claim.policyName || getPolicyLabel(claim.userPolicyId) }}</td>
               <td class="px-4 py-4 font-semibold text-green-600">₹{{ formatAmount(claim.claimAmount) }}</td>
               <td class="px-4 py-4 text-gray-500">{{ formatDate(claim.claimDate) }}</td>
@@ -142,7 +142,13 @@ export default {
     }
   },
   async mounted() {
-    await this.$store.dispatch('fetchPolicies');
+    // Load policies via namespaced module if available
+    const uid = this.userId
+    if (uid && this.$store._modulesNamespaceMap['policies/']) {
+      await this.$store.dispatch('policies/fetchUserPolicies', uid)
+    } else if (this.$store._actions['fetchPolicies']) {
+      await this.$store.dispatch('fetchPolicies')
+    }
     await this.loadClaims();
   },
   
@@ -156,7 +162,11 @@ export default {
         console.error('User not authenticated');
         return;
       }
-      await this.$store.dispatch('fetchClaims', this.userId);
+      if (this.$store._actions['claims/fetchClaims']) {
+        await this.$store.dispatch('claims/fetchClaims', this.userId)
+      } else {
+        await this.$store.dispatch('fetchClaims', this.userId)
+      }
     },
 
     formatDate(dateString) {
@@ -175,7 +185,10 @@ export default {
     },
 
     getPolicyLabel(userPolicyId) {
-      const policy = this.$store.state.policies.find(p => p.id === userPolicyId);
+      const listFromClaims = this.$store?.state?.claims?.policies || []
+      const listFromPolicies = this.$store?.state?.policies?.policies || this.$store?.state?.policies || []
+      const list = Array.isArray(listFromClaims) && listFromClaims.length ? listFromClaims : (Array.isArray(listFromPolicies) ? listFromPolicies : [])
+      const policy = list.find(p => p.id === userPolicyId);
       if (!policy) return `Policy ${userPolicyId}`;
       return policy.policyType || `Policy ${userPolicyId}`;
     },

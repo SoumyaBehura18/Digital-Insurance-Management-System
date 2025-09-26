@@ -76,9 +76,23 @@ const actions = {
     commit('SET_LOADING', true);
     try {
       const response = await makeRequestWithoutToken("POST", `/login`, credentials);
-      commit('SET_CURRENT_USER', response.data);
-      localStorage.setItem('currentUser', JSON.stringify(response.data)); // store full user object
-      localStorage.setItem('authToken', response.data.token); // store token separately for auth requests
+      const raw = response.data || {};
+      const normalizedUser = {
+        id: raw.id || (raw.userId != null ? parseInt(raw.userId) : undefined),
+        userId: raw.userId != null ? parseInt(raw.userId) : (raw.id != null ? raw.id : undefined),
+        role: raw.role || 'user',
+        token: raw.token,
+        ...raw
+      };
+      commit('SET_CURRENT_USER', normalizedUser);
+      localStorage.setItem('currentUser', JSON.stringify(normalizedUser));
+      if (normalizedUser.token) {
+        localStorage.setItem('authToken', normalizedUser.token);
+        localStorage.setItem('token', normalizedUser.token);
+      }
+      if (normalizedUser.userId != null) {
+        localStorage.setItem('userId', String(normalizedUser.userId));
+      }
       commit('SET_ERROR', null);
     } catch (error) {
       commit('SET_ERROR', error.response?.data || 'Invalid credentials');
@@ -93,6 +107,8 @@ const actions = {
     commit('SET_USERS', []);
     localStorage.removeItem('currentUser');
     localStorage.removeItem('authToken');
+  localStorage.removeItem('token');
+  localStorage.removeItem('userId');
   }
 };
 
