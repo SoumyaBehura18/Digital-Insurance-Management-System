@@ -18,7 +18,10 @@
       </div>
 
       <!-- Error -->
-      <div v-else-if="error" class="text-red-600 text-center bg-red-50 py-2 rounded-lg mb-4">
+      <div
+        v-else-if="error"
+        class="text-red-600 text-center bg-red-50 py-2 rounded-lg mb-4"
+      >
         {{ error }}
       </div>
 
@@ -44,13 +47,15 @@
               class="hover:bg-purple-100 transition-colors"
             >
               <td class="px-4 py-3 text-gray-800">{{ user.id }}</td>
-              <td class="px-4 py-3 text-gray-800 font-medium">{{ user.name }}</td>
+              <td class="px-4 py-3 text-gray-800 font-medium">
+                {{ user.name }}
+              </td>
               <td class="px-4 py-3 text-gray-700">{{ user.email }}</td>
               <td class="px-4 py-3">
                 <span
                   :class="{
                     'bg-green-100 text-green-800': user.roleType === 'ADMIN',
-                    'bg-blue-100 text-blue-800': user.roleType === 'USER'
+                    'bg-blue-100 text-blue-800': user.roleType === 'USER',
                   }"
                   class="px-3 py-1 rounded-full text-xs font-semibold"
                 >
@@ -73,10 +78,16 @@
       </div>
 
       <!-- Update Modal -->
-      <div v-if="selectedUser" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+      <div
+        v-if="selectedUser"
+        class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+      >
         <div class="bg-white p-6 rounded-lg w-[24rem] space-y-4 shadow-xl">
           <h3 class="font-bold text-lg">Update User Role</h3>
-          <p class="text-gray-600">Update the role for <strong>{{ selectedUser.name }}</strong>.</p>
+          <p class="text-gray-600">
+            Update the role for <strong>{{ selectedUser.name }}</strong
+            >.
+          </p>
 
           <select v-model="newRole" class="border rounded-lg w-full px-3 py-2">
             <option value="USER">USER</option>
@@ -84,7 +95,10 @@
           </select>
 
           <div class="flex justify-end gap-2 mt-4">
-            <button class="border px-4 py-2 rounded" @click="selectedUser = null">
+            <button
+              class="border px-4 py-2 rounded"
+              @click="selectedUser = null"
+            >
               Cancel
             </button>
             <button
@@ -96,8 +110,12 @@
             </button>
           </div>
 
-          <div v-if="updateError" class="text-red-500 text-sm">{{ updateError }}</div>
-          <div v-if="updateSuccess" class="text-green-500 text-sm">Role updated successfully!</div>
+          <div v-if="updateError" class="text-red-500 text-sm">
+            {{ updateError }}
+          </div>
+          <div v-if="updateSuccess" class="text-green-500 text-sm">
+            Role updated successfully!
+          </div>
         </div>
       </div>
     </main>
@@ -113,7 +131,9 @@ const store = useStore();
 
 // Sidebar
 const isCollapsed = ref(true);
-const setIsCollapsed = (val) => { isCollapsed.value = val; };
+const setIsCollapsed = (val) => {
+  isCollapsed.value = val;
+};
 
 // Local user for header
 const user = ref({
@@ -150,7 +170,6 @@ async function updateRole() {
   updateSuccess.value = false;
 
   try {
-   
     await store.dispatch("user/updateUserRole", {
       userId: selectedUser.value.id,
       role: newRole.value,
@@ -182,7 +201,8 @@ table {
   border-collapse: collapse;
   width: 100%;
 }
-th, td {
+th,
+td {
   border-bottom: 1px solid #e5e7eb;
 }
 </style>
