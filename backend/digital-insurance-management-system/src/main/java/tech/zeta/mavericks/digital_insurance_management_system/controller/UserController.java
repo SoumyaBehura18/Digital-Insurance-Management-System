@@ -7,11 +7,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import tech.zeta.mavericks.digital_insurance_management_system.DTO.LoginRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.RoleUpdateRequest;
 import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.LoginResponse;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.RoleType;
 import tech.zeta.mavericks.digital_insurance_management_system.service.JWTService;
@@ -20,6 +18,7 @@ import tech.zeta.mavericks.digital_insurance_management_system.entity.UserPrinci
 import tech.zeta.mavericks.digital_insurance_management_system.entity.User;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -70,12 +69,23 @@ public class UserController{
                 userPrincipal.getUser().getSmokingDrinking(),
                 userPrincipal.getUser().getVehicleType(),
                 userPrincipal.getUser().getVehicleAge(),
-                userPrincipal.getUser().getPreexistingConditions()
+                userPrincipal.getUser().getPreexistingConditions(),
+                userPrincipal.getUser().getName(),
+                userPrincipal.getUser().getEmail()
         );
 
         return ResponseEntity.ok(responseDTO);
     }
 
+    @GetMapping("/getAllUsers")
+    public ResponseEntity<List<User>> getAllUsers(){
+        return new ResponseEntity<>(service.getAllUsers(),HttpStatus.OK);
+    }
 
+    @PatchMapping("/updateUserRole/{id}")
+    public ResponseEntity<User> updateUserRole(@PathVariable Long id, @RequestBody RoleUpdateRequest request) {
+        RoleType role = RoleType.valueOf(request.getRoleType().toUpperCase());
+        return new ResponseEntity<>(service.updateUserRole(id, role), HttpStatus.OK);
+    }
 
 }

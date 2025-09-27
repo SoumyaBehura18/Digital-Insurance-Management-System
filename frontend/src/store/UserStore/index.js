@@ -1,4 +1,4 @@
-import { makeRequestWithToken, makeRequestWithoutToken } from '@/utils/requests';
+import { makeRequestWithToken, makeRequestWithoutToken, requestWithAuth } from '@/utils/requests';
 const state = {
   currentUser: null,       // logged-in user
   users: [],               // all users (if admin view)
@@ -47,7 +47,7 @@ const actions = {
   async fetchAllUsers({ commit }) {
     commit('SET_LOADING', true);
     try {
-      const response = await makeRequestWithToken("GET", `/users`);
+      const response = await makeRequestWithToken("GET", `/getAllUsers`);
       commit('SET_USERS', response.data);
       commit('SET_ERROR', null);
     } catch (error) {
@@ -109,7 +109,23 @@ const actions = {
     localStorage.removeItem('authToken');
   localStorage.removeItem('token');
   localStorage.removeItem('userId');
-  }
+  },
+  async updateUserRole({ commit }, { userId, role }) {
+    const payload = {
+        roleType: role,
+      };
+    commit('SET_LOADING', true);
+    try {
+      const response = await requestWithAuth("PATCH", `/updateUserRole/${userId}`, payload);
+      commit('SET_ERROR', null);
+      return response.data;
+    } catch (error) {
+      commit('SET_ERROR', error.response?.data || 'Failed to update user role');
+      throw error;
+    } finally {
+      commit('SET_LOADING', false);
+    }
+}
 };
 
 
