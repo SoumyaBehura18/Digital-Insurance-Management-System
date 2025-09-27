@@ -45,4 +45,8 @@ public class UserService {
 
     }
 
+    public List<User> getUsersByIds(List<Long> ids) {
+        return repo.findByIds(ids);
+    }
+
 }
