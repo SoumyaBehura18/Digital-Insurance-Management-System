@@ -75,54 +75,53 @@ export default {
     },
 
     async fetchPolicies({ commit }) {
-      try {
-        commit('SET_LOADING', true)
-        commit('CLEAR_MESSAGES')
+    try {
+      commit('SET_LOADING', true)
+      commit('CLEAR_MESSAGES')
 
-        const userId = parseInt(localStorage.getItem('userId'))
-        if (!userId) {
-          commit('SET_ERROR', 'User not authenticated')
-          return
+      const userId = parseInt(localStorage.getItem('userId'))
+      if (!userId) {
+        commit('SET_ERROR', 'User not authenticated')
+        return
+      }
+
+      // 🔹 Fetch user policies from new endpoint
+      const res = await requestWithAuth('GET', `/user/policies/${userId}`)
+      const rawPolicies = Array.isArray(res.data) ? res.data : []
+
+      // 🔹 Normalize and also fetch remaining amount
+      const normalized = await Promise.all(rawPolicies.map(async (p) => {
+        const policyId = p?.policyId
+        let availableAmount = p.coverageAmount
+
+        try {
+          if (policyId != null) {
+            const rem = await requestWithAuth('GET', `/claim/policy/remaining-amount/${policyId}`)
+            if (rem?.data?.remainingClaimAmount != null) {
+              availableAmount = rem.data.remainingClaimAmount
+            }
+          }
+        } catch (err) {
+          console.log("Error fetching remaining amount:", err)
         }
 
-        const res = await requestWithAuth('GET', `/claim/policy/${userId}`)
-        const rawPolicies = Array.isArray(res.data) ? res.data : []
+        return {
+          id: p.id, // userPolicyId
+          policyType: p.policyName || 'Policy',
+          policyNumber: `POL-${p.policyId || p.id}`,
+          description: p.policyName || '',
+          coverageAmount: p.coverageAmount || 0,
+          availableAmount
+        }
+      }))
 
-        const normalized = await Promise.all(rawPolicies.map(async (up) => {
-          const policyId = up?.policy?.id
-          const name = up?.policy?.name || 'Policy'
-          const description = up?.policy?.description || ''
-          const coverageAmt = up?.policy?.coverageAmt || 0
-
-          let availableAmount = coverageAmt
-          try {
-            if (policyId != null) {
-              const rem = await requestWithAuth('GET', `/claim/policy/remaining-amount/${policyId}`)
-              if (rem?.data?.remainingClaimAmount != null) {
-                availableAmount = rem.data.remainingClaimAmount
-              }
-            }
-          } catch {
-            availableAmount = coverageAmt
-          }
-
-          return {
-            id: up?.id,
-            policyType: name,
-            policyNumber: up?.policy?.policyNumber || `POL-${policyId || up?.id}`,
-            description,
-            coverageAmount: coverageAmt,
-            availableAmount
-          }
-        }))
-
-        commit('SET_POLICIES', normalized)
-      } catch (error) {
-        commit('SET_ERROR', 'Something went wrong')
-      } finally {
-        commit('SET_LOADING', false)
-      }
-    },
+      commit('SET_POLICIES', normalized)
+    } catch (err) {
+      console.log("Error fetching policies:", err)
+    } finally {
+      commit('SET_LOADING', false)
+    }
+  },
 
     async submitClaim({ commit }, claimData) {
       try {
