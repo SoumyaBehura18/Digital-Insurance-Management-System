@@ -9,21 +9,26 @@
       <!-- User Info -->
       <div class="flex items-center gap-4">
         <div class="text-right">
-          <p class="font-medium">{{ props.user?.name }}</p>
-          <p class="text-sm text-brand-textTheme text-muted-foreground">{{ props.user?.email }}</p>
+          <p class="font-medium">{{ name }}</p>
+          <p class="text-sm text-brand-textTheme text-muted-foreground">
+            {{ email }}
+          </p>
         </div>
-        <AvatarComponent :user-name="props.user?.name" />
+        <AvatarComponent :user-name="name" />
       </div>
     </div>
   </header>
 </template>
 
 <script setup>
+import { computed, ref } from "vue";
+import { useStore } from "vuex";
 import AvatarComponent from "../AvatarComponent.vue";
 
-const props = defineProps({
-  user: { type: Object, default: null },
-  isCollapsed: { type: Boolean, default: false },
-  setIsCollapsed: { type: Function, required: true },
-});
+const store = useStore();
+const user = ref(JSON.parse(localStorage.getItem("currentUser")));
+const currentUser = computed(() => store.getters["user/getCurrentUser"]);
+console.log("Current User from Store:", currentUser.value);   
+const email = user.value?.email;
+const name = user.value?.name;
 </script>

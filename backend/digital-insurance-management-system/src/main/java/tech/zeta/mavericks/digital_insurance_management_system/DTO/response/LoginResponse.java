@@ -20,6 +20,9 @@ public class LoginResponse {
     private VehicleType vehicleType;
     private Integer vehicleAge;
     private Set<HealthCondition> preexistingConditions;
+    private String name;
+    private String email;
+
 
 
 }

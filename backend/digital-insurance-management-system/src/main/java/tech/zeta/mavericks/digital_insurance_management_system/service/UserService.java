@@ -6,7 +6,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.User;
+import tech.zeta.mavericks.digital_insurance_management_system.enums.RoleType;
 import tech.zeta.mavericks.digital_insurance_management_system.repository.UserRepository;
+
+import java.util.List;
 
 @Service
 public class UserService {
@@ -28,6 +31,22 @@ public class UserService {
         user.setPassword(encoder.encode(user.getPassword()));
         repo.save(user);
         return user;
+    }
+
+    public List<User> getAllUsers(){
+        return repo.findAll();
+    }
+
+    public User updateUserRole(Long id, RoleType roleType){
+        System.out.println("Inside Here");
+        User user=repo.findById(id).orElseThrow(()-> new RuntimeException("User Not Found"));
+        user.setRoleType(roleType);
+        return repo.save(user);
+
+    }
+
+    public List<User> getUsersByIds(List<Long> ids) {
+        return repo.findByIds(ids);
     }
 
 }

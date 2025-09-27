@@ -48,7 +48,7 @@ const router = useRouter();
 
 const isCollapsed = ref(true);
 const setIsCollapsed = (val) => (isCollapsed.value = val);
-const user = ref(JSON.parse(localStorage.getItem("currentUser")) || { name: "John Doe" });
+const user = ref(JSON.parse(localStorage.getItem("currentUser")));
 
 const policies = computed(() => store.getters["userPolicies/getPolicies"] || []);
 const claims = computed(() => store.getters["claims/allClaims"] || []);
