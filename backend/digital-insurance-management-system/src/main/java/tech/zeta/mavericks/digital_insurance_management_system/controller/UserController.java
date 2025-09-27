@@ -82,6 +82,13 @@ public class UserController{
         return new ResponseEntity<>(service.getAllUsers(),HttpStatus.OK);
     }
 
+    @GetMapping("getUsersByIds")
+    public ResponseEntity<List<User>> getUsersByIds( @RequestParam List<Long> ids){
+        List<User> users = service.getUsersByIds(ids);
+        return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+
+
     @PatchMapping("/updateUserRole/{id}")
     public ResponseEntity<User> updateUserRole(@PathVariable Long id, @RequestBody RoleUpdateRequest request) {
         RoleType role = RoleType.valueOf(request.getRoleType().toUpperCase());
