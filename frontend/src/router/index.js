@@ -13,14 +13,14 @@ import ManagePolicies from "@/views/Admin/ManagePolicies.vue";
 import ManageClaims from "@/views/Admin/ManageClaims.vue";
 import SupportTickets from "@/views/Admin/SupportTickets.vue";
 import UsersPage from "@/views/Admin/UsersPage.vue";
- 
-// import RegisterPage from "../views/RegisterPage.vue";
+import RegisterPage from "../views/RegisterPage.vue";
  
  
 const routes = [
   // Public routes
   { path: "/", component: LandingPage },
   { path: "/login", component: LoginPage },
+  {path: "/register", component: RegisterPage },
   
   // User Routes - direct paths (no prefix)
   {

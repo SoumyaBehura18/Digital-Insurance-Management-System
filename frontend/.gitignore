@@ -21,3 +21,7 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Ignore Spring Boot application properties
+backend/digital-insurance-management-system/src/main/resources/application.properties
+
