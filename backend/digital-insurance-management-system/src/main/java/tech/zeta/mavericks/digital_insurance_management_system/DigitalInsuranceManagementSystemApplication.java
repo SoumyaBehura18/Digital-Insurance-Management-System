@@ -12,5 +12,4 @@ public class DigitalInsuranceManagementSystemApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(DigitalInsuranceManagementSystemApplication.class, args);
 	}
-
 }

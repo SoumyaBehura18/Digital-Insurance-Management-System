@@ -72,11 +72,12 @@ public class UserPolicyService {
         return mapToResponse(updated);
     }
 
-    public UserPolicyResponse updateUserPolicyStatusById(Long id, PolicyStatus policyStatus){
+    public UserPolicyResponse updateUserPolicyStatusById(Long id, PolicyStatus policyStatus,Double premiumRate){
         UserPolicy userPolicy = userPolicyRepository.findById(id)
                 .orElseThrow(() -> new PolicyNotFoundException("UserPolicy not found with id: " + id));
 
         userPolicy.setStatus(policyStatus);
+        userPolicy.setPremiumPaid(premiumRate);
         UserPolicy updated = userPolicyRepository.save(userPolicy);
 
         // Return mapped response
@@ -97,7 +98,8 @@ public class UserPolicyService {
                 entity.getPremiumPaid(),
                 entity.getPolicy().getName(),
                 entity.getPolicy().getType(),
-                entity.getNoClaimBonus()
+                entity.getNoClaimBonus(),
+                entity.getPolicy().getCoverageAmt()
         );
     }
 }

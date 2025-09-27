@@ -33,6 +33,5 @@ public interface PolicyRepository extends JpaRepository<Policy, Long> {
                                                               VehicleType vehicleType,
                                                               Integer vehicleAge,
                                                               Set<HealthCondition> preexistingConditions);
-
     }
 }
