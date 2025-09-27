@@ -5,6 +5,8 @@ import lombok.Data;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.TicketStatus;
 
 import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -23,12 +25,12 @@ public class SupportTicket {
 
     // Optional policy related to the ticket
     @ManyToOne
-    @JoinColumn(name = "policy_id")
+    @JoinColumn(name = "policy_id", nullable = true)
     private Policy policy;
 
     // Optional claim related to the ticket
     @ManyToOne
-    @JoinColumn(name = "claim_id")
+    @JoinColumn(name = "claim_id", nullable = true)
     private Claim claim;
 
     @Column(nullable = false)
@@ -42,11 +44,12 @@ public class SupportTicket {
     private TicketStatus status;
 
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Message> responses;
+    private List<Message> responses = new ArrayList<>();
+
 
     @Column(nullable = false)
-    private Date createdAt;
+    private Timestamp createdAt;
 
-    private Date resolvedAt;
+    private Timestamp resolvedAt;
 
 }
