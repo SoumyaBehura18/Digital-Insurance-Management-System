@@ -158,6 +158,7 @@ public class ClaimService {
     }
 
     public List<UserPolicy> getUserPoliciesByUserId(Long userId) {
+
         return userPolicyRepository.findByUser_Id(userId);
     }
 

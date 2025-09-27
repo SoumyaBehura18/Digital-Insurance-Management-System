@@ -21,6 +21,7 @@ public class UserPolicyResponse {
     private String policyName;
     private PolicyType policyType;
     private Boolean noClaimBonus;
+    private Double coverageAmount;
 
 }
 
