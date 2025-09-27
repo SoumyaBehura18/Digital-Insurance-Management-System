@@ -8,6 +8,7 @@ import tech.zeta.mavericks.digital_insurance_management_system.dto.premium.Vehic
 import tech.zeta.mavericks.digital_insurance_management_system.entity.*;
 import tech.zeta.mavericks.digital_insurance_management_system.service.PolicyServiceAdmin;
 
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -81,6 +82,11 @@ public class PolicyAdminController {
 
         return ResponseEntity.ok(total);
     }
+//    @GetMapping
+//    public ResponseEntity<List<Policy>> getAllPolicies() {
+//        return ResponseEntity.ok(policyServiceAdmin.getAllPolicies());
+//    }
+
 
 
 }

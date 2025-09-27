@@ -25,6 +25,8 @@ public class Policy {
     private Double coverageAmt;
 
     private Integer durationMonths;
+    private Double premiumRate;
+    private Double renewalRate;
 
     private LocalDateTime createdAt;
 

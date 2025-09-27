@@ -115,7 +115,10 @@ watch(
 );
 const handleLogout = () => {
 
-  localStorage.removeItem("token"); 
+  localStorage.removeItem('currentUser');
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('token');
+  localStorage.removeItem('userId');
   router.push("/");
 };
 

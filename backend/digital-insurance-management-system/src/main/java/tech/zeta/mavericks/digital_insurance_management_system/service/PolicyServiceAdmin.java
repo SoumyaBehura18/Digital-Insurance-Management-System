@@ -135,6 +135,10 @@ public class PolicyServiceAdmin {
 
         return total;
     }
+//    public List<Policy> getAllPolicies() {
+//        return policyRepository.findAll();
+//    }
+
 
 
 }

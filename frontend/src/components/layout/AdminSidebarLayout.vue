@@ -115,11 +115,23 @@ watch(
 );
 
 const handleLogout = () => {
-  props.onLogout();
+  // props.onLogout();
+  // Clear all auth-related localStorage
+  localStorage.removeItem('currentUser');
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('token');
+  localStorage.removeItem('userId');
+  // Redirect to login page
+  router.push('/login');
 };
 
 const handleClick = (id) => {
   props.setCurrentPage(id);
+  // push to route when clicking sidebar item
+  const target = `/admin/${id}`;
+  if (router.currentRoute.value.path !== target) {
+    router.push(target);
+  }
 };
 </script>
 

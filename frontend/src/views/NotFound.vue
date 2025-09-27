@@ -8,8 +8,9 @@
         <p class="text-xl mt-4 text-gray-700">Page Not Found</p>
       </div>
       <div class="w-full flex justify-center mt-6">
-        <BaseButton variant="primary" @click="this.$router.push('/dashboard')">
-          Go Back Home</BaseButton
+        <BaseButton variant="primary" @click="$router.push('/dashboard')">
+          Go Back Home
+</BaseButton
         >
       </div>
     </div>

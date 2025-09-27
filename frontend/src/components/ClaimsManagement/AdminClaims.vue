@@ -9,11 +9,11 @@
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
       <!-- Total Claims -->
-      <div class="bg-white rounded-lg border border-gray-200 p-6">
+  <div class="bg-white rounded-lg border border-gray-200 p-6">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-brand-textTheme text-sm">Total Claims</p>
-            <p class="text-3xl font-bold text-brand-backgroundTheme">{{ $store.state.adminClaims.length }}</p>
+    <p class="text-3xl font-bold text-brand-backgroundTheme">{{ ($store.state.claims?.adminClaims || []).length }}</p>
           </div>
           <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
             <svg class="w-6 h-6 text-brand-backgroundTheme" fill="currentColor" viewBox="0 0 20 20">
@@ -28,7 +28,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-brand-textTheme text-sm">Pending</p>
-            <p class="text-3xl font-bold text-yellow-600">{{ $store.getters.adminPendingClaims.length }}</p>
+            <p class="text-3xl font-bold text-yellow-600">{{ ($store.getters['claims/adminPendingClaims'] || []).length }}</p>
           </div>
           <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
             <svg class="w-6 h-6 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
@@ -43,7 +43,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-brand-textTheme text-sm">Approved</p>
-            <p class="text-3xl font-bold text-green-600">{{ $store.getters.adminApprovedClaims.length }}</p>
+            <p class="text-3xl font-bold text-green-600">{{ ($store.getters['claims/adminApprovedClaims'] || []).length }}</p>
           </div>
           <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
             <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
@@ -58,7 +58,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-brand-textTheme text-sm">Rejected</p>
-            <p class="text-3xl font-bold text-red-600">{{ $store.getters.adminRejectedClaims.length }}</p>
+            <p class="text-3xl font-bold text-red-600">{{ ($store.getters['claims/adminRejectedClaims'] || []).length }}</p>
           </div>
           <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
             <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
@@ -85,16 +85,8 @@
       </button>
     </div>
 
-    <!-- Empty State -->
-    <div v-else-if="filteredClaims.length === 0" class="text-center py-12">
-      <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-      </svg>
-      <p class="text-gray-500">No {{ activeFilter === 'all' ? '' : activeFilter }} claims to review at the moment</p>
-    </div>
-
-    <!-- Claims Table -->
-    <div v-else class="bg-white rounded-lg border border-gray-200 shadow-sm">
+  <!-- Claims Table + Filters (always visible) -->
+  <div v-else class="bg-white rounded-lg border border-gray-200 shadow-sm">
       <!-- Table Header with Filters -->
       <div class="p-6 border-b border-gray-200">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
@@ -111,7 +103,7 @@
                   : 'text-brand-textTheme hover:text-gray-900 hover:bg-brand-hover hover:text-white'
               ]"
             >
-              All Claims ({{ $store.state.adminClaims.length }})
+              All Claims ({{ ($store.state.claims?.adminClaims || []).length }})
             </button>
             <button 
               @click="activeFilter = 'pending'"
@@ -122,7 +114,7 @@
                   : 'text-brand-textTheme hover:text-gray-900 hover:bg-brand-hover hover:text-white'
               ]"
             >
-              Pending ({{ $store.getters.adminPendingClaims.length }})
+              Pending ({{ ($store.getters['claims/adminPendingClaims'] || []).length }})
             </button>
             <button 
               @click="activeFilter = 'approved'"
@@ -133,7 +125,7 @@
                   : 'text-brand-textTheme hover:text-gray-900 hover:bg-brand-hover hover:text-white'
               ]"
             >
-              Approved ({{ $store.getters.adminApprovedClaims.length }})
+              Approved ({{ ($store.getters['claims/adminApprovedClaims'] || []).length }})
             </button>
             <button 
               @click="activeFilter = 'rejected'"
@@ -144,7 +136,7 @@
                   : 'text-brand-textTheme hover:text-gray-900 hover:bg-brand-hover hover:text-white'
               ]"
             >
-              Rejected ({{ $store.getters.adminRejectedClaims.length }})
+              Rejected ({{ ($store.getters['claims/adminRejectedClaims'] || []).length }})
             </button>
           </div>
         </div>
@@ -165,7 +157,14 @@
         </div>
       </div>
       
-      <div class="overflow-x-auto">
+      <div v-if="filteredClaims.length === 0" class="text-center py-12">
+        <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <p class="text-gray-500">No {{ activeFilter === 'all' ? '' : activeFilter }} claims to review at the moment</p>
+      </div>
+
+      <div v-else class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead class="bg-gray-50">
             <tr>
@@ -183,7 +182,7 @@
             <tr v-for="claim in filteredClaims" :key="claim.id" class="hover:bg-gray-50">
               <td class="px-6 py-4 font-medium text-gray-900">#{{ claim.id }}</td>
               <td class="px-6 py-4 text-gray-900">{{ claim.userName }}</td>
-              <td class="px-6 py-4 text-gray-900">{{ claim.policyType }}</td>
+              <td class="px-6 py-4 text-gray-900">{{ claim.policyName || '-' }}</td>
               <td class="px-6 py-4 font-semibold text-gray-900">${{ formatAmount(claim.claimAmount) }}</td>
               <td class="px-6 py-4 text-gray-700 max-w-xs truncate">{{ claim.reason }}</td>
               <td class="px-6 py-4 text-gray-500">{{ formatDate(claim.claimDate) }}</td>
@@ -244,7 +243,7 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Policy</label>
-            <p class="text-gray-900">{{ selectedClaim?.policyType }}</p>
+            <p class="text-gray-900">{{ selectedClaim?.policyName || '-' }}</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Claim Amount</label>
@@ -347,17 +346,25 @@ export default {
   },
   computed: {
     filteredClaims() {
+      // Safely pull from namespaced claims module
+      const all = (this.$store.state.claims && Array.isArray(this.$store.state.claims.adminClaims))
+        ? this.$store.state.claims.adminClaims
+        : []
+      const pending = this.$store.getters['claims/adminPendingClaims'] || []
+      const approved = this.$store.getters['claims/adminApprovedClaims'] || []
+      const rejected = this.$store.getters['claims/adminRejectedClaims'] || []
+
       let claims = [];
       
       // Filter by status first
       if (this.activeFilter === 'pending') {
-        claims = this.$store.getters.adminPendingClaims;
+        claims = pending;
       } else if (this.activeFilter === 'approved') {
-        claims = this.$store.getters.adminApprovedClaims;
+        claims = approved;
       } else if (this.activeFilter === 'rejected') {
-        claims = this.$store.getters.adminRejectedClaims;
+        claims = rejected;
       } else {
-        claims = this.$store.state.adminClaims;
+        claims = all;
       }
       
       // Then filter by search query
@@ -367,7 +374,7 @@ export default {
           claim.id.toString().includes(query) ||
           claim.userName.toLowerCase().includes(query) ||
           claim.reason.toLowerCase().includes(query) ||
-          claim.policyType.toLowerCase().includes(query)
+          (claim.policyName || '').toLowerCase().includes(query)
         );
       }
       
@@ -376,15 +383,24 @@ export default {
   },
   async mounted() {
     console.log('AdminClaims mounted, loading data...');
+  console.log('Initial store state (claims module):', this.$store.state.claims);
+  console.log('Available store actions:', Object.keys(this.$store._actions || {}));
+    
     await this.loadAdminClaims();
-    console.log('Admin claims loaded:', this.$store.state.adminClaims);
+    
+  console.log('Final claims module state after loading:', this.$store.state.claims);
+  console.log('Admin claims loaded:', this.$store.state.claims?.adminClaims);
+  console.log('Admin claims length:', (this.$store.state.claims?.adminClaims || []).length);
   },
   methods: {
     async loadAdminClaims() {
       console.log('Loading admin claims...');
       try {
-        await this.$store.dispatch('fetchAdminClaims');
+    const actionName = this.$store._actions['claims/fetchAllClaims'] ? 'claims/fetchAllClaims' : 'fetchAllClaims'
+    console.log('Dispatching action:', actionName);
+    await this.$store.dispatch(actionName);
         console.log('Admin claims fetched successfully');
+    console.log('Claims module state after fetch:', this.$store.state.claims);
       } catch (error) {
         console.error('Error loading admin claims:', error);
       }
@@ -409,10 +425,12 @@ export default {
       }
 
       try {
-        await this.$store.dispatch('updateAdminClaimStatus', {
+  const actionName = this.$store._actions['claims/reviewClaim'] ? 'claims/reviewClaim' : 'reviewClaim'
+  await this.$store.dispatch(actionName, {
           claimId: claim.id,
           status: newStatus,
-          reviewerComment: claim.tempComment.trim()
+          reviewComments: claim.tempComment.trim(),
+          userPolicyId: claim.userPolicyId
         });
         
         // Show success message

@@ -15,6 +15,7 @@ import java.util.List;
 @Repository
 public interface ClaimRepository extends JpaRepository<Claim, Long> {
     List<Claim> findByUserPolicy_User_Id(Long userId);
+    List<Claim> findByUserPolicy_Id(Long userPolicyId);
 }
 
 //public interface ClaimRepository extends JpaRepository<Claim, Long> { }

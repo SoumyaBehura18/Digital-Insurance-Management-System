@@ -10,14 +10,15 @@
 
     <!-- Page Content -->
     <main class="flex-1 p-6 overflow-auto">
-      <h1 class="text-2xl font-bold">Admin Dashboard</h1>
-      <p>This is Admin dashboard</p>
+      <!-- Replace placeholder with dashboard view -->
+      <DashboardView />
     </main>
   </div>
 </template>
 
 <script setup>
 import HeaderLayout from "@/components/layout/HeaderLayout.vue";
+import DashboardView from "@/components/admindashboard/DashboardView.vue";
 import { ref } from "vue";
 
 const isCollapsed = ref(true);
