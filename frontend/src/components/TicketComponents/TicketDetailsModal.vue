@@ -1,7 +1,7 @@
 <template>
   <BaseModal
     :is-open="isOpen"
-    :title="ticket?.title || '-'"
+    :title="ticket?.subject || '-'"
     :subtitle="`Ticket #${ticket?.id || ''}`"
     size="lg"
     @close="$emit('close')"
@@ -92,7 +92,7 @@
           Our support team is here to help you resolve this issue.
         </p>
         <p class="text-sm text-blue-600">
-          📧 support@company.com • 📞 1-800-SUPPORT
+          📧 support@insurance.com • 📞 1800-629-599-70
         </p>
       </div>
     </div>
@@ -130,7 +130,6 @@ import {
   getStatusClasses,
   formatDate,
 } from "@/utils/helperFunctions";
-import { X, BookMarked } from "lucide-vue-next";
 
 // Props
 const props = defineProps({

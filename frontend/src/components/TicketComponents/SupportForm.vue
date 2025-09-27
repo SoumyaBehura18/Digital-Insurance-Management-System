@@ -64,9 +64,13 @@
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none"
               >
                 <option value="" disabled>Select a policy if relevant</option>
-                <option value="policy1">Home Insurance Policy - HI001</option>
-                <option value="policy2">Auto Insurance Policy - AI002</option>
-                <option value="policy3">Life Insurance Policy - LI003</option>
+                <option
+                  v-for="policy in policies"
+                  :key="policy.id"
+                  :value="policy.id"
+                >
+                  {{ policy.name }}
+                </option>
               </select>
               <div
                 class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none"
@@ -102,10 +106,14 @@
                 v-model="form.relatedClaim"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none"
               >
-                <option value="" disabled>Select a claim if relevant</option>
-                <option value="claim1">Water Damage Claim - WD001</option>
-                <option value="claim2">Car Accident Claim - CA002</option>
-                <option value="claim3">Medical Claim - MC003</option>
+                <option value="" disabled>Select a policy if relevant</option>
+                <option
+                  v-for="claim in claims"
+                  :key="claim.id"
+                  :value="claim.id"
+                >
+                  {{ claim.name }}
+                </option>
               </select>
               <div
                 class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none"
@@ -145,7 +153,13 @@
           customClass="bg-indigo-600 hover:bg-indigo-700 flex-1"
           :disabled="isSubmitting"
         >
-          {{ isSubmitting ? "Submitting..." : "Submit Ticket" }}
+          {{
+            props.ticket
+              ? "Update Ticket"
+              : isSubmitting
+              ? "Submitting..."
+              : "Submit Ticket"
+          }}
         </BaseButton>
       </div>
     </form>
@@ -153,54 +167,95 @@
 </template>
 
 <script setup>
-import { reactive, ref } from "vue";
+import { reactive, computed, ref, watch } from "vue";
 import BaseButton from "@/components/BaseButton.vue";
+import { useStore } from "vuex";
+
+const props = defineProps({
+  userId: {
+    type: Number,
+    required: true,
+  },
+  ticket: {
+    type: Object,
+    default: null,
+  },
+});
 
 // Emits
 const emit = defineEmits(["ticket-created", "cancel"]);
+const store = useStore();
+
+const policies = computed(() => store.getters["userPolicies/getPolicies"]);
+const claims = computed(() => store.getters["userClaims/getClaims"]);
+const error = computed(() => store.getters["userPolicies/getError"]);
 
 // Form state
 const form = reactive({
-  subject: "",
-  description: "",
-  relatedPolicy: "",
-  relatedClaim: "",
+  subject: props.ticket?.subject || "",
+  description: props.ticket?.description || "",
+  relatedPolicy: props.ticket?.relatedPolicy || "",
+  relatedClaim: props.ticket?.relatedClaim || "",
 });
+
+watch(
+  () => props.ticket,
+  async () => {
+    const response = await store.dispatch(
+      "tickets/fetchTicketById",
+      props.ticket
+    );
+
+    if (response) {
+      form.subject = response.subject || "";
+      form.description = response.description || "";
+      form.relatedPolicy = response.policyId || "";
+      form.relatedClaim = response.claimId || "";
+    }
+  },
+  { immediate: true }
+);
 
 const isSubmitting = ref(false);
 
 // Methods
 const handleSubmit = async () => {
-  isSubmitting.value = true;
+  if (props.userId) {
+    isSubmitting.value = true;
 
-  try {
-    // Simulate API call
-    console.log("Submitting ticket:", form);
+    try {
+      // Create ticket object to emit
+      const newTicket = {
+        subject: form.subject,
+        description: form.description,
+        policyId: form.relatedPolicy === "" ? form.relatedPolicy : null,
+        claimId: form.relatedClaim === "" ? form.relatedClaim : null,
+        userId: props.userId,
+      };
 
-    // Here you would make your API call
-    // await createTicket(form);
+      if (props.ticket) {
+        await store.dispatch("tickets/updateTicket", {
+          ticketData: { ...newTicket, status: "OPEN" },
+          ticketId: props.ticket,
+        });
+        emit("ticket-updated");
+      } else {
+        const result = await store.dispatch("tickets/createTicket", newTicket);
+        console.log("Ticket created:", result);
+        // Emit the new ticket to parent
+        emit("ticket-created", newTicket);
+      }
 
-    // Create ticket object to emit
-    const newTicket = {
-      title: form.subject,
-      description: form.description,
-      status: "OPEN",
-      relatedPolicy: form.relatedPolicy,
-      relatedClaim: form.relatedClaim,
-    };
-
-    // Emit the new ticket to parent
-    emit("ticket-created", newTicket);
-
-    // Reset form after successful submission
-    Object.keys(form).forEach((key) => {
-      form[key] = "";
-    });
-  } catch (error) {
-    console.error("Error submitting ticket:", error);
-    alert("Error submitting ticket. Please try again.");
-  } finally {
-    isSubmitting.value = false;
+      // Reset form after successful submission
+      Object.keys(form).forEach((key) => {
+        form[key] = "";
+      });
+    } catch (error) {
+      console.error("Error submitting ticket:", error);
+      alert("Error submitting ticket. Please try again.");
+    } finally {
+      isSubmitting.value = false;
+    }
   }
 };
 </script>

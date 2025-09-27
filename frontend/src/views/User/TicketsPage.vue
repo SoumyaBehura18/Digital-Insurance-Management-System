@@ -37,6 +37,7 @@
       <TicketsList
         v-if="activeView === 'tickets'"
         :tickets="tickets"
+        :ticket-selected="ticketSelected"
         @create-first-ticket="setActiveView('create')"
         @update-ticket="handleUpdateTicket"
         @resolve-ticket="handleResolveTicket"
@@ -44,7 +45,10 @@
 
       <CreateTicketForm
         v-if="activeView === 'create'"
+        :user-id="userId"
+        :ticket="selectedTicket"
         @ticket-created="handleTicketCreated"
+        @ticket-updated="handleTicketUpdated"
         @cancel="setActiveView('tickets')"
       />
     </main>
@@ -52,15 +56,43 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, onMounted, watch } from "vue";
 import BaseButton from "@/components/BaseButton.vue";
 import TicketsList from "@/components/TicketComponents/TicketList.vue";
 import CreateTicketForm from "@/components/TicketComponents/SupportForm.vue";
 import { ArrowLeft } from "lucide-vue-next";
 import HeaderLayout from "@/components/layout/HeaderLayout.vue";
+import { useStore } from "vuex";
 
 const isCollapsed = ref(true);
 const setIsCollapsed = (val) => (isCollapsed.value = val);
+const userId = ref(null);
+const tickets = ref([]);
+const store = useStore();
+
+onMounted(() => {
+  userId.value = parseInt(localStorage.getItem("userId")) || null;
+  fetchUserTickets();
+});
+
+const fetchUserTickets = async () => {
+  try {
+    if (userId.value) {
+      const response = await store.dispatch(
+        "tickets/fetchUserTickets",
+        userId.value
+      );
+
+      if (response) {
+        tickets.value = response;
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching tickets:", error);
+  }
+};
+
+const selectedTicket = ref(null);
 
 const user = ref({
   name: "John Doe",
@@ -69,29 +101,12 @@ const user = ref({
 
 const activeView = ref("tickets"); // 'tickets' | 'create'
 
-const tickets = ref([
-  {
-    id: 1,
-    title: "Login Issues",
-    description: "Unable to login to my account",
-    status: "OPEN",
-    createdAt: new Date("2024-01-15"),
-  },
-  {
-    id: 2,
-    title: "Payment Problem",
-    description: "Payment was charged twice",
-    status: "RESOLVED",
-    createdAt: new Date("2024-01-20"),
-  },
-]);
-
 const setActiveView = (view) => {
   activeView.value = view;
 };
 
 const handleUpdateTicket = (ticket) => {
-  console.log("Update ticket:", ticket);
+  selectedTicket.value = ticket;
   setActiveView("create");
 };
 
@@ -105,8 +120,15 @@ const handleResolveTicket = (ticket) => {
   console.log("Ticket resolved:", ticket.id);
 };
 
+const handleTicketUpdated = async () => {
+  setActiveView("tickets");
+  await fetchUserTickets();
+};
 const handleTicketCreated = (newTicket) => {
   // Add the new ticket to the list
+  if (tickets.value.length === 0) {
+    tickets.value = [];
+  }
   tickets.value.unshift({
     id: tickets.value.length + 1,
     ...newTicket,
