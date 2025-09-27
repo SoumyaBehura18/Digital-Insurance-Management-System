@@ -170,86 +170,114 @@
 <script>
 export default {
   name: 'SubmitClaim',
+  
+  // Component data
   data() {
     return {
       form: {
         userPolicyId: '',
-  claimDate: new Date().toISOString().slice(0, 10),
+        claimDate: new Date().toISOString().slice(0, 10), // Today's date
         claimAmount: '',
         reason: ''
       }
     };
   },
+  
+  // Computed properties
   computed: {
-    userId() {
-      return parseInt(localStorage.getItem('userId')) || null;
+    // This function gets current user ID from localStorage currentUser object
+    currentUserId() {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}')
+      return parseInt(currentUser.userId) || null;
     },
+    
+    // This function takes no input and returns selected policy object based on form selection
     selectedPolicy() {
       if (!this.form.userPolicyId) return null;
-      const list = this.$store?.state?.claims?.policies || []
-      return list.find(policy => policy.id === parseInt(this.form.userPolicyId));
+      
+      const policiesList = this.$store?.state?.claims?.policies || []
+      return policiesList.find(policy => policy.id === parseInt(this.form.userPolicyId));
     }
   },
+  // Watch for form changes to clear messages
   watch: {
     'form.userPolicyId'() {
-      if (this.$store._actions['claims/clearMessages']) this.$store.dispatch('claims/clearMessages');
-      else if (this.$store._actions['clearMessages']) this.$store.dispatch('clearMessages');
+      this.clearStoreMessages();
     },
     'form.claimAmount'() {
-      if (this.$store._actions['claims/clearMessages']) this.$store.dispatch('claims/clearMessages');
-      else if (this.$store._actions['clearMessages']) this.$store.dispatch('clearMessages');
+      this.clearStoreMessages();
     },
     'form.reason'() {
-      if (this.$store._actions['claims/clearMessages']) this.$store.dispatch('claims/clearMessages');
-      else if (this.$store._actions['clearMessages']) this.$store.dispatch('clearMessages');
+      this.clearStoreMessages();
     }
   },
+  
+  // Component lifecycle - load policies when component mounts
   async mounted() {
-    if (this.$store._actions['claims/fetchPolicies']) {
-      await this.$store.dispatch('claims/fetchPolicies')
-    } else if (this.$store._actions['fetchPolicies']) {
-      await this.$store.dispatch('fetchPolicies')
-    }
+    await this.loadUserPolicies();
   },
+  // Component methods
   methods: {
+    // This function takes amount as input and returns formatted number in Indian currency format
     formatAmount(amount) {
       if (!amount) return '0';
       return new Intl.NumberFormat('en-IN').format(amount);
     },
+    
+    // This function takes no input and validates that claim amount does not exceed policy available amount
     enforceMax() {
       if (!this.selectedPolicy) return;
-      const max = this.selectedPolicy.availableAmount;
-      const current = parseFloat(this.form.claimAmount);
-      if (!isNaN(current) && current > max) {
-        this.form.claimAmount = max;
+      
+      const maxAmount = this.selectedPolicy.availableAmount;
+      const currentAmount = parseFloat(this.form.claimAmount);
+      
+      if (!isNaN(currentAmount) && currentAmount > maxAmount) {
+        this.form.claimAmount = maxAmount;
       }
-      if (current < 0) {
+      if (currentAmount < 0) {
         this.form.claimAmount = 0;
       }
     },
+    
+    // This function takes no input and loads all available policies for current user from store
+    async loadUserPolicies() {
+      if (this.$store._actions['claims/fetchPolicies']) {
+        await this.$store.dispatch('claims/fetchPolicies')
+      } else if (this.$store._actions['fetchPolicies']) {
+        await this.$store.dispatch('fetchPolicies')
+      }
+    },
+    
+    // This function takes no input and clears all error and success messages from store
+    clearStoreMessages() {
+      if (this.$store._actions['claims/clearMessages']) {
+        this.$store.dispatch('claims/clearMessages');
+      } else if (this.$store._actions['clearMessages']) {
+        this.$store.dispatch('clearMessages');
+      }
+    },
+    // This function takes no input and processes the entire claim form submission with validation
     async submitClaim() {
       try {
-        // Validate user authentication
-        if (!this.userId) {
-          if (this.$store._mutations['claims/SET_ERROR']) this.$store.commit('claims/SET_ERROR', 'User not authenticated. Please log in again.');
-          else if (this.$store._mutations['SET_ERROR']) this.$store.commit('SET_ERROR', 'User not authenticated. Please log in again.');
+        // Check if user is logged in
+        if (!this.currentUserId) {
+          this.setStoreError('User not authenticated. Please log in again.');
           return;
         }
 
-        // Validate claim amount doesn't exceed available amount
+        // Check claim amount doesn't exceed available amount
         if (this.selectedPolicy && parseInt(this.form.claimAmount) > this.selectedPolicy.availableAmount) {
-          if (this.$store._mutations['claims/SET_ERROR']) this.$store.commit('claims/SET_ERROR', `Claim amount cannot exceed available amount of ₹${this.formatAmount(this.selectedPolicy.availableAmount)}`);
-          else if (this.$store._mutations['SET_ERROR']) this.$store.commit('SET_ERROR', `Claim amount cannot exceed available amount of ₹${this.formatAmount(this.selectedPolicy.availableAmount)}`);
+          this.setStoreError(`Claim amount cannot exceed available amount of ₹${this.formatAmount(this.selectedPolicy.availableAmount)}`);
           return;
         }
 
-        // Validate reason length
+        // Check reason length
         if (!this.form.reason || this.form.reason.trim().length < 15) {
-          if (this.$store._mutations['claims/SET_ERROR']) this.$store.commit('claims/SET_ERROR', 'Reason must be at least 15 characters long.');
-          else if (this.$store._mutations['SET_ERROR']) this.$store.commit('SET_ERROR', 'Reason must be at least 15 characters long.');
+          this.setStoreError('Reason must be at least 15 characters long.');
           return;
         }
 
+        // Prepare claim data
         const claimData = {
           userPolicyId: parseInt(this.form.userPolicyId),
           claimDate: this.form.claimDate,
@@ -257,19 +285,13 @@ export default {
           reason: this.form.reason
         };
 
-        if (this.$store._actions['claims/submitClaim']) {
-          await this.$store.dispatch('claims/submitClaim', claimData)
-        } else if (this.$store._actions['submitClaim']) {
-          await this.$store.dispatch('submitClaim', claimData)
-        }
+        // Submit claim to store
+        await this.submitClaimToStore(claimData);
         
-        this.form = {
-          userPolicyId: '',
-          claimDate: new Date().toISOString().slice(0, 10),
-          claimAmount: '',
-          reason: ''
-        };
+        // Reset form after successful submission
+        this.resetForm();
 
+        // Navigate to claims list after 2 seconds
         setTimeout(() => {
           if (this.$router) {
             this.$router.push('/claims');
@@ -277,8 +299,36 @@ export default {
         }, 2000);
 
       } catch (error) {
-        console.error('Failed to submit claim:', error);
+        console.log('Failed to submit claim');
       }
+    },
+    
+    // This function takes claimData object as input and sends it to store for API submission
+    async submitClaimToStore(claimData) {
+      if (this.$store._actions['claims/submitClaim']) {
+        await this.$store.dispatch('claims/submitClaim', claimData)
+      } else if (this.$store._actions['submitClaim']) {
+        await this.$store.dispatch('submitClaim', claimData)
+      }
+    },
+    
+    // This function takes errorMessage string as input and sets it in store for display
+    setStoreError(errorMessage) {
+      if (this.$store._mutations['claims/SET_ERROR']) {
+        this.$store.commit('claims/SET_ERROR', errorMessage);
+      } else if (this.$store._mutations['SET_ERROR']) {
+        this.$store.commit('SET_ERROR', errorMessage);
+      }
+    },
+    
+    // This function takes no input and resets all form fields to their initial empty state
+    resetForm() {
+      this.form = {
+        userPolicyId: '',
+        claimDate: new Date().toISOString().slice(0, 10),
+        claimAmount: '',
+        reason: ''
+      };
     }
   }
 };

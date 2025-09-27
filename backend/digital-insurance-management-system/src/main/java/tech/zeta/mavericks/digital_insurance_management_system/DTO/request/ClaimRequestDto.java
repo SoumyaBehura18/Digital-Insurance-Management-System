@@ -1,4 +1,4 @@
-package tech.zeta.mavericks.digital_insurance_management_system.dto;
+package tech.zeta.mavericks.digital_insurance_management_system.DTO.request;
 
 import lombok.Data;
 import jakarta.validation.constraints.*;

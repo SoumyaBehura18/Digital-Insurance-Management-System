@@ -151,7 +151,7 @@
           <input 
             v-model="searchQuery"
             type="text" 
-            placeholder="Search by claim ID, customer, or subject..."
+            placeholder="Search by claim ID, email, or policy..."
             class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-brand-backgroundTheme focus:border-brand-backgroundTheme"
           >
         </div>
@@ -169,10 +169,9 @@
           <thead class="bg-gray-50">
             <tr>
               <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Claim ID</th>
-              <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+              <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Email</th>
               <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Policy</th>
               <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-              <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
               <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
               <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -181,10 +180,9 @@
           <tbody class="bg-white divide-y divide-gray-200">
             <tr v-for="claim in filteredClaims" :key="claim.id" class="hover:bg-gray-50">
               <td class="px-6 py-4 font-medium text-gray-900">#{{ claim.id }}</td>
-              <td class="px-6 py-4 text-gray-900">{{ claim.userName }}</td>
+              <td class="px-6 py-4 text-gray-900">{{ claim.userEmail || 'No email' }}</td>
               <td class="px-6 py-4 text-gray-900">{{ claim.policyName || '-' }}</td>
               <td class="px-6 py-4 font-semibold text-gray-900">${{ formatAmount(claim.claimAmount) }}</td>
-              <td class="px-6 py-4 text-gray-700 max-w-xs truncate">{{ claim.reason }}</td>
               <td class="px-6 py-4 text-gray-500">{{ formatDate(claim.claimDate) }}</td>
               <td class="px-6 py-4">
                 <span 
@@ -238,8 +236,8 @@
         <!-- Claim Info Grid -->
         <div class="grid grid-cols-2 gap-6 mb-6">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Customer</label>
-            <p class="text-gray-900">{{ selectedClaim?.userName }}</p>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Customer Email</label>
+            <p class="text-gray-900">{{ selectedClaim?.userEmail || 'No email' }}</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Policy</label>
@@ -259,7 +257,7 @@
         <div class="mb-6">
           <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Claim</label>
           <div class="bg-gray-50 rounded-lg p-4">
-            <p class="text-gray-900">{{ selectedClaim?.reason }}</p>
+            <p class="text-gray-900">{{ selectedClaim?.reason || 'No reason provided' }}</p>
           </div>
         </div>
 
@@ -372,8 +370,7 @@ export default {
         const query = this.searchQuery.toLowerCase().trim();
         claims = claims.filter(claim => 
           claim.id.toString().includes(query) ||
-          claim.userName.toLowerCase().includes(query) ||
-          claim.reason.toLowerCase().includes(query) ||
+          (claim.userEmail || '').toLowerCase().includes(query) ||
           (claim.policyName || '').toLowerCase().includes(query)
         );
       }

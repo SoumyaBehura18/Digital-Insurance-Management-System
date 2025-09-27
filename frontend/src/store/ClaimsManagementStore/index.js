@@ -2,6 +2,8 @@ import { requestWithAuth } from '@/utils/requests.js'
 
 export default {
   namespaced: true,
+  
+  // Application state for claims management
   state: {
     claims: [],
     adminClaims: [],
@@ -11,186 +13,223 @@ export default {
     successMessage: null
   },
 
+  // State update functions
   mutations: {
-    SET_CLAIMS(state, claims) {
-      state.claims = claims
+    // This function takes claimsList array as input and updates user claims in state
+    SET_CLAIMS(state, claimsList) {
+      state.claims = claimsList
     },
-    SET_ADMIN_CLAIMS(state, adminClaims) {
-      state.adminClaims = adminClaims
+    
+    // This function takes adminClaimsList array as input and updates admin claims in state
+    SET_ADMIN_CLAIMS(state, adminClaimsList) {
+      state.adminClaims = adminClaimsList
     },
-    SET_POLICIES(state, policies) {
-      state.policies = policies
+    
+    // This function takes policiesList array as input and updates policies in state
+    SET_POLICIES(state, policiesList) {
+      state.policies = policiesList
     },
-    ADD_CLAIM(state, claim) {
-      state.claims.push(claim)
+    
+    // This function takes newClaim object as input and adds it to user claims array
+    ADD_CLAIM(state, newClaim) {
+      state.claims.push(newClaim)
     },
-    SET_LOADING(state, loading) {
-      state.loading = loading
+    
+    // This function takes loadingStatus boolean as input and updates loading state
+    SET_LOADING(state, loadingStatus) {
+      state.loading = loadingStatus
     },
-    SET_ERROR(state, error) {
-      state.error = error
+    
+    // This function takes errorMessage string as input and sets error message in state
+    SET_ERROR(state, errorMessage) {
+      state.error = errorMessage
     },
+    
+    // This function takes message string as input and sets success message in state
     SET_SUCCESS_MESSAGE(state, message) {
       state.successMessage = message
     },
+    
+    // This function takes no input and clears both error and success messages from state
     CLEAR_MESSAGES(state) {
       state.error = null
       state.successMessage = null
     }
   },
 
+  // API action functions
   actions: {
-    async fetchClaims({ dispatch }, maybeUserId) {
-      const localUserId = parseInt(localStorage.getItem('userId'))
-      const userId = Number.isInteger(maybeUserId) ? maybeUserId : localUserId
-      if (userId) {
-        return dispatch('fetchUserClaims', userId)
+    // This function takes optional userId as input and fetches claims for that user or current logged-in user
+    async fetchClaims({ dispatch }, providedUserId) {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}')
+      const currentUserId = parseInt(currentUser.userId)
+      const targetUserId = Number.isInteger(providedUserId) ? providedUserId : currentUserId
+      
+      if (targetUserId) {
+        return dispatch('fetchUserClaims', targetUserId)
       }
     },
 
+    // This function takes userId as input and retrieves all claims belonging to that specific user
     async fetchUserClaims({ commit }, userId) {
       try {
         commit('SET_LOADING', true)
         commit('CLEAR_MESSAGES')
+        
         const response = await requestWithAuth('GET', `/claim/user/${userId}`)
         commit('SET_CLAIMS', response.data)
+        
       } catch (error) {
-        commit('SET_ERROR', 'Something went wrong')
+        commit('SET_ERROR', 'Failed to load user claims')
       } finally {
         commit('SET_LOADING', false)
       }
     },
 
+    // This function takes no input and retrieves all claims from database for admin dashboard view
     async fetchAllClaims({ commit }) {
       try {
         commit('SET_LOADING', true)
         commit('CLEAR_MESSAGES')
+        
         const response = await requestWithAuth('GET', '/claim/claims')
         commit('SET_ADMIN_CLAIMS', response.data)
+        
       } catch (error) {
-        commit('SET_ERROR', 'Something went wrong')
+        commit('SET_ERROR', 'Failed to load admin claims')
       } finally {
         commit('SET_LOADING', false)
       }
     },
 
+    // This function takes no input and fetches all active/renewed policies for current logged-in user
     async fetchPolicies({ commit }) {
-    try {
-      commit('SET_LOADING', true)
-      commit('CLEAR_MESSAGES')
-
-      const userId = parseInt(localStorage.getItem('userId'))
-      if (!userId) {
-        commit('SET_ERROR', 'User not authenticated')
-        return
-      }
-      console.log("Fetching policies for userId:", userId)
-      // 🔹 Fetch user policies from new endpoint
-      const res = await requestWithAuth('GET', `/user/policies/${userId}`)
-      const rawPolicies = Array.isArray(res.data) ? res.data : []
-
-      // 🔹 Normalize and also fetch remaining amount
-      const normalized = await Promise.all(
-  rawPolicies
-    .filter(p => p && (p.id)) // ✅ Skip null/invalid policies
-    .map(async (p) => {
-      const userPolicyId =  p.id
-      let availableAmount = p.coverageAmount || 0
-
-      console.log("Processing valid policy:", p)
-
       try {
+        commit('SET_LOADING', true)
+        commit('CLEAR_MESSAGES')
 
-        const rem = await requestWithAuth('GET', `/claim/policy/remaining-amount/${userPolicyId}`)
-        console.log(`Remaining amount response for userPolicyId ${userPolicyId}:`, rem)
-        if (rem?.data?.remainingClaimAmount != null) {
-          availableAmount = rem.data.remainingClaimAmount
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}')
+        const currentUserId = parseInt(currentUser.userId)
+        if (!currentUserId) {
+          commit('SET_ERROR', 'User not authenticated')
+          return
         }
-      } catch (err) {
-        console.log("Error fetching remaining amount:", err)
+
+        // Get user policies from API
+        const policiesResponse = await requestWithAuth('GET', `/user/policies/${currentUserId}`)
+        const rawPoliciesList = Array.isArray(policiesResponse.data) ? policiesResponse.data : []
+
+        // Process each valid policy and get remaining claim amount
+        const processedPolicies = await Promise.all(
+          rawPoliciesList
+            .filter(policy => policy && policy.id) // Only valid policies
+            .filter(policy => policy.status === 'ACTIVE' || policy.status === 'RENEWED') // Only active policies
+            .map(async (policy) => {
+              const policyId = policy.id
+              let remainingAmount = policy.coverageAmount || 0
+
+              // Get remaining claim amount for this policy
+              try {
+                const remainingResponse = await requestWithAuth('GET', `/claim/policy/remaining-amount/${policyId}`)
+                if (remainingResponse?.data?.remainingClaimAmount != null) {
+                  remainingAmount = remainingResponse.data.remainingClaimAmount
+                }
+              } catch (error) {
+                console.log("Could not fetch remaining amount for policy:", policyId)
+              }
+
+              // Format policy data
+              return {
+                id: policy.id || policy.policyId,
+                policyType: policy.policyName || 'Policy',
+                policyNumber: `POL-${policy.policyId || policy.id}`,
+                description: policy.policyName || '',
+                coverageAmount: policy.coverageAmount || 0,
+                availableAmount: remainingAmount
+              }
+            })
+        )
+
+        commit('SET_POLICIES', processedPolicies)
+
+      } catch (error) {
+        commit('SET_ERROR', 'Failed to load policies')
+      } finally {
+        commit('SET_LOADING', false)
       }
+    },
 
-      return {
-        id: p?.id || p?.policyId, // ✅ Always defined now
-        policyType: p?.policyName || 'Policy',
-        policyNumber: `POL-${p?.policyId || p?.id}`,
-        description: p?.policyName || '',
-        coverageAmount: p?.coverageAmount || 0,
-        availableAmount
-      }
-    })
-)
-
-console.log("✅ Final Fetched Policies:", normalized)
-commit('SET_POLICIES', normalized)
-
-    } catch (err) {
-      console.log("Error fetching policies:", err)
-    } finally {
-      commit('SET_LOADING', false)
-    }
-  },
-
+    // This function takes claimData object as input and submits a new insurance claim to the server
     async submitClaim({ commit }, claimData) {
       try {
         commit('SET_LOADING', true)
         commit('CLEAR_MESSAGES')
-        const body = {
+        
+        const claimPayload = {
           userPolicyId: Number(claimData.userPolicyId),
           claimDate: claimData.claimDate,
           claimAmount: Number(claimData.claimAmount),
           reason: claimData.reason
         }
-        const response = await requestWithAuth('POST', '/claim', body)
+        
+        const response = await requestWithAuth('POST', '/claim', claimPayload)
         commit('ADD_CLAIM', response.data)
         commit('SET_SUCCESS_MESSAGE', `Claim submitted successfully! Claim ID: ${response.data.id}`)
+        
         return response.data
       } catch (error) {
-        commit('SET_ERROR', 'Something went wrong')
+        commit('SET_ERROR', 'Failed to submit claim')
         throw error
       } finally {
         commit('SET_LOADING', false)
       }
     },
 
-  async reviewClaim({ commit, dispatch }, { claimId, status, reviewComments, userPolicyId }) {
-  try {
-    commit('SET_LOADING', true)
-    commit('CLEAR_MESSAGES')
-    const body = { status, reviewComments }
-    await requestWithAuth('PUT', `/claim/${claimId}/review`, body)
-    commit('SET_SUCCESS_MESSAGE', `Claim ${status.toLowerCase()} successfully`)
-    dispatch('fetchAllClaims')
+    // This function takes claim review data as input and updates claim status to approved or rejected
+    async reviewClaim({ commit, dispatch }, { claimId, status, reviewComments, userPolicyId }) {
+      try {
+        commit('SET_LOADING', true)
+        commit('CLEAR_MESSAGES')
+        
+        const reviewPayload = { status, reviewComments }
+        await requestWithAuth('PUT', `/claim/${claimId}/review`, reviewPayload)
+        
+        commit('SET_SUCCESS_MESSAGE', `Claim ${status.toLowerCase()} successfully`)
+        dispatch('fetchAllClaims')
 
-    // ✅ Notify NCB if claim approved
-    if (status === 'APPROVED' && userPolicyId) {
-      await dispatch('notifyNcb', userPolicyId)
+        // Update no claim bonus if claim approved
+        if (status === 'APPROVED' && userPolicyId) {
+          await dispatch('updateNoClaimBonus', userPolicyId)
+        }
+
+      } catch (error) {
+        commit('SET_ERROR', 'Failed to review claim')
+        throw error
+      } finally {
+        commit('SET_LOADING', false)
+      }
+    },
+
+    // This function takes userPolicyId as input and updates no claim bonus status for that policy
+    async updateNoClaimBonus(context, userPolicyId) {
+      try {
+        await requestWithAuth('PATCH', `/user/policy/ncb/${userPolicyId}`)
+      } catch (error) {
+        console.log('Could not update no claim bonus for policy:', userPolicyId)
+      }
     }
-
-  } catch (error) {
-    commit('SET_ERROR', 'Something went wrong')
-    throw error
-  } finally {
-    commit('SET_LOADING', false)
-  }
-},
+  },
 
 
-  async notifyNcb(_, userPolicyId) {
-    try {
-      await requestWithAuth('PATCH', `/user/policy/ncb/${userPolicyId}`)
-    } catch (error) {
-      console.error('Failed to notify NCB for userPolicyId:', userPolicyId, error)
-    }
-  }
-},
-
-
+  // Computed values from state
   getters: {
+    // User claims by status
     pendingClaims: (state) => state.claims.filter(claim => claim.status === 'PENDING'),
     approvedClaims: (state) => state.claims.filter(claim => claim.status === 'APPROVED'),
     rejectedClaims: (state) => state.claims.filter(claim => claim.status === 'REJECTED'),
     allClaims: (state) => state.claims,
+    
+    // Admin claims by status
     adminPendingClaims: (state) => state.adminClaims.filter(claim => claim.status === 'PENDING'),
     adminApprovedClaims: (state) => state.adminClaims.filter(claim => claim.status === 'APPROVED'),
     adminRejectedClaims: (state) => state.adminClaims.filter(claim => claim.status === 'REJECTED')
