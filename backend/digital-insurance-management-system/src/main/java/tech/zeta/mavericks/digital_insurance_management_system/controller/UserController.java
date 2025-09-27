@@ -82,12 +82,18 @@ public class UserController{
         return new ResponseEntity<>(service.getAllUsers(),HttpStatus.OK);
     }
 
-    @GetMapping("getUsersByIds")
-    public ResponseEntity<List<User>> getUsersByIds( @RequestParam List<Long> ids){
-        List<User> users = service.getUsersByIds(ids);
-        return new ResponseEntity<>(users, HttpStatus.OK);
+    @GetMapping("/getUsersByIds")
+    public ResponseEntity<List<User>> getUsersByIds(@RequestParam List<Long> ids) {
+        try {
+            if (ids == null || ids.isEmpty()) {
+                return new ResponseEntity<>(List.of(), HttpStatus.OK);
+            }
+            List<User> users = service.getUsersByIds(ids);
+            return new ResponseEntity<>(users, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
-
 
     @PatchMapping("/updateUserRole/{id}")
     public ResponseEntity<User> updateUserRole(@PathVariable Long id, @RequestBody RoleUpdateRequest request) {
