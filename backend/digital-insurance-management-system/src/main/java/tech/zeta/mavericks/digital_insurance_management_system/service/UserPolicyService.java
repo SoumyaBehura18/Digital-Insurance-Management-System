@@ -98,7 +98,8 @@ public class UserPolicyService {
                 entity.getPremiumPaid(),
                 entity.getPolicy().getName(),
                 entity.getPolicy().getType(),
-                entity.getNoClaimBonus()
+                entity.getNoClaimBonus(),
+                entity.getPolicy().getCoverageAmt()
         );
     }
 }
