@@ -84,38 +84,46 @@ export default {
         commit('SET_ERROR', 'User not authenticated')
         return
       }
-
+      console.log("Fetching policies for userId:", userId)
       // 🔹 Fetch user policies from new endpoint
       const res = await requestWithAuth('GET', `/user/policies/${userId}`)
       const rawPolicies = Array.isArray(res.data) ? res.data : []
 
       // 🔹 Normalize and also fetch remaining amount
-      const normalized = await Promise.all(rawPolicies.map(async (p) => {
-        const policyId = p?.policyId
-        let availableAmount = p.coverageAmount
+      const normalized = await Promise.all(
+  rawPolicies
+    .filter(p => p && (p.id)) // ✅ Skip null/invalid policies
+    .map(async (p) => {
+      const userPolicyId =  p.id
+      let availableAmount = p.coverageAmount || 0
 
-        try {
-          if (policyId != null) {
-            const rem = await requestWithAuth('GET', `/claim/policy/remaining-amount/${policyId}`)
-            if (rem?.data?.remainingClaimAmount != null) {
-              availableAmount = rem.data.remainingClaimAmount
-            }
-          }
-        } catch (err) {
-          console.log("Error fetching remaining amount:", err)
+      console.log("Processing valid policy:", p)
+
+      try {
+
+        const rem = await requestWithAuth('GET', `/claim/policy/remaining-amount/${userPolicyId}`)
+        console.log(`Remaining amount response for userPolicyId ${userPolicyId}:`, rem)
+        if (rem?.data?.remainingClaimAmount != null) {
+          availableAmount = rem.data.remainingClaimAmount
         }
+      } catch (err) {
+        console.log("Error fetching remaining amount:", err)
+      }
 
-        return {
-          id: p.id, // userPolicyId
-          policyType: p.policyName || 'Policy',
-          policyNumber: `POL-${p.policyId || p.id}`,
-          description: p.policyName || '',
-          coverageAmount: p.coverageAmount || 0,
-          availableAmount
-        }
-      }))
+      return {
+        id: p?.id || p?.policyId, // ✅ Always defined now
+        policyType: p?.policyName || 'Policy',
+        policyNumber: `POL-${p?.policyId || p?.id}`,
+        description: p?.policyName || '',
+        coverageAmount: p?.coverageAmount || 0,
+        availableAmount
+      }
+    })
+)
 
-      commit('SET_POLICIES', normalized)
+console.log("✅ Final Fetched Policies:", normalized)
+commit('SET_POLICIES', normalized)
+
     } catch (err) {
       console.log("Error fetching policies:", err)
     } finally {
@@ -182,7 +190,7 @@ export default {
     pendingClaims: (state) => state.claims.filter(claim => claim.status === 'PENDING'),
     approvedClaims: (state) => state.claims.filter(claim => claim.status === 'APPROVED'),
     rejectedClaims: (state) => state.claims.filter(claim => claim.status === 'REJECTED'),
-
+    allClaims: (state) => state.claims,
     adminPendingClaims: (state) => state.adminClaims.filter(claim => claim.status === 'PENDING'),
     adminApprovedClaims: (state) => state.adminClaims.filter(claim => claim.status === 'APPROVED'),
     adminRejectedClaims: (state) => state.adminClaims.filter(claim => claim.status === 'REJECTED')
