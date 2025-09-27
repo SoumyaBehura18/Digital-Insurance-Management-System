@@ -406,141 +406,87 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import BaseButton from "@/components/BaseButton.vue";
 import TicketDetailsModal from "@/components/TicketComponents/TicketDetailsModal.vue";
-import { getStatusClassIcon, getStatusClasses } from "@/utils/helperFunctions";
+import { useStore } from "vuex";
 import { MessageSquare, CheckCircle, XCircle } from "lucide-vue-next";
 
-// Admin user data
-const adminUser = ref({
-  name: "Admin User",
-  email: "admin@insurance.com",
-});
+const store = useStore();
 
-// State
+// Admin info (can be dynamic)
+const adminUser = ref({ name: "Admin User", email: "admin@example.com" });
+const adminUserInitials = computed(() =>
+  adminUser.value.name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+);
+
+const tickets = ref([]);
 const statusFilter = ref(null);
 const searchQuery = ref("");
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
+
 const isModalOpen = ref(false);
 const selectedTicket = ref(null);
 
-// Sample tickets data (replace with API call)
-const tickets = ref([
-  {
-    id: 1,
-    customerName: "John Doe",
-    subject: "Policy renewal question",
-    description:
-      "I need help understanding my policy renewal options and pricing changes.",
-    status: "OPEN",
-    createdAt: new Date("2024-09-20"),
-    relatedPolicy: "Home Insurance Policy - HI001",
-    relatedClaim: null,
-  },
-  {
-    id: 2,
-    customerName: "John Doe",
-    subject: "Claim status inquiry",
-    description: "When will my claim be processed?",
-    status: "RESOLVED",
-    createdAt: new Date("2024-09-18"),
-    relatedPolicy: null,
-    relatedClaim: "Water Damage Claim - WD001",
-  },
-  {
-    id: 3,
-    customerName: "Jane Smith",
-    subject: "Update contact information",
-    description: "I need to update my phone number and address in my account.",
-    status: "CLOSED",
-    createdAt: new Date("2024-09-15"),
-    relatedPolicy: null,
-    relatedClaim: null,
-  },
-]);
+// Fetch tickets
+const fetchAllTickets = async () => {
+  try {
+    const response = await store.dispatch("tickets/fetchAllTickets");
+    tickets.value = Array.isArray(response) ? response : response.tickets;
+  } catch (err) {
+    console.error("Error fetching tickets:", err);
+  }
+};
 
-// Computed properties
-const adminUserInitials = computed(() => {
-  return adminUser.value.name
-    .split(" ")
-    .map((word) => word.charAt(0))
-    .join("")
-    .toUpperCase()
-    .substring(0, 2);
-});
+onMounted(fetchAllTickets);
 
+// Computed: filtered tickets
 const filteredTickets = computed(() => {
-  let result = tickets.value;
-
-  // Filter by status
-  if (statusFilter.value) {
-    result = result.filter((ticket) => ticket.status === statusFilter.value);
-  }
-
-  // Filter by search query
-  if (searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase().trim();
-    result = result.filter((ticket) => {
-      return (
-        ticket.id.toString().includes(query) ||
-        ticket.customerName.toLowerCase().includes(query) ||
-        ticket.subject.toLowerCase().includes(query) ||
-        ticket.description.toLowerCase().includes(query) ||
-        ticket.status.toLowerCase().includes(query)
-      );
-    });
-  }
-
-  return result;
+  return tickets.value.filter((ticket) => {
+    const matchesStatus =
+      !statusFilter.value || ticket.status === statusFilter.value;
+    const matchesQuery =
+      !searchQuery.value ||
+      ticket.id.toString().includes(searchQuery.value) ||
+      ticket.subject?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      ticket.description
+        ?.toLowerCase()
+        .includes(searchQuery.value.toLowerCase()) ||
+      ticket.userId.toString().includes(searchQuery.value);
+    return matchesStatus && matchesQuery;
+  });
 });
 
-const totalPages = computed(() => {
-  return Math.ceil(filteredTickets.value.length / itemsPerPage.value);
-});
-
+// Pagination
+const totalPages = computed(() =>
+  Math.ceil(filteredTickets.value.length / itemsPerPage.value)
+);
 const paginatedTickets = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value;
   const end = start + itemsPerPage.value;
   return filteredTickets.value.slice(start, end);
 });
 
+// Watch filters to reset page
+watch([statusFilter, searchQuery], () => (currentPage.value = 1));
+
 // Methods
-const formatDate = (date) => {
-  return new Intl.DateTimeFormat("en-US", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(new Date(date));
-};
+const formatDate = (date) => (date ? new Date(date).toLocaleString() : "-");
 
-const getStatusBadgeClasses = (status) => {
-  const baseClasses =
-    "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium gap-1";
-
+const getStatusClasses = (status) => {
   switch (status) {
     case "OPEN":
-      return `${baseClasses} bg-red-100 text-red-800 border border-red-200`;
+      return "bg-red-100 text-red-800 border border-red-200";
     case "RESOLVED":
-      return `${baseClasses} bg-green-100 text-green-800 border border-green-200`;
+      return "bg-green-100 text-green-800 border border-green-200";
     case "CLOSED":
-      return `${baseClasses} bg-gray-100 text-gray-800 border border-gray-200`;
+      return "bg-gray-100 text-gray-800 border border-gray-200";
     default:
-      return `${baseClasses} bg-gray-100 text-gray-800 border border-gray-200`;
-  }
-};
-
-const getStatusIcon = (status) => {
-  switch (status) {
-    case "OPEN":
-      return "⚠️";
-    case "RESOLVED":
-      return "✅";
-    case "CLOSED":
-      return "❌";
-    default:
-      return "📋";
+      return "bg-gray-100 text-gray-800 border border-gray-200";
   }
 };
 
@@ -548,30 +494,14 @@ const viewTicket = (ticket) => {
   selectedTicket.value = ticket;
   isModalOpen.value = true;
 };
-
 const handleCloseModal = () => {
-  isModalOpen.value = false;
   selectedTicket.value = null;
+  isModalOpen.value = false;
 };
-
-const handleUpdateTicket = (ticket) => {
-  console.log("Update ticket:", ticket);
-  // Handle ticket update logic
+const handleUpdateTicket = async () => {
+  await fetchAllTickets(); // refetch to update table after editing
 };
-
-const handleResolveTicket = (ticket) => {
-  // Find and update the ticket in the array
-  const ticketIndex = tickets.value.findIndex((t) => t.id === ticket.id);
-  if (ticketIndex !== -1) {
-    tickets.value[ticketIndex].status = "RESOLVED";
-    tickets.value[ticketIndex].updatedAt = new Date();
-  }
-  console.log("Ticket resolved:", ticket.id);
+const handleResolveTicket = async () => {
+  await fetchAllTickets(); // refetch after resolving
 };
-
-// Reset pagination when filters change
-import { watch } from "vue";
-watch([statusFilter, searchQuery], () => {
-  currentPage.value = 1;
-});
 </script>
