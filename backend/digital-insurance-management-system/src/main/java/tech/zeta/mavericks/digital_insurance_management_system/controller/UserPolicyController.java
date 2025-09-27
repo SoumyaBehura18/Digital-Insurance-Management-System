@@ -43,7 +43,7 @@ public class UserPolicyController {
             @PathVariable Long id,
             @RequestBody PolicyStatusRequest request) {
         return new ResponseEntity<>(
-                userPolicyService.updateUserPolicyStatusById(id, request.getPolicyStatus()),
+                userPolicyService.updateUserPolicyStatusById(id, request.getPolicyStatus(),request.getPremiumRate()),
                 HttpStatus.OK
         );
     }
