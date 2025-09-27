@@ -88,27 +88,28 @@ export async function requestWithAuth(type, endpoint, body) {
     return await makeRequestWithToken(type, endpoint, body);
   } catch (err) {
     const status = err?.response?.status;
+    console.error('Request error:', err);
     if (status === 401 || status === 403) {
       // Clear stale credentials and redirect to login
       try {
-        localStorage.removeItem("currentUser");
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("token");
-        localStorage.removeItem("userId");
+        // localStorage.removeItem("currentUser");
+        // localStorage.removeItem("authToken");
+        // localStorage.removeItem("token");
+        // localStorage.removeItem("userId");
       } catch (_) {
         // intentionally ignore storage errors (ESLint no-empty fix)
         // noop
       }
       // Best-effort redirect without importing router here
-      if (typeof window !== "undefined") {
-        const current = window.location.pathname + window.location.search;
-        const loginUrl =
-          "/login" +
-          (current && current !== "/login"
-            ? `?redirect=${encodeURIComponent(current)}`
-            : "");
-        window.location.assign(loginUrl);
-      }
+      // if (typeof window !== "undefined") {
+      //   const current = window.location.pathname + window.location.search;
+      //   const loginUrl =
+      //     "/login" +
+      //     (current && current !== "/login"
+      //       ? `?redirect=${encodeURIComponent(current)}`
+      //       : "");
+      //   window.location.assign(loginUrl);
+      // }
     }
     throw err;
   }

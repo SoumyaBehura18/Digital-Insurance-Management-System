@@ -20,7 +20,12 @@
 
       <QuickActions @navigate="goToPage" />
 
-      <RecentActivity :recent-policies="recentPolicies" />
+      <!-- ✅ Pass multiple props -->
+      <RecentActivity
+        :recent-policies="recentPolicies"
+        :recent-claims="recentClaims"
+        :recent-tickets="recentTickets"
+      />
     </div>
   </div>
 </template>
@@ -46,29 +51,33 @@ const setIsCollapsed = (val) => (isCollapsed.value = val);
 const user = ref(JSON.parse(localStorage.getItem("currentUser")) || { name: "John Doe" });
 
 const policies = computed(() => store.getters["userPolicies/getPolicies"] || []);
-const claims = computed(() => store.getters["claims/getClaims"] || []);
+const claims = computed(() => store.getters["claims/allClaims"] || []);
 const allPolicies = computed(() => store.getters["policies/getAllPolicies"] || []);
 
-const activeUserPolicies = computed(() => policies.value.filter(p => p.status === "ACTIVE" || p.status === "RENEWED"));
+const activeUserPolicies = computed(() =>
+  policies.value.filter((p) => p.status === "ACTIVE" || p.status === "RENEWED")
+);
 
-const totalCoverage = computed(() => {
-  return activeUserPolicies.value.reduce((sum, userPolicy) => {
-    const basePolicy = allPolicies.value.find(bp => bp.policyId === userPolicy.policyId);
+const totalCoverage = computed(() =>
+  activeUserPolicies.value.reduce((sum, userPolicy) => {
+    const basePolicy = allPolicies.value.find((bp) => bp.policyId === userPolicy.policyId);
     return sum + (basePolicy?.coverage || 0);
-  }, 0);
-});
+  }, 0)
+);
 
 const pendingTickets = ref([
-  { id: 1, title: "Ticket 1" },
-  { id: 2, title: "Ticket 2" },
+  { id: 1, title: "Ticket 1", status: "Pending" },
+  { id: 2, title: "Ticket 2", status: "In Progress" },
+  { id: 3, title: "Ticket 3", status: "Closed" },
 ]);
 
-const recentPolicies = computed(() => policies.value.slice(-3).reverse());
-
+// ✅ Recent data (last 2 each)
+const recentPolicies = computed(() => policies.value.slice(-2).reverse());
+const recentClaims = computed(() => claims.value.slice(-2).reverse());
+const recentTickets = computed(() => pendingTickets.value.slice(-2).reverse());
 
 const goToPage = (page) => router.push(`/${page}`);
 
-// Fetch data
 onMounted(async () => {
   const userId = user.value?.userId;
 
