@@ -4,6 +4,10 @@ import lombok.Data;
 
 @Data
 public class SupportTicketUpdateDTO {
+    private Long policyId;  // Optional
+    private Long claimId;   // Optional
+    private String subject;
+    private String description;
     private String status;   // e.g., OPEN, IN_PROGRESS, RESOLVED, CLOSED
 }
 

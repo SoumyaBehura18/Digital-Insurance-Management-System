@@ -1,5 +1,6 @@
 package tech.zeta.mavericks.digital_insurance_management_system.service;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +20,10 @@ import tech.zeta.mavericks.digital_insurance_management_system.repository.Suppor
 import tech.zeta.mavericks.digital_insurance_management_system.repository.UserRepository;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.TicketStatus;
 import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,11 +65,23 @@ public class SupportTicketService {
         ticket.setSubject(requestDTO.getSubject());
         ticket.setDescription(requestDTO.getDescription());
         ticket.setStatus(TicketStatus.OPEN);
-        ticket.setCreatedAt(Date.valueOf(LocalDate.now()));
+        ticket.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
 
         SupportTicket saved = supportTicketRepository.save(ticket);
 
         return mapToResponseDTO(saved);
+    }
+
+    /**
+     * Get all tickets for the admin
+     */
+    public List<SupportTicketResponseDTO> getAllTickets() {
+        List<SupportTicket> tickets = supportTicketRepository.findAll().stream()
+                .collect(Collectors.toList());
+
+        return tickets.stream()
+                .map(this::mapToResponseDTO)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -91,20 +107,38 @@ public class SupportTicketService {
     /**
      * Update ticket with admin response and status
      */
+    @Transactional
     public SupportTicketResponseDTO updateSupportTicket(Long ticketId, SupportTicketUpdateDTO updateDTO) {
         SupportTicket ticket = supportTicketRepository.findById(ticketId)
                 .orElseThrow(() -> new TicketNotFoundException("Ticket not found with id: " + ticketId));
 
-        TicketStatus newStatus = TicketStatus.valueOf(updateDTO.getStatus().toUpperCase());
-        ticket.setStatus(newStatus);
+        if (updateDTO.getSubject() != null) ticket.setSubject(updateDTO.getSubject());
+        if (updateDTO.getDescription() != null) ticket.setDescription(updateDTO.getDescription());
 
-        if (newStatus == TicketStatus.RESOLVED || newStatus == TicketStatus.CLOSED) {
-            ticket.setResolvedAt(Date.valueOf(LocalDate.now()));
+        if (updateDTO.getPolicyId() != null) {
+            Policy policy = policyRepository.findById(updateDTO.getPolicyId())
+                    .orElseThrow(() -> new PolicyNotFoundException("Policy not found"));
+            ticket.setPolicy(policy);
+        }
+
+        if (updateDTO.getClaimId() != null) {
+            Claim claim = claimRepository.findById(updateDTO.getClaimId())
+                    .orElseThrow(() -> new ClaimNotFoundException("Claim not found"));
+            ticket.setClaim(claim);
+        }
+
+        if (updateDTO.getStatus() != null) {
+            TicketStatus newStatus = TicketStatus.valueOf(updateDTO.getStatus().toUpperCase());
+            ticket.setStatus(newStatus);
+            if (newStatus == TicketStatus.RESOLVED || newStatus == TicketStatus.CLOSED) {
+                ticket.setResolvedAt(Timestamp.valueOf(LocalDateTime.now()));
+            }
         }
 
         SupportTicket updated = supportTicketRepository.save(ticket);
         return mapToResponseDTO(updated);
     }
+
 
     public MessageResponseDTO addMessage(Long ticketId, MessageRequestDTO request) {
         SupportTicket ticket = supportTicketRepository.findById(ticketId)
