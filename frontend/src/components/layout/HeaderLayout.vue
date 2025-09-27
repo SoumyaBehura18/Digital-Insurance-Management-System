@@ -10,7 +10,9 @@
       <div class="flex items-center gap-4">
         <div class="text-right">
           <p class="font-medium">{{ name }}</p>
-          <p class="text-sm text-brand-textTheme text-muted-foreground">{{ email }}</p>
+          <p class="text-sm text-brand-textTheme text-muted-foreground">
+            {{ email }}
+          </p>
         </div>
         <AvatarComponent :user-name="name" />
       </div>
@@ -19,12 +21,14 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useStore } from "vuex";
 import AvatarComponent from "../AvatarComponent.vue";
 
-const store=useStore();
+const store = useStore();
 const user = ref(JSON.parse(localStorage.getItem("currentUser")));
-const email=user.value?.email;
-const name=user.value?.name;
+const currentUser = computed(() => store.getters["user/getCurrentUser"]);
+console.log("Current User from Store:", currentUser.value);   
+const email = user.value?.email;
+const name = user.value?.name;
 </script>
