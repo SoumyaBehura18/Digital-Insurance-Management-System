@@ -33,10 +33,11 @@ const mutations = {
 };
 
 const actions = {
+  // Add this action to your user store module
+
   async fetchUsersByIds({ commit }, userIds) {
     commit("SET_LOADING", true);
     try {
-      // Build query string manually since makeRequestWithToken doesn't support params
       const queryString = userIds.map((id) => `ids=${id}`).join("&");
       const url = `/getUsersByIds?${queryString}`;
 
@@ -44,11 +45,10 @@ const actions = {
 
       commit("SET_ERROR", null);
 
-      // Return the users array for local caching
       return response.data;
     } catch (error) {
       commit("SET_ERROR", error.response?.data || "Failed to fetch users");
-      throw error; // Re-throw so the component can handle fallback
+      throw error;
     } finally {
       commit("SET_LOADING", false);
     }

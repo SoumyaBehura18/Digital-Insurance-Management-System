@@ -110,10 +110,12 @@ const handleUpdateTicket = (ticket) => {
   setActiveView("create");
 };
 
-const handleResolveTicket = (ticket) => {
+const handleResolveTicket = async (ticket) => {
   // Find and update the ticket in the array
+  console.log("Selected ticket to resolve:", ticket);
   const ticketIndex = tickets.value.findIndex((t) => t.id === ticket.id);
   if (ticketIndex !== -1) {
+    await store.dispatch("tickets/resolveTicket", ticket.id);
     tickets.value[ticketIndex].status = "RESOLVED";
     tickets.value[ticketIndex].updatedAt = new Date();
   }
