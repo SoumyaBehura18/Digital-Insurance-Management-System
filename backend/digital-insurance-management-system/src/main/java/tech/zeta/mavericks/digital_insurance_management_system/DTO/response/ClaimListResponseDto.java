@@ -1,4 +1,4 @@
-package tech.zeta.mavericks.digital_insurance_management_system.dto;
+package tech.zeta.mavericks.digital_insurance_management_system.DTO.response;
 
 import lombok.Data;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.ClaimStatus;
@@ -20,4 +20,16 @@ public class ClaimListResponseDto {
     private ClaimStatus status;
     private String reviewerComment;
     private LocalDate resolvedDate;
+
+    @Data
+    public static class ClaimResponseDto {
+        private Long id;
+        private Long userPolicyId;
+        private LocalDate claimDate;
+        private BigDecimal claimAmount;
+        private String reason;
+        private ClaimStatus status;
+        private String reviewerComment;
+        private LocalDate resolvedDate;
+    }
 }

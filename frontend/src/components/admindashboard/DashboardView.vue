@@ -152,138 +152,184 @@
 export default {
   name: 'DashboardView',
   computed: {
-    // Derived dashboard stats from Vuex stores only
+    // This function takes no input and returns calculated dashboard statistics from claims and tickets data
     stats() {
-      const claimsState = this.$store?.state?.claims || {}
-      const adminClaims = Array.isArray(claimsState.adminClaims) ? claimsState.adminClaims : []
+      const claimsStoreState = this.$store?.state?.claims || {}
+      const adminClaimsList = Array.isArray(claimsStoreState.adminClaims) ? claimsStoreState.adminClaims : []
       
-      // Count unique policies from claims data
+      // Count unique policy types from claims data
       const uniquePolicyNames = new Set()
-      for (const claim of adminClaims) {
+      adminClaimsList.forEach(claim => {
         if (claim?.policyName) {
           uniquePolicyNames.add(claim.policyName)
         }
-      }
+      })
       const totalPoliciesCount = uniquePolicyNames.size
+      const activePoliciesDisplayText = totalPoliciesCount ? `${totalPoliciesCount} policy types` : 'No data available for now'
 
-      // For now, we can't determine "active" policies from claims data alone
-      // This would require a proper policy management endpoint
-      const activePoliciesText = totalPoliciesCount ? `${totalPoliciesCount} policy types` : 'No data available for now'
+      // Count pending claims
+      const pendingClaimsCount = adminClaimsList.filter(claim => 
+        (claim?.status || '').toUpperCase() === 'PENDING'
+      ).length
 
-      const pendingClaims = adminClaims.filter(c => (c?.status || '').toUpperCase() === 'PENDING').length
+      // Get tickets data from admin tickets store
+      const ticketsStoreState = this.$store?.state?.adminTickets || {}
+      const adminTicketsList = Array.isArray(ticketsStoreState.tickets) ? ticketsStoreState.tickets : []
+      
+      // Count open tickets
+      const openTicketsCount = adminTicketsList.filter(ticket => 
+        (ticket?.status || '').toUpperCase() === 'OPEN' || 
+        (ticket?.status || '').toUpperCase() === 'PENDING'
+      ).length
 
-      // Tickets not yet wired
-      const totalTickets = 0
-      const openTickets = 0
+      const openTicketsDisplayText = openTicketsCount 
+        ? `${openTicketsCount} open` 
+        : adminTicketsList.length 
+          ? 'All resolved' 
+          : 'No data available for now'
 
       return {
         totalPoliciesText: String(totalPoliciesCount || 0),
-        activePoliciesText,
-        totalClaimsText: String(adminClaims.length || 0),
-        pendingClaimsText: `${pendingClaims} pending review`,
-        totalTicketsText: String(totalTickets),
-        openTicketsText: openTickets ? `${openTickets} open` : 'No data available for now'
+        activePoliciesText: activePoliciesDisplayText,
+        totalClaimsText: String(adminClaimsList.length || 0),
+        pendingClaimsText: `${pendingClaimsCount} pending review`,
+        totalTicketsText: String(adminTicketsList.length || 0),
+        openTicketsText: openTicketsDisplayText
       }
     },
+    // This function takes no input and returns policy breakdown data categorized by insurance types
     policyBreakdown() {
-      // Derive policy breakdown from claims data (since PolicyStore is for user recommendations)
-      const claimsState = this.$store?.state?.claims || {}
-      const adminClaims = Array.isArray(claimsState.adminClaims) ? claimsState.adminClaims : []
+      const claimsStoreState = this.$store?.state?.claims || {}
+      const adminClaimsList = Array.isArray(claimsStoreState.adminClaims) ? claimsStoreState.adminClaims : []
       
-      if (!adminClaims.length) {
+      if (adminClaimsList.length === 0) {
         return []
       }
 
-      // Count policies by type from claims data
-      const policyTypeCounts = {}
+      // Count each policy type from claims
+      const policyTypeCounter = {}
       
-      for (const claim of adminClaims) {
+      adminClaimsList.forEach(claim => {
         const policyName = claim?.policyName || 'Unknown Policy'
         
-        // Categorize by policy name patterns
-        let category = 'Auto Insurance' // default
-        if (policyName.toLowerCase().includes('health') || policyName.toLowerCase().includes('medical')) {
-          category = 'Health Insurance'
-        } else if (policyName.toLowerCase().includes('life') || policyName.toLowerCase().includes('term')) {
-          category = 'Life Insurance'
-        } else if (policyName.toLowerCase().includes('auto') || policyName.toLowerCase().includes('vehicle') || policyName.toLowerCase().includes('car')) {
-          category = 'Auto Insurance'
+        // Determine policy category based on name
+        let policyCategory = 'Auto Insurance' // default category
+        const lowerCaseName = policyName.toLowerCase()
+        
+        if (lowerCaseName.includes('health') || lowerCaseName.includes('medical')) {
+          policyCategory = 'Health Insurance'
+        } else if (lowerCaseName.includes('life') || lowerCaseName.includes('term')) {
+          policyCategory = 'Life Insurance'
+        } else if (lowerCaseName.includes('auto') || lowerCaseName.includes('vehicle') || lowerCaseName.includes('car')) {
+          policyCategory = 'Auto Insurance'
         }
         
-        policyTypeCounts[category] = (policyTypeCounts[category] || 0) + 1
-      }
+        policyTypeCounter[policyCategory] = (policyTypeCounter[policyCategory] || 0) + 1
+      })
 
-      // Convert to breakdown format
-      const total = Object.values(policyTypeCounts).reduce((sum, count) => sum + count, 0) || 1
+      // Calculate percentages and format data
+      const totalCount = Object.values(policyTypeCounter).reduce((sum, count) => sum + count, 0) || 1
       
-      return Object.entries(policyTypeCounts).map(([name, count]) => ({
-        name,
-        count,
-        percent: (count / total) * 100
-      })).filter(item => item.count > 0)
+      return Object.entries(policyTypeCounter)
+        .map(([categoryName, categoryCount]) => ({
+          name: categoryName,
+          count: categoryCount,
+          percent: (categoryCount / totalCount) * 100
+        }))
+        .filter(item => item.count > 0)
     },
+    // This function takes no input and returns total count of all policies from breakdown data
     totalPoliciesFromBreakdown() {
-      return this.policyBreakdown.reduce((sum, item) => sum + item.count, 0)
+      return this.policyBreakdown.reduce((totalSum, policyItem) => totalSum + policyItem.count, 0)
     },
+    
+    // This function takes no input and returns CSS conic-gradient style for pie chart visualization
     pieChartStyle() {
-      if (!this.policyBreakdown.length) return {}
+      if (this.policyBreakdown.length === 0) return {}
       
-      const colors = {
+      const policyColors = {
         'Health Insurance': '#3b82f6',
         'Life Insurance': '#10b981', 
         'Auto Insurance': '#8b5cf6'
       }
       
-      let cumulativePercent = 0
-      const gradientStops = []
+      let currentPercent = 0
+      const colorGradientStops = []
       
-      this.policyBreakdown.forEach(item => {
-        const color = colors[item.name] || '#6b7280'
-        const startPercent = cumulativePercent
-        const endPercent = cumulativePercent + item.percent
+      this.policyBreakdown.forEach(policyItem => {
+        const itemColor = policyColors[policyItem.name] || '#6b7280'
+        const startPercent = currentPercent
+        const endPercent = currentPercent + policyItem.percent
         
-        gradientStops.push(`${color} ${startPercent}% ${endPercent}%`)
-        cumulativePercent = endPercent
+        colorGradientStops.push(`${itemColor} ${startPercent}% ${endPercent}%`)
+        currentPercent = endPercent
       })
       
       return {
-        background: `conic-gradient(${gradientStops.join(', ')})`
+        background: `conic-gradient(${colorGradientStops.join(', ')})`
       }
     },
+    // This function takes no input and returns combined list of recent claims and tickets activities
     recentActivities() {
-      const claimsState = this.$store?.state?.claims || {}
-      const adminClaims = Array.isArray(claimsState.adminClaims) ? claimsState.adminClaims : []
+      const claimsStoreState = this.$store?.state?.claims || {}
+      const adminClaimsList = Array.isArray(claimsStoreState.adminClaims) ? claimsStoreState.adminClaims : []
+      
+      const ticketsStoreState = this.$store?.state?.adminTickets || {}
+      const adminTicketsList = Array.isArray(ticketsStoreState.tickets) ? ticketsStoreState.tickets : []
 
-      const parseDate = (d) => {
-        if (!d) return 0
-        const ts = Date.parse(d)
-        return isNaN(ts) ? 0 : ts
+      // Parse date string safely
+      const parseActivityDate = (dateString) => {
+        if (!dateString) return 0
+        const parsedTimestamp = Date.parse(dateString)
+        return isNaN(parsedTimestamp) ? 0 : parsedTimestamp
       }
 
-      // Show recent claims (latest 6)
-      const claimActs = [...adminClaims]
-        .sort((a, b) => parseDate(b?.createdAt || b?.claimDate || b?.resolvedDate) - parseDate(a?.createdAt || a?.claimDate || a?.resolvedDate))
-        .slice(0, 6)
-        .map(c => ({
-          title: `New claim submitted for ${c?.policyName || c?.policyType || 'Unknown Policy'}`
+      // Get latest 4 claims activities
+      const recentClaimsActivities = [...adminClaimsList]
+        .sort((firstClaim, secondClaim) => 
+          parseActivityDate(secondClaim?.createdAt || secondClaim?.claimDate || secondClaim?.resolvedDate) - 
+          parseActivityDate(firstClaim?.createdAt || firstClaim?.claimDate || firstClaim?.resolvedDate)
+        )
+        .slice(0, 4)
+        .map(claim => ({
+          title: `New claim submitted for ${claim?.policyName || claim?.policyType || 'Unknown Policy'}`,
+          type: 'claim'
         }))
 
-      return claimActs
+      // Get latest 2 tickets activities
+      const recentTicketsActivities = [...adminTicketsList]
+        .sort((firstTicket, secondTicket) => 
+          parseActivityDate(secondTicket?.createdAt || secondTicket?.createdDate || secondTicket?.dateCreated) - 
+          parseActivityDate(firstTicket?.createdAt || firstTicket?.createdDate || firstTicket?.dateCreated)
+        )
+        .slice(0, 2)
+        .map(ticket => ({
+          title: `Support ticket: ${ticket?.subject || ticket?.title || 'Customer inquiry'}`,
+          type: 'ticket'
+        }))
+
+      // Combine activities and return latest 6
+      return [...recentClaimsActivities, ...recentTicketsActivities].slice(0, 6)
     }
   },
+  // Component methods
   methods: {
-    timeAgo(iso) {
+    // This function takes dateString as input and returns human-readable time difference from now
+    calculateTimeAgo(dateString) {
       try {
-        const then = new Date(iso).getTime()
-        const now = Date.now()
-        const diff = Math.max(0, now - then)
-        const minutes = Math.floor(diff / 60000)
-        if (minutes < 1) return 'just now'
-        if (minutes < 60) return `${minutes} minute${minutes===1?'':'s'} ago`
-        const hours = Math.floor(minutes / 60)
-        if (hours < 24) return `${hours} hour${hours===1?'':'s'} ago`
-        const days = Math.floor(hours / 24)
-        return `${days} day${days===1?'':'s'} ago`
+        const pastTime = new Date(dateString).getTime()
+        const currentTime = Date.now()
+        const timeDifference = Math.max(0, currentTime - pastTime)
+        const minutesAgo = Math.floor(timeDifference / 60000)
+        
+        if (minutesAgo < 1) return 'just now'
+        if (minutesAgo < 60) return `${minutesAgo} minute${minutesAgo === 1 ? '' : 's'} ago`
+        
+        const hoursAgo = Math.floor(minutesAgo / 60)
+        if (hoursAgo < 24) return `${hoursAgo} hour${hoursAgo === 1 ? '' : 's'} ago`
+        
+        const daysAgo = Math.floor(hoursAgo / 24)
+        return `${daysAgo} day${daysAgo === 1 ? '' : 's'} ago`
       } catch {
         return 'just now'
       }

@@ -26,7 +26,7 @@
             <th class="px-4 py-3 text-left font-semibold">End Date</th>
             <th class="px-4 py-3 text-left font-semibold">Status</th>
             <th class="px-4 py-3 text-left font-semibold">Premium Paid</th>
-            <th class="px-4 py-3 text-left font-semibold">Claim Status</th>
+            <th class="px-4 py-3 text-left font-semibold">NCB Eligibility</th>
             <th class="px-4 py-3 text-left font-semibold">Actions</th>
             <th class="px-4 py-3 text-left font-semibold">Cancel</th> <!-- New column -->
           </tr>
