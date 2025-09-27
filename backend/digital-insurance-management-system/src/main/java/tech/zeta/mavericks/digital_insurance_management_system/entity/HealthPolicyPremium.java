@@ -3,6 +3,7 @@ package tech.zeta.mavericks.digital_insurance_management_system.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
+import tech.zeta.mavericks.digital_insurance_management_system.enums.HealthCondition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,9 +24,9 @@ public class HealthPolicyPremium {
 
     private Double renewalRate;
 
-    private Integer startAge;
-
-    private Integer endAge;
-
     private Boolean smokingDrinking;
+
+
+
+
 }

@@ -25,5 +25,6 @@ public class LifePolicyPremium {
 
     private Boolean smokingDrinking;
 
+   private Double totalPremium;
 }
 
