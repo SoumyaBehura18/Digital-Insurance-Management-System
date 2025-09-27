@@ -3,7 +3,8 @@ package tech.zeta.mavericks.digital_insurance_management_system.DTO.response;
 import lombok.Data;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.TicketStatus;
 
-import java.sql.Date;
+
+import java.sql.Timestamp;
 import java.util.List;
 
 @Data
@@ -15,8 +16,8 @@ public class SupportTicketResponseDTO {
     private String subject;
     private String description;
     private TicketStatus status;
-    private Date createdAt;
-    private Date resolvedAt;
+    private Timestamp createdAt;
+    private Timestamp resolvedAt;
 
     private List<MessageResponseDTO> messages;
 }
