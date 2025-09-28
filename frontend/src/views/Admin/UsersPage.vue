@@ -28,7 +28,7 @@
       <!-- Users Table -->
       <div v-else class="bg-white shadow-md rounded-lg overflow-hidden">
         <table class="min-w-full border-collapse">
-          <thead class="bg-[#e0e0ff] text-[#6c63ff]">
+          <thead class="bg-gray-50 text-[#6c63ff]">
             <tr>
               <th class="px-4 py-3 text-left font-semibold">ID</th>
               <th class="px-4 py-3 text-left font-semibold">Name</th>

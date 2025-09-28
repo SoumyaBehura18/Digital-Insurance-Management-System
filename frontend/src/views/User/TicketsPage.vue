@@ -75,9 +75,8 @@ const claims = ref([]);
 const store = useStore();
 
 onMounted(async () => {
-  userId.value = parseInt(localStorage.getItem("userId")) || null;
-  // parse json from localStorage to get user Id
-
+  const currentUser=JSON.parse(localStorage.getItem("currentUser"));
+  userId.value = currentUser ? currentUser.id : null;
   if (userId.value) {
     await fetchUserTickets();
     await fetchPoliciesAndClaims();

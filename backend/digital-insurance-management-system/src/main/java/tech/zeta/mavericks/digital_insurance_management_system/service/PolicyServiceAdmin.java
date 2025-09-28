@@ -2,9 +2,10 @@ package tech.zeta.mavericks.digital_insurance_management_system.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tech.zeta.mavericks.digital_insurance_management_system.dto.premium.ConditionPremiumDTO;
+import tech.zeta.mavericks.digital_insurance_management_system.DTO.premium.ConditionPremiumDTO;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.*;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.HealthCondition;
+import tech.zeta.mavericks.digital_insurance_management_system.exception.PolicyNotFoundException;
 import tech.zeta.mavericks.digital_insurance_management_system.repository.*;
 
 import java.util.List;
@@ -43,7 +44,7 @@ public class PolicyServiceAdmin {
 
         // fetch base policy
         Policy policy = policyRepository.findById(policyId)
-                .orElseThrow(() -> new RuntimeException("Policy not found with id: " + policyId));
+                .orElseThrow(() -> new PolicyNotFoundException("Policy not found with id: " + policyId));
 
         // Non-smoker premium
         HealthPolicyPremium baseFalse = new HealthPolicyPremium();
@@ -72,7 +73,7 @@ public class PolicyServiceAdmin {
         double total = 0.0;
 
         Policy policy = policyRepository.findById(policyId)
-                .orElseThrow(() -> new RuntimeException("Policy not found"));
+                .orElseThrow(() -> new PolicyNotFoundException("Policy not found"));
 
         for (ConditionPremiumDTO dto : conditionPremiums) {
             HealthPreexistingCondition preexisting = new HealthPreexistingCondition();
@@ -92,7 +93,7 @@ public class PolicyServiceAdmin {
 
         // fetch base premium from DB
         Policy policy = policyRepository.findById(policyId)
-                .orElseThrow(() -> new RuntimeException("Policy not found with id: " + policyId));
+                .orElseThrow(() -> new PolicyNotFoundException("Policy not found with id: " + policyId));
 
         // create base premium for non-smokers
        LifePolicyPremium baseFalse1 = new LifePolicyPremium();
@@ -121,7 +122,7 @@ public class PolicyServiceAdmin {
 
         // fetch base policy
         Policy policy = policyRepository.findById(policyId)
-                .orElseThrow(() -> new RuntimeException("Policy not found with id: " + policyId));
+                .orElseThrow(() -> new PolicyNotFoundException("Policy not found with id: " + policyId));
 
         // vehicle age <= 5 years
         VehiclePolicyPremium base = new VehiclePolicyPremium();

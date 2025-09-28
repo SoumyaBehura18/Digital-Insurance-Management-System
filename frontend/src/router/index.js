@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from "vue-router";
 import DashboardPage from "@/views/User/DashboardPage.vue";
 import PoliciesPage from "@/views/User/PoliciesPage.vue";
 import ClaimsPage from "@/views/User/ClaimsPage.vue";
-import ChatbotPage from "@/views/User/ChatbotPage.vue";
 import TicketsPage from "@/views/User/TicketsPage.vue";
 import LandingPage from "@/views/LandingPage.vue";
 import LoginPage from "../views/LoginPage.vue";
@@ -41,11 +40,6 @@ const routes = [
   {
     path: "/submit-claim",
     component: ClaimsPage,
-    meta: { requiresAuth: true, role: 'user' }
-  },
-  {
-    path: "/chatbot",
-    component: ChatbotPage,
     meta: { requiresAuth: true, role: 'user' }
   },
   {

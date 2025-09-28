@@ -15,11 +15,57 @@
       {{ error }}
     </div>
 
+    <!-- Filters -->
+    <div v-else class="mb-4 flex flex-wrap gap-4 items-center justify-between">
+      <!-- Status Filter -->
+      <div class="flex items-center gap-2">
+        <span class="font-semibold text-gray-700">Filter by Status:</span>
+        <button
+          v-for="status in statusOptions"
+          :key="status"
+          @click="selectedStatus = selectedStatus === status ? null : status"
+          :class="[
+            'px-3 py-1 rounded-full text-xs font-medium transition-all border',
+            selectedStatus === status
+              ? 'bg-purple-600 text-white border-purple-600'
+              : 'bg-gray-100 text-gray-700 hover:bg-purple-100 border-gray-300'
+          ]"
+        >
+          {{ status }}
+        </button>
+        <button
+          v-if="selectedStatus || selectedNCB"
+          @click="resetFilters"
+          class="ml-2 text-xs text-gray-500 hover:text-red-500 underline"
+        >
+          Reset Filters
+        </button>
+      </div>
+
+      <!-- NCB Filter -->
+      <div class="flex items-center gap-2">
+        <span class="font-semibold text-gray-700">Filter by NCB Eligibility:</span>
+        <button
+          v-for="ncb in ncbOptions"
+          :key="ncb.value"
+          @click="selectedNCB = selectedNCB === ncb.value ? null : ncb.value"
+          :class="[
+            'px-3 py-1 rounded-full text-xs font-medium transition-all border',
+            selectedNCB === ncb.value
+              ? 'bg-purple-600 text-white border-purple-600'
+              : 'bg-gray-100 text-gray-700 hover:bg-purple-100 border-gray-300'
+          ]"
+        >
+          {{ ncb.label }}
+        </button>
+      </div>
+    </div>
+
     <!-- Policies Table -->
-    <div v-else class="bg-white shadow-lg rounded-lg overflow-hidden">
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
       <table class="w-full table-auto border-collapse">
         <thead>
-          <tr class="bg-[#e0e0ff] text-[#6c63ff]">
+          <tr class="bg-gray-50 text-[#6c63ff]">
             <th class="px-4 py-3 text-left font-semibold">Policy Name</th>
             <th class="px-4 py-3 text-left font-semibold">Type</th>
             <th class="px-4 py-3 text-left font-semibold">Start Date</th>
@@ -28,48 +74,54 @@
             <th class="px-4 py-3 text-left font-semibold">Premium Paid</th>
             <th class="px-4 py-3 text-left font-semibold">NCB Eligibility</th>
             <th class="px-4 py-3 text-left font-semibold">Actions</th>
-            <th class="px-4 py-3 text-left font-semibold">Cancel</th> <!-- New column -->
+            <th class="px-4 py-3 text-left font-semibold">Cancel</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(policy, index) in policies" :key="policy.id"
-            :class="index % 2 === 0 ? 'bg-white' : 'bg-purple-50'" class="hover:bg-purple-100 transition-colors">
-            <td class="px-4 py-3 font-medium text-gray-800">
-              {{ policy.policyName }}
-            </td>
+          <tr
+            v-for="(policy, index) in filteredPolicies"
+            :key="policy.id"
+            :class="index % 2 === 0 ? 'bg-white' : 'bg-purple-50'"
+            class="hover:bg-purple-100 transition-colors"
+          >
+            <td class="px-4 py-3 font-medium text-gray-800">{{ policy.policyName }}</td>
             <td class="px-4 py-3 text-gray-700">{{ policy.policyType }}</td>
-            <td class="px-4 py-3 text-gray-700">
-              {{ formatDate(policy.startDate) }}
-            </td>
-            <td class="px-4 py-3 text-gray-700">
-              {{ formatDate(policy.endDate) }}
-            </td>
+            <td class="px-4 py-3 text-gray-700">{{ formatDate(policy.startDate) }}</td>
+            <td class="px-4 py-3 text-gray-700">{{ formatDate(policy.endDate) }}</td>
             <td class="px-4 py-3">
-              <span :class="{
-                'bg-green-100 text-green-800': policy.status === 'ACTIVE',
-                'bg-gray-200 text-gray-700': policy.status === 'RENEWED',
-                'bg-red-100 text-red-800': policy.status === 'EXPIRED',
-                'bg-gray-300 text-gray-600': policy.status === 'CANCELLED'
-              }" class="px-3 py-1 rounded-full text-xs font-semibold">
+              <span
+                :class="{
+                  'bg-green-100 text-green-800': policy.status === 'ACTIVE',
+                  'bg-gray-200 text-gray-700': policy.status === 'RENEWED',
+                  'bg-red-100 text-red-800': policy.status === 'EXPIRED',
+                  'bg-gray-300 text-gray-600': policy.status === 'CANCELLED'
+                }"
+                class="px-3 py-1 rounded-full text-xs font-semibold"
+              >
                 {{ policy.status }}
               </span>
             </td>
-            <td class="px-4 py-3 text-gray-700">
-              Rs.{{ formatCurrency(policy.premiumPaid) }}
-            </td>
+            <td class="px-4 py-3 text-gray-700">Rs.{{ formatCurrency(policy.premiumPaid) }}</td>
             <td class="px-4 py-3">
-              <span v-if="!policy.noClaimBonus"
-                class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
+              <span
+                v-if="!policy.noClaimBonus"
+                class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold"
+              >
                 Eligible
               </span>
-              <span v-else class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-semibold">
+              <span
+                v-else
+                class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-semibold"
+              >
                 Not Eligible
               </span>
             </td>
             <td class="px-4 py-3">
-              <button v-if="canRenew(policy)"
+              <button
+                v-if="canRenew(policy)"
                 class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-medium transition"
-                @click="openModal(policy)">
+                @click="openModal(policy)"
+              >
                 Renew
                 <span v-if="policy.status === 'EXPIRED'">
                   ({{ 15 - daysSinceExpiry(policy) }} days left)
@@ -77,7 +129,11 @@
               </button>
             </td>
             <td class="px-4 py-3 text-center">
-              <button v-show="policy.status !== 'CANCELLED'" @click="cancelPolicy(policy)" class="text-red-500 hover:text-red-700 transition">
+              <button
+                v-show="policy.status !== 'CANCELLED'"
+                @click="cancelPolicy(policy)"
+                class="text-red-500 hover:text-red-700 transition"
+              >
                 <Trash class="w-5 h-5" />
               </button>
             </td>
@@ -87,26 +143,57 @@
     </div>
 
     <!-- Purchase / Renewal Modal -->
-    <PurchaseModal v-if="selectedPolicy" :policy="selectedPolicy" @close="selectedPolicy = null"
-      @purchased="openModal" />
+    <PurchaseModal
+      v-if="selectedPolicy"
+      :policy="selectedPolicy"
+      @close="selectedPolicy = null"
+      @purchased="openModal"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed, nextTick } from "vue";
 import { useStore } from "vuex";
-import PurchaseModal from "@/components/PoliciesComponents/PurchaseModal.vue"; // ✅ import your modal
+import PurchaseModal from "@/components/PoliciesComponents/PurchaseModal.vue";
 import { Trash } from "lucide-vue-next";
-
 
 const store = useStore();
 
 const selectedPolicy = ref(null);
+const selectedStatus = ref(null);
+const selectedNCB = ref(null);
 
-// Getters
+const statusOptions = ["ACTIVE", "RENEWED", "EXPIRED", "CANCELLED"];
+const ncbOptions = [
+  { label: "Eligible", value: "eligible" },
+  { label: "Not Eligible", value: "not_eligible" },
+];
+
 const policies = computed(() => store.getters["userPolicies/getPolicies"]);
 const loading = computed(() => store.getters["userPolicies/isLoading"]);
 const error = computed(() => store.getters["userPolicies/getError"]);
+
+const filteredPolicies = computed(() => {
+  return policies.value.filter((policy) => {
+    const matchesStatus = selectedStatus.value
+      ? policy.status === selectedStatus.value
+      : true;
+
+    const matchesNCB = selectedNCB.value
+      ? selectedNCB.value === "eligible"
+        ? !policy.noClaimBonus
+        : policy.noClaimBonus
+      : true;
+
+    return matchesStatus && matchesNCB;
+  });
+});
+
+function resetFilters() {
+  selectedStatus.value = null;
+  selectedNCB.value = null;
+}
 
 function formatDate(date) {
   if (!date) return "N/A";
@@ -137,40 +224,26 @@ function daysSinceExpiry(policy) {
 }
 
 function openModal(userPolicy) {
-  console.log("Opening modal for userPolicy:", userPolicy);
-
   const allPolicies = store.getters["policies/getAllPolicies"] || [];
-  console.log("All base policies:", allPolicies);
-
   const basePolicy = allPolicies.find(
     (p) => p.policyId === (userPolicy.policyId || userPolicy.id)
   );
-  if (!basePolicy) {
-    console.error(
-      "❌ Base policy not found for:",
-      userPolicy.policyId || userPolicy.id
-    );
-    return;
-  }
-
-  console.log("✅ Base policy found:", basePolicy);
-
-  selectedPolicy.value = null; // reset first
+  if (!basePolicy) return;
+  selectedPolicy.value = null;
   nextTick(() => {
     selectedPolicy.value = {
       ...basePolicy,
       ...userPolicy,
-      isRenewal: true
+      isRenewal: true,
     };
   });
 }
 
 async function cancelPolicy(policy) {
   if (!confirm(`Are you sure you want to cancel ${policy.policyName}?`)) return;
-
   try {
     await store.dispatch("userPolicies/cancelPolicy", policy);
-     const storedUser = localStorage.getItem("currentUser");
+    const storedUser = localStorage.getItem("currentUser");
     const userId = storedUser ? JSON.parse(storedUser).userId : null;
     if (userId) {
       await store.dispatch("userPolicies/fetchUserPolicies", userId);
@@ -180,32 +253,24 @@ async function cancelPolicy(policy) {
   }
 }
 
-
 function checkAndExpirePolicies(policies) {
   const now = new Date();
-
-  policies.forEach(policy => {
+  policies.forEach((policy) => {
     if (!policy.endDate) return;
-
     const endDate = new Date(policy.endDate);
     const diffDays = (now - endDate) / (1000 * 60 * 60 * 24);
-
-    // Expire if more than 15 days past end date
-    if (diffDays > 15 && policy.status !== 'EXPIRED') {
-      store.dispatch('userPolicies/expirePolicy', policy);
+    if (diffDays > 15 && policy.status !== "EXPIRED") {
+      store.dispatch("userPolicies/expirePolicy", policy);
     }
   });
 }
 
-// Example: call after fetching user policies
 onMounted(async () => {
-  const storedUser = localStorage.getItem('currentUser');
+  const storedUser = localStorage.getItem("currentUser");
   const userId = storedUser ? JSON.parse(storedUser).userId : null;
-
   if (userId) {
-    await store.dispatch('userPolicies/fetchUserPolicies', userId);
+    await store.dispatch("userPolicies/fetchUserPolicies", userId);
     checkAndExpirePolicies(store.state.userPolicies.policies);
   }
 });
-
 </script>
