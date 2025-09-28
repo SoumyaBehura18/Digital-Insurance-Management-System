@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.User;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.RoleType;
 import tech.zeta.mavericks.digital_insurance_management_system.exception.PolicyNotFoundException;
+import tech.zeta.mavericks.digital_insurance_management_system.exception.UserAlreadyExistException;
 import tech.zeta.mavericks.digital_insurance_management_system.repository.UserRepository;
 
 import java.util.List;
@@ -27,12 +28,23 @@ public class UserService {
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
     public User register(User user) {
-        user.setEmail(user.getEmail());  // ← Add this
-        System.out.println("Password:"+user.getPassword());
+        String email = user.getEmail();
+
+        // Check if user already exists
+        User existingUser = repo.findByEmail(email);
+        if (existingUser != null) {
+            throw new UserAlreadyExistException("User with email "+email+" already exist");
+        }
+
+        // Encode password
+        System.out.println("Password: " + user.getPassword());
         user.setPassword(encoder.encode(user.getPassword()));
-        repo.save(user);
-        return user;
+
+        // Save user
+        return repo.save(user);
     }
+
+
 
     public List<User> getAllUsers(){
         return repo.findAll();

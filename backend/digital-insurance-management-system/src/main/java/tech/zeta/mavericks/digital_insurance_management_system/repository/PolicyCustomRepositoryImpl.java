@@ -37,7 +37,7 @@ public class PolicyCustomRepositoryImpl implements PolicyRepository.PolicyCustom
     @Override
     public List<PolicyWithPremiumDTO> findVehiclePoliciesForUser(PolicyRequest policyRequest) {
         List<VehiclePolicyPremium> vehiclePolicies = em.createQuery(
-                        "SELECT v FROM VehiclePolicyPremium v JOIN FETCH v.policy WHERE v.vehicleAge >= :vehicleAge", VehiclePolicyPremium.class)
+                        "SELECT v FROM VehiclePolicyPremium v JOIN FETCH v.policy WHERE v.vehicleAge >= :vehicleAge and :vehicleAge!=0", VehiclePolicyPremium.class)
                 .setParameter("vehicleAge", policyRequest.getVehicleAge())
                 .getResultList();
 
