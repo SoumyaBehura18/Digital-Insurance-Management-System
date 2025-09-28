@@ -18,7 +18,7 @@
 
 <script setup>
 import HeaderLayout from "@/components/layout/HeaderLayout.vue";
-import DashboardView from "@/components/admindashboard/DashboardView.vue";
+import DashboardView from "@/components/AdminDashboard/DashboardView.vue";
 import { ref, onMounted } from "vue";
 import { useStore } from "vuex";
 

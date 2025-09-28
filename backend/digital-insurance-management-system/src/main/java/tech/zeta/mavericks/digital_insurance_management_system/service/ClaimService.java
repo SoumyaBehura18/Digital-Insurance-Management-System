@@ -10,6 +10,7 @@ import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.Rema
 import tech.zeta.mavericks.digital_insurance_management_system.entity.Claim;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.UserPolicy;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.ClaimStatus;
+import tech.zeta.mavericks.digital_insurance_management_system.enums.PolicyStatus;
 import tech.zeta.mavericks.digital_insurance_management_system.exception.ClaimNotFoundException;
 import tech.zeta.mavericks.digital_insurance_management_system.exception.UserPolicyNotFoundException;
 import tech.zeta.mavericks.digital_insurance_management_system.repository.ClaimRepository;
@@ -34,6 +35,10 @@ public class ClaimService {
 
         log.info("UserPolicy status: {}", userPolicy.getStatus());
         log.info("UserPolicy start date: {}, end date: {}", userPolicy.getStartDate(), userPolicy.getEndDate());
+
+        if (userPolicy.getStatus() != PolicyStatus.ACTIVE) {
+            throw new RuntimeException("Cannot submit claim for non-active policy (status=" + userPolicy.getStatus() + ")");
+        }
 
         Claim claim = new Claim();
         claim.setUserPolicy(userPolicy);
