@@ -1,31 +1,30 @@
 <template>
   <div class="flex h-screen">
-    <!-- Show Admin Sidebar for authenticated admin users -->
-    <AdminSidebarLayout
-      v-if="isAuthenticated && isAdmin"
-      :currentPage="currentRoute"
-      :setCurrentPage="setCurrentPage"
-      :isCollapsed="isCollapsed"
-      :setIsCollapsed="setIsCollapsed"
-      :isDarkMode="isDarkMode"
-      :setIsDarkMode="setIsDarkMode"
-      :onLogout="onLogout"
-    />
-    
-    <!-- Show User Sidebar for authenticated regular users -->
-    <SidebarLayout
-      v-else-if="isAuthenticated && !isAdmin"
-      :currentPage="currentRoute"
-      :setCurrentPage="setCurrentPage"
-      :isCollapsed="isCollapsed"
-      :setIsCollapsed="setIsCollapsed"
-      :isDarkMode="isDarkMode"
-      :setIsDarkMode="setIsDarkMode"
-      :onLogout="onLogout"
-    />
+    <!-- Conditionally show sidebar only if user is authenticated AND route is not "/", "/login", or "/register" -->
+    <template v-if="!hideSidebar">
+      <!-- Show Admin Sidebar for authenticated admin users -->
+      <AdminSidebarLayout
+        v-if="isAdmin"
+        :currentPage="currentRoute"
+        :setCurrentPage="setCurrentPage"
+        :isCollapsed="isCollapsed"
+        :setIsCollapsed="setIsCollapsed"
+        :onLogout="onLogout"
+      />
 
-    <!-- Main content - full width when not authenticated -->
-    <main :class="isAuthenticated ? 'flex-1 overflow-auto' : 'w-full overflow-auto'">
+      <!-- Show User Sidebar for authenticated regular users -->
+      <SidebarLayout
+        v-else-if="!isAdmin"
+        :currentPage="currentRoute"
+        :setCurrentPage="setCurrentPage"
+        :isCollapsed="isCollapsed"
+        :setIsCollapsed="setIsCollapsed"
+        :onLogout="onLogout"
+      />
+    </template>
+
+    <!-- Main content -->
+    <main :class="hideSidebar ? 'w-full overflow-auto' : 'flex-1 overflow-auto'">
       <router-view />
     </main>
   </div>
@@ -41,20 +40,24 @@ const router = useRouter();
 const route = useRoute();
 
 const isCollapsed = ref(true);
-const isDarkMode = ref(false);
 const userRole = ref('');
 const isAuthenticated = ref(false);
 
 const setIsCollapsed = (val) => (isCollapsed.value = val);
-const setIsDarkMode = (val) => (isDarkMode.value = val);
 
 const currentRoute = computed(() => route.path);
 const isAdmin = computed(() => userRole.value === 'admin');
 
+// ✅ Hide sidebar for these routes
+const hideSidebar = computed(() => {
+  const hiddenRoutes = ['/', '/login', '/register'];
+  return hiddenRoutes.includes(route.path);
+});
+
 // Function to update authentication state
 const updateAuthState = () => {
   const storedUser = localStorage.getItem('currentUser');
- const user = storedUser ? JSON.parse(storedUser) : null;
+  const user = storedUser ? JSON.parse(storedUser) : null;
   const token = user?.token;
   const role = user?.role;
   
@@ -73,7 +76,6 @@ watch(() => route.path, () => {
 });
 
 const setCurrentPage = (page) => {
-  // Handle navigation based on current user role
   const userRole = localStorage.getItem('role');
   
   if (userRole === 'admin') {
@@ -84,15 +86,10 @@ const setCurrentPage = (page) => {
 };
 
 const onLogout = () => {
-  // Clear all auth data
-  localStorage.removeItem('token');
   localStorage.removeItem('role');
   localStorage.removeItem('userId');
   
-  // Update reactive state
   updateAuthState();
-  
-  // Redirect to login
   router.push('/login');
   
   console.log("User logged out");

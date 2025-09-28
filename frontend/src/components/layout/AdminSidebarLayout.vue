@@ -118,8 +118,6 @@ const handleLogout = () => {
   // props.onLogout();
   // Clear all auth-related localStorage
   localStorage.removeItem('currentUser');
-  localStorage.removeItem('authToken');
-  localStorage.removeItem('token');
   localStorage.removeItem('userId');
   // Redirect to login page
   router.push('/login');

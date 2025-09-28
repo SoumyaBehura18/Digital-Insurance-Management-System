@@ -69,7 +69,7 @@
           <div class="flex items-center justify-between">
             <span class="text-sm font-medium text-gray-700">Coverage</span>
             <span class="font-bold text-lg text-gray-900">
-              Rs.{{ formatAmount(policy.coverageAmount || "250000") }}
+              Rs.{{ formatAmount(policy.coverage) }}
             </span>
           </div>
           <div class="flex items-center justify-between">

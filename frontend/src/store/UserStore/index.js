@@ -119,13 +119,8 @@ const actions = {
       };
       commit("SET_CURRENT_USER", normalizedUser);
       localStorage.setItem("currentUser", JSON.stringify(normalizedUser));
-      if (normalizedUser.token) {
-        localStorage.setItem("authToken", normalizedUser.token);
-        localStorage.setItem("token", normalizedUser.token);
-      }
-      if (normalizedUser.userId != null) {
-        localStorage.setItem("userId", String(normalizedUser.userId));
-      }
+      
+      
       commit("SET_ERROR", null);
     } catch (error) {
       commit("SET_ERROR", error.response?.data || "Invalid credentials");
@@ -139,8 +134,6 @@ const actions = {
     commit("SET_CURRENT_USER", null);
     commit("SET_USERS", []);
     localStorage.removeItem("currentUser");
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("token");
     localStorage.removeItem("userId");
   },
   async updateUserRole({ commit }, { userId, role }) {

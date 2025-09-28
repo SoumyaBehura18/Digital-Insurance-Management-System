@@ -8,7 +8,7 @@
       <KpiCards
         :active-policies="activeUserPolicies"
         :claims="claims"
-        :pending-tickets="pendingTickets"
+        :pending-tickets="tickets"
         :total-coverage="totalCoverage"
       />
 
@@ -53,6 +53,7 @@ const user = ref(JSON.parse(localStorage.getItem("currentUser")));
 const policies = computed(() => store.getters["userPolicies/getPolicies"] || []);
 const claims = computed(() => store.getters["claims/allClaims"] || []);
 const allPolicies = computed(() => store.getters["policies/getAllPolicies"] || []);
+const tickets = computed(() => store.getters["tickets/getTickets"] || []);
 
 const activeUserPolicies = computed(() =>
   policies.value.filter((p) => p.status === "ACTIVE" || p.status === "RENEWED")
@@ -65,16 +66,10 @@ const totalCoverage = computed(() =>
   }, 0)
 );
 
-const pendingTickets = ref([
-  { id: 1, title: "Ticket 1", status: "Pending" },
-  { id: 2, title: "Ticket 2", status: "In Progress" },
-  { id: 3, title: "Ticket 3", status: "Closed" },
-]);
-
 // ✅ Recent data (last 2 each)
 const recentPolicies = computed(() => policies.value.slice(-2).reverse());
 const recentClaims = computed(() => claims.value.slice(-2).reverse());
-const recentTickets = computed(() => pendingTickets.value.slice(-2).reverse());
+const recentTickets = computed(() => tickets.value.slice(-2).reverse());
 
 const goToPage = (page) => router.push(`/${page}`);
 
@@ -92,6 +87,7 @@ onMounted(async () => {
     await store.dispatch("userPolicies/fetchUserPolicies", userId);
     await store.dispatch("claims/fetchClaims", userId);
     await store.dispatch("policies/fetchAllPolicies", policyRequest);
+    await store.dispatch("tickets/fetchUserTickets", userId);
   }
 });
 </script>

@@ -231,7 +231,8 @@ const removeCondition = (index) => {
 // Create policy
 const createPolicy = async () => {
   try {
-    const token = localStorage.getItem("authToken");
+    const user = JSON.parse(localStorage.getItem("currentUser"));
+    const token = user?.token;
     if (!token) {
       alert("No token found. Please login again.");
       return;
@@ -324,7 +325,8 @@ const resetNewPolicy = () => {
 const removePolicy = async (policyId, index) => {
   if (confirm("Are you sure you want to delete this policy?")) {
     try {
-      const token = localStorage.getItem("authToken");
+      const user = JSON.parse(localStorage.getItem("currentUser"));
+      const token = user?.token;
       await axios.delete(`http://localhost:9090/api/admin/policies/${policyId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -339,7 +341,8 @@ const removePolicy = async (policyId, index) => {
 // Load policies on mount
 onMounted(async () => {
   try {
-    const token = localStorage.getItem("authToken");
+    const user = JSON.parse(localStorage.getItem("currentUser"));
+    const token = user?.token;
     const response = await axios.get("http://localhost:9090/api/admin/policies", {
       headers: { Authorization: `Bearer ${token}` },
     });
