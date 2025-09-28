@@ -16,7 +16,8 @@ import java.util.List;
 @RequestMapping("/user")
 public class UserPolicyController {
 
-    @Autowired private UserPolicyService userPolicyService;
+    @Autowired
+    public UserPolicyService userPolicyService;
 
     @PostMapping("/policy/purchase")
     public ResponseEntity<UserPolicyResponse> saveUserPolicy(@RequestBody UserPolicyRequest request){
