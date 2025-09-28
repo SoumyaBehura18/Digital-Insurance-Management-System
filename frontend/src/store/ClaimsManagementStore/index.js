@@ -119,36 +119,46 @@ export default {
         const policiesResponse = await requestWithAuth('GET', `/user/policies/${currentUserId}`)
         const rawPoliciesList = Array.isArray(policiesResponse.data) ? policiesResponse.data : []
 
-        // Process each valid policy and get remaining claim amount
-        const processedPolicies = await Promise.all(
-          rawPoliciesList
-            .filter(policy => policy && policy.id) // Only valid policies
-            .filter(policy => policy.status === 'ACTIVE' || policy.status === 'RENEWED') // Only active policies
-            .map(async (policy) => {
-              const policyId = policy.id
-              let remainingAmount = policy.coverageAmount || 0
+        // Get user's claims to calculate remaining amounts
+        let userClaims = []
+        try {
+          const claimsResponse = await requestWithAuth('GET', `/claim/user/${currentUserId}`)
+          userClaims = Array.isArray(claimsResponse.data) ? claimsResponse.data : []
+        } catch (error) {
+          console.log("Could not fetch user claims for available amount calculation")
+        }
 
-              // Get remaining claim amount for this policy
-              try {
-                const remainingResponse = await requestWithAuth('GET', `/claim/policy/remaining-amount/${policyId}`)
-                if (remainingResponse?.data?.remainingClaimAmount != null) {
-                  remainingAmount = remainingResponse.data.remainingClaimAmount
-                }
-              } catch (error) {
-                console.log("Could not fetch remaining amount for policy:", policyId)
-              }
+        // Process each valid policy and calculate remaining claim amount
+        const processedPolicies = rawPoliciesList
+          .filter(policy => policy && policy.id) // Only valid policies
+          .filter(policy => policy.status === 'ACTIVE' || policy.status === 'RENEWED') // Only active policies
+          .map((policy) => {
+            const policyId = policy.id
+            const coverageAmount = policy.coverageAmount || 0
 
-              // Format policy data
-              return {
-                id: policy.id || policy.policyId,
-                policyType: policy.policyName || 'Policy',
-                policyNumber: `POL-${policy.policyId || policy.id}`,
-                description: policy.policyName || '',
-                coverageAmount: policy.coverageAmount || 0,
-                availableAmount: remainingAmount
-              }
-            })
-        )
+            // Calculate total approved claims for this policy
+            const policyApprovedClaims = userClaims.filter(claim => 
+              claim.userPolicyId === policyId && (claim.status === 'APPROVED' || claim.status === 'PENDING')
+            )
+            const approvedClaimsTotal = policyApprovedClaims.reduce((total, claim) => 
+              total + (claim.claimAmount || 0), 0
+            )
+
+            // Calculate remaining available amount
+            const availableAmount = Math.max(0, coverageAmount - approvedClaimsTotal)
+
+            console.log(`Policy ${policyId}: Coverage=${coverageAmount}, Approved Claims=${approvedClaimsTotal}, Available=${availableAmount}`)
+
+            // Format policy data
+            return {
+              id: policy.id || policy.policyId,
+              policyType: policy.policyName || 'Policy',
+              policyNumber: `POL-${policy.policyId || policy.id}`,
+              description: policy.policyName || '',
+              coverageAmount: coverageAmount,
+              availableAmount: availableAmount
+            }
+          })
 
         commit('SET_POLICIES', processedPolicies)
 
