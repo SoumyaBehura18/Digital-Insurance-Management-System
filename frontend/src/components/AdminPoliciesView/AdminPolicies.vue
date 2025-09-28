@@ -28,10 +28,7 @@
               <th class="px-4 py-3 text-left font-semibold text-gray-700">Policy Name</th>
               <th class="px-4 py-3 text-left font-semibold text-gray-700">Type</th>
               <th class="px-4 py-3 text-left font-semibold text-gray-700">Coverage</th>
-              <th class="px-4 py-3 text-left font-semibold text-gray-700">Premium</th>
-              <th class="px-4 py-3 text-left font-semibold text-gray-700">Renewal Rate</th>
               <th class="px-4 py-3 text-left font-semibold text-gray-700">Duration</th>
-              <th class="px-4 py-3 text-center font-semibold text-gray-700">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -47,20 +44,8 @@
                 </span>
               </td>
               <td class="px-4 py-3">{{ policy.coverageAmt }}</td>
-              <td class="px-4 py-3">{{ policy.premiumRate }}</td>
-              <td class="px-4 py-3">{{ policy.renewalRate }}</td>
               <td class="px-4 py-3">{{ policy.durationMonths }}</td>
-              <td class="px-4 py-3 flex justify-center space-x-3">
-                <button class="text-gray-600 hover:text-indigo-600">
-                  <Pencil class="w-4 h-4" />
-                </button>
-                <button
-                  class="text-gray-600 hover:text-red-600"
-                  @click="removePolicy(policy.id, index)"
-                >
-                  <Trash class="w-4 h-4" />
-                </button>
-              </td>
+              
             </tr>
           </tbody>
         </table>
@@ -299,6 +284,7 @@ const createPolicy = async () => {
 
     // Step 4: Update UI
     policies.value.push(created);
+    
     alert("Policy created successfully!");
     resetNewPolicy();
     showCreatePolicy.value = false;
@@ -323,21 +309,7 @@ const resetNewPolicy = () => {
 };
 
 // Delete policy
-const removePolicy = async (policyId, index) => {
-  if (confirm("Are you sure you want to delete this policy?")) {
-    try {
-      const user = JSON.parse(localStorage.getItem("currentUser"));
-      const token = user?.token;
-      await axios.delete(`http://localhost:9090/api/admin/policies/${policyId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      policies.value.splice(index, 1);
-    } catch (error) {
-      console.error("Error deleting policy:", error);
-      alert("Failed to delete policy");
-    }
-  }
-};
+
 
 // Load policies on mount
 onMounted(async () => {

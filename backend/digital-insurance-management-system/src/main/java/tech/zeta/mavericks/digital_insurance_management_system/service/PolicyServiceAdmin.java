@@ -2,7 +2,7 @@ package tech.zeta.mavericks.digital_insurance_management_system.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.premium.ConditionPremiumDTO;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.premium.ConditionPremiumDTO;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.*;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.HealthCondition;
 import tech.zeta.mavericks.digital_insurance_management_system.exception.PolicyNotFoundException;
@@ -34,7 +34,6 @@ public class PolicyServiceAdmin {
 
     // Create a new policy
     public Policy createPolicy(Policy policy) {
-
         return policyRepository.save(policy);
     }
     // Add Health Premium
@@ -117,7 +116,7 @@ public class PolicyServiceAdmin {
 
 
     // Add Vehicle Premium
-    public double addVehiclePremium(Long policyId, Double premiumRate, Double renewalRate) {
+    public double addVehiclePremium(Long policyId, Double premiumRate, Double renewalRate,Integer vehicleAge) {
         double total = 0.0;
 
         // fetch base policy
@@ -129,15 +128,15 @@ public class PolicyServiceAdmin {
         base.setPolicy(policy);
         base.setPremiumRate(premiumRate);
         base.setRenewalRate(renewalRate);
-        base.setVehicleAge(5);  // mark max age in this slab
+        base.setVehicleAge(vehicleAge != null ? vehicleAge : Integer.MAX_VALUE); // mark max age in this slab
         vehicleRepo.save(base);
 
         return total;
     }
 
-    public List<Policy> getAllPolicies() {
-        return policyRepository.findAll();
-    }
+//    public List<Policy> getAllPolicies() {
+//        return policyRepository.findAll();
+//    }
 
 
 }
