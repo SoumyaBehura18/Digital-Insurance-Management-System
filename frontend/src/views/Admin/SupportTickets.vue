@@ -431,7 +431,6 @@ const getUserName = (customerId) => {
   return user ? user.name : "Loading...";
 };
 
-
 const fetchAllTickets = async () => {
   try {
     // 1. Fetch all tickets first

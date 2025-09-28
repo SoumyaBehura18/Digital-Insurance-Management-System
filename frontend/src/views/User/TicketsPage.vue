@@ -41,6 +41,7 @@
         @create-first-ticket="setActiveView('create')"
         @update-ticket="handleUpdateTicket"
         @resolve-ticket="handleResolveTicket"
+        @close-ticket="handleCloseTicket"
       />
 
       <CreateTicketForm
@@ -75,7 +76,7 @@ const claims = ref([]);
 const store = useStore();
 
 onMounted(async () => {
-  const currentUser=JSON.parse(localStorage.getItem("currentUser"));
+  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
   userId.value = currentUser ? currentUser.id : null;
   if (userId.value) {
     await fetchUserTickets();
@@ -145,15 +146,19 @@ const handleUpdateTicket = (ticket) => {
 };
 
 const handleResolveTicket = async (ticket) => {
-  // Find and update the ticket in the array
-  console.log("Selected ticket to resolve:", ticket);
   const ticketIndex = tickets.value.findIndex((t) => t.id === ticket.id);
   if (ticketIndex !== -1) {
-    await store.dispatch("tickets/resolveTicket", ticket.id);
     tickets.value[ticketIndex].status = "RESOLVED";
     tickets.value[ticketIndex].updatedAt = new Date();
   }
-  console.log("Ticket resolved:", ticket.id);
+};
+
+const handleCloseTicket = async (ticket) => {
+  const ticketIndex = tickets.value.findIndex((t) => t.id === ticket.id);
+  if (ticketIndex !== -1) {
+    tickets.value[ticketIndex].status = "CLOSED";
+    tickets.value[ticketIndex].updatedAt = new Date();
+  }
 };
 
 const handleTicketUpdated = async () => {
@@ -173,7 +178,5 @@ const handleTicketCreated = (newTicket) => {
 
   // Switch back to tickets view
   setActiveView("tickets");
-
-  console.log("New ticket created:", newTicket);
 };
 </script>
