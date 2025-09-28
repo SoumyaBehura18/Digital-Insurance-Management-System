@@ -34,12 +34,8 @@ export async function makeRequestWithToken(type, endpoint, body = null) {
   const url = base_url + endpoint;
 
   // Get the token from multiple fallbacks in localStorage
-  const storedUser = localStorage.getItem("currentUser");
-  const parsedUser = storedUser ? JSON.parse(storedUser) : null;
-  const token =
-    parsedUser?.token ||
-    localStorage.getItem("authToken") ||
-    localStorage.getItem("token");
+  const user=JSON.parse(localStorage.getItem("currentUser"));
+  const token = user?.token;
 
   if (!token) {
     throw new Error("No auth token found in localStorage");
@@ -93,8 +89,6 @@ export async function requestWithAuth(type, endpoint, body) {
       // Clear stale credentials and redirect to login
       try {
         // localStorage.removeItem("currentUser");
-        // localStorage.removeItem("authToken");
-        // localStorage.removeItem("token");
         // localStorage.removeItem("userId");
       } catch (_) {
         // intentionally ignore storage errors (ESLint no-empty fix)

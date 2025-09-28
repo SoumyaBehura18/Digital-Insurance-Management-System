@@ -24,7 +24,6 @@ import java.util.Map;
 
 
 
-@CrossOrigin(origins = "http://localhost:8081") // allow your frontend
 @RestController
 
 

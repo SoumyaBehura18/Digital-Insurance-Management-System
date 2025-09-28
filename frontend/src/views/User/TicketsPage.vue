@@ -71,7 +71,8 @@ const tickets = ref([]);
 const store = useStore();
 
 onMounted(() => {
-  userId.value = parseInt(localStorage.getItem("userId")) || null;
+  const currentUser=JSON.parse(localStorage.getItem("currentUser"));
+  userId.value = currentUser ? currentUser.id : null;
   fetchUserTickets();
 });
 
