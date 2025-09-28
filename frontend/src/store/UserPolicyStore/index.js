@@ -22,6 +22,12 @@ const mutations = {
   SET_ERROR(state, error) {
     state.error = error;
   },
+  UPDATE_POLICY(state, updatedPolicy) {
+  const index = state.policies.findIndex((p) => p.id === updatedPolicy.id);
+  if (index !== -1) {
+    state.policies.splice(index, 1, updatedPolicy);
+  }
+}
 };
 
 const actions = {
@@ -79,6 +85,81 @@ const actions = {
       commit("SET_LOADING", false);
     }
   },
+  async checkPolicyStatuses({ state, dispatch }) {
+  const now = new Date();
+
+  for (const policy of state.policies) {
+    if (!policy.endDate) continue;
+
+    const endDate = new Date(policy.endDate);
+    const diffDays = (now - endDate) / (1000 * 60 * 60 * 24); // how many days since expiry
+
+    // Case 1️⃣: Policy is still active → do nothing
+    if (policy.status === "ACTIVE") {
+      continue;
+    }
+
+    // Case 2️⃣: Expired but within 15 days → set RENEW_PENDING
+    if (diffDays >= 0 && diffDays <= 15 && policy.status !== "RENEW_PENDING") {
+      console.log(
+        `Policy ${policy.id} expired ${diffDays.toFixed(
+          1
+        )} days ago → marking as RENEW_PENDING`
+      );
+      await dispatch("renewablePolicy", policy);
+      continue;
+    }
+
+    // Case 3️⃣: Expired for more than 15 days → mark EXPIRED
+    if (diffDays > 15 && policy.status !== "EXPIRED") {
+      console.log(
+        `Policy ${policy.id} expired ${diffDays.toFixed(
+          1
+        )} days ago → marking as EXPIRED`
+      );
+      await dispatch("expirePolicy", policy);
+    }
+  }
+},
+async renewablePolicy({ commit, state }, policy) {
+    commit("SET_LOADING", true);
+    try {
+      // Build payload for renewal
+      const payload = {
+        premiumRate: 0,
+        policyStatus: "RENEW_PENDING",
+      };
+
+      console.log("Renewable payload:", payload);
+
+      // Hit the backend renewal endpoint
+      const response = await requestWithAuth(
+        "PATCH",
+        `/user/policy/status/${policy.id}`,
+        payload
+      );
+
+      console.log("Renewable response:", response.data);
+
+      // Update the store: find the policy and update it
+      const index = state.policies.findIndex((p) => p.id === policy.id);
+      if (index !== -1) {
+        state.policies[index] = {
+          ...state.policies[index],
+          ...response.data,
+        };
+        commit("SET_POLICIES", [...state.policies]);
+      }
+
+      commit("SET_ERROR", null);
+      return response.data;
+    } catch (err) {
+      commit("SET_ERROR", err.response?.data || "Renewable failed");
+      throw err;
+    } finally {
+      commit("SET_LOADING", false);
+    }
+  },
   async renewPolicy({ commit, state }, policy) {
     commit("SET_LOADING", true);
     try {
@@ -123,7 +204,7 @@ const actions = {
       // Prepare payload
       const payload = {
         policyStatus: "EXPIRED",
-        premiumPaid: 0.0,
+        premiumPaid: 0,
       };
 
       const response = await requestWithAuth(

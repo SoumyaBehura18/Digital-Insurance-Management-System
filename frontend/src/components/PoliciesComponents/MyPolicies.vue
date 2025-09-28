@@ -93,6 +93,7 @@
                 :class="{
                   'bg-green-100 text-green-800': policy.status === 'ACTIVE',
                   'bg-gray-200 text-gray-700': policy.status === 'RENEWED',
+                  'bg-yellow-100 text-yellow-800': policy.status === 'RENEW_PENDING',
                   'bg-red-100 text-red-800': policy.status === 'EXPIRED',
                   'bg-gray-300 text-gray-600': policy.status === 'CANCELLED'
                 }"
@@ -122,10 +123,7 @@
                 class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-medium transition"
                 @click="openModal(policy)"
               >
-                Renew
-                <span v-if="policy.status === 'EXPIRED'">
-                  ({{ 15 - daysSinceExpiry(policy) }} days left)
-                </span>
+                {{ policy.status === 'RENEW_PENDING' ? 'Renew (Grace Period)' : 'Renew' }}
               </button>
             </td>
             <td class="px-4 py-3 text-center">
@@ -164,7 +162,7 @@ const selectedPolicy = ref(null);
 const selectedStatus = ref(null);
 const selectedNCB = ref(null);
 
-const statusOptions = ["ACTIVE", "RENEWED", "EXPIRED", "CANCELLED"];
+const statusOptions = ["ACTIVE", "RENEWED", "RENEW_PENDING", "EXPIRED", "CANCELLED"];
 const ncbOptions = [
   { label: "Eligible", value: "eligible" },
   { label: "Not Eligible", value: "not_eligible" },
@@ -206,21 +204,7 @@ function formatCurrency(value) {
 }
 
 function canRenew(policy) {
-  if (policy.status === "ACTIVE") return true;
-  if (policy.status === "EXPIRED" && policy.endDate) {
-    const endDate = new Date(policy.endDate);
-    const now = new Date();
-    const diffDays = (now - endDate) / (1000 * 60 * 60 * 24);
-    return diffDays <= 15 && diffDays >= 0;
-  }
-  return false;
-}
-
-function daysSinceExpiry(policy) {
-  if (!policy.endDate) return null;
-  const endDate = new Date(policy.endDate);
-  const now = new Date();
-  return Math.ceil((now - endDate) / (1000 * 60 * 60 * 24));
+  return policy.status === "ACTIVE" || policy.status === "RENEW_PENDING";
 }
 
 function openModal(userPolicy) {
@@ -247,22 +231,11 @@ async function cancelPolicy(policy) {
     const userId = storedUser ? JSON.parse(storedUser).userId : null;
     if (userId) {
       await store.dispatch("userPolicies/fetchUserPolicies", userId);
+      await store.dispatch("userPolicies/checkPolicyStatuses");
     }
   } catch (err) {
     console.error("Cancel failed:", err);
   }
-}
-
-function checkAndExpirePolicies(policies) {
-  const now = new Date();
-  policies.forEach((policy) => {
-    if (!policy.endDate) return;
-    const endDate = new Date(policy.endDate);
-    const diffDays = (now - endDate) / (1000 * 60 * 60 * 24);
-    if (diffDays > 15 && policy.status !== "EXPIRED") {
-      store.dispatch("userPolicies/expirePolicy", policy);
-    }
-  });
 }
 
 onMounted(async () => {
@@ -270,7 +243,7 @@ onMounted(async () => {
   const userId = storedUser ? JSON.parse(storedUser).userId : null;
   if (userId) {
     await store.dispatch("userPolicies/fetchUserPolicies", userId);
-    checkAndExpirePolicies(store.state.userPolicies.policies);
+    await store.dispatch("userPolicies/checkPolicyStatuses");
   }
 });
 </script>
