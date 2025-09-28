@@ -113,9 +113,16 @@
         <BaseButton
           v-if="ticket?.status !== 'RESOLVED'"
           customClass="bg-green-600 hover:bg-green-700"
-          @click="handleResolveTicket"
+          @click="handleResolveOrCloseTicket('RESOLVED')"
         >
           Mark as Resolved
+        </BaseButton>
+        <BaseButton
+          v-if="ticket?.status === 'RESOLVED'"
+          customClass="bg-green-600 hover:bg-green-700"
+          @click="handleResolveOrCloseTicket('CLOSED')"
+        >
+          Close the Ticket
         </BaseButton>
       </div>
     </template>
@@ -153,11 +160,11 @@ const handleUpdateTicket = () => {
   emit("update-ticket", props.ticket);
 };
 
-const handleResolveTicket = async () => {
+const handleResolveOrCloseTicket = async (status) => {
   try {
     console.log("Resolving ticket:", props.ticket);
     emit("resolve-ticket", props.ticket);
-    const newTicket = { ...props.ticket, status: "RESOLVED" };
+    const newTicket = { ...props.ticket, status: status };
     await store.dispatch("tickets/updateTicket", {
       ticketData: newTicket,
       ticketId: newTicket.id,
