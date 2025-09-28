@@ -132,9 +132,11 @@ public class PolicyServiceAdmin {
         base.setVehicleAge(5);  // mark max age in this slab
         vehicleRepo.save(base);
 
-
-
         return total;
+    }
+
+    public List<Policy> getAllPolicies() {
+        return policyRepository.findAll();
     }
 
 
