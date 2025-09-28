@@ -8,8 +8,8 @@ const state = {
 };
 
 const getters = {
-  getTickets: (state) => state.policies,
-  getIndividualTicket: (state) => state.policy,
+  getTickets: (state) => state.tickets,
+  getIndividualTicket: (state) => state.tickets,
   isLoading: (state) => state.loading,
   getError: (state) => state.error,
 };

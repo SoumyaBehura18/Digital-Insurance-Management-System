@@ -47,6 +47,8 @@
         v-if="activeView === 'create'"
         :user-id="userId"
         :ticket="selectedTicket"
+        :policies="policies"
+        :claims="claims"
         @ticket-created="handleTicketCreated"
         @ticket-updated="handleTicketUpdated"
         @cancel="setActiveView('tickets')"
@@ -68,12 +70,17 @@ const isCollapsed = ref(true);
 const setIsCollapsed = (val) => (isCollapsed.value = val);
 const userId = ref(null);
 const tickets = ref([]);
+const policies = ref([]);
+const claims = ref([]);
 const store = useStore();
 
-onMounted(() => {
+onMounted(async () => {
   const currentUser=JSON.parse(localStorage.getItem("currentUser"));
   userId.value = currentUser ? currentUser.id : null;
-  fetchUserTickets();
+  if (userId.value) {
+    await fetchUserTickets();
+    await fetchPoliciesAndClaims();
+  }
 });
 
 const fetchUserTickets = async () => {
@@ -90,6 +97,32 @@ const fetchUserTickets = async () => {
     }
   } catch (error) {
     console.error("Error fetching tickets:", error);
+  }
+};
+
+const fetchPoliciesAndClaims = async () => {
+  try {
+    if (store._modulesNamespaceMap["policies/"]) {
+      policies.value = await store.dispatch(
+        "userPolicies/fetchUserPolicies",
+        userId.value
+      );
+      // policies.value = store.state.policies?.policies || [];
+      console.log("The policies are: ", store.state);
+    } else if (store._actions["fetchPolicies"]) {
+      await store.dispatch("fetchPolicies");
+      policies.value = store.state.policies || [];
+    }
+
+    if (store._actions["claims/fetchClaims"]) {
+      await store.dispatch("claims/fetchClaims", userId.value);
+      claims.value = store.state.claims?.claims || [];
+    } else {
+      await store.dispatch("fetchClaims", userId.value);
+      claims.value = store.state.claims?.claims || [];
+    }
+  } catch (err) {
+    console.error("Error fetching policies/claims:", err);
   }
 };
 

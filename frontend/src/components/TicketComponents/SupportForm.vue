@@ -65,11 +65,11 @@
               >
                 <option value="" disabled>Select a policy if relevant</option>
                 <option
-                  v-for="policy in policies"
+                  v-for="policy in props.policies"
                   :key="policy.id"
                   :value="policy.id"
                 >
-                  {{ policy.name }}
+                  {{ policy.policyName }}
                 </option>
               </select>
               <div
@@ -106,13 +106,13 @@
                 v-model="form.relatedClaim"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none"
               >
-                <option value="" disabled>Select a policy if relevant</option>
+                <option value="" disabled>Select a claim if relevant</option>
                 <option
-                  v-for="claim in claims"
+                  v-for="claim in props.claims"
                   :key="claim.id"
                   :value="claim.id"
                 >
-                  {{ claim.name }}
+                  {{ claim.id }}
                 </option>
               </select>
               <div
@@ -180,16 +180,29 @@ const props = defineProps({
     type: Object,
     default: null,
   },
+  policies: {
+    type: Array,
+    default: () => [],
+  },
+  claims: {
+    type: Array,
+    default: () => [],
+  },
 });
 
 // Emits
 const emit = defineEmits(["ticket-created", "cancel"]);
 const store = useStore();
 
-const policies = computed(() => store.getters["userPolicies/getPolicies"]);
-const claims = computed(() => store.getters["userClaims/getClaims"]);
+// const policies = computed(() => store.getters["userPolicies/getPolicies"]);
+// const claims = computed(() => store.getters["userClaims/getClaims"]);
 const error = computed(() => store.getters["userPolicies/getError"]);
 
+console.log(
+  "The value of claims and policies are:",
+  props.claims,
+  props.policies
+);
 // Form state
 const form = reactive({
   subject: props.ticket?.subject || "",
@@ -198,15 +211,18 @@ const form = reactive({
   relatedClaim: props.ticket?.relatedClaim || "",
 });
 
+console.log("The form is: ", props.ticket);
+
 watch(
   () => props.ticket,
   async () => {
     const response = await store.dispatch(
       "tickets/fetchTicketById",
-      props.ticket
+      props.ticket.id
     );
 
     if (response) {
+      console.log("The response is: ", response);
       form.subject = response.subject || "";
       form.description = response.description || "";
       form.relatedPolicy = response.policyId || "";
@@ -223,20 +239,24 @@ const handleSubmit = async () => {
   if (props.userId) {
     isSubmitting.value = true;
 
+    console.log("---", form.relatedClaim, form.relatedPolicy);
+
     try {
       // Create ticket object to emit
       const newTicket = {
         subject: form.subject,
         description: form.description,
-        policyId: form.relatedPolicy === "" ? form.relatedPolicy : null,
-        claimId: form.relatedClaim === "" ? form.relatedClaim : null,
+        policyId: form.relatedPolicy !== "" ? form.relatedPolicy : null,
+        claimId: form.relatedClaim !== "" ? form.relatedClaim : null,
         userId: props.userId,
       };
+
+      console.log("The new ticket is: ", newTicket);
 
       if (props.ticket) {
         await store.dispatch("tickets/updateTicket", {
           ticketData: { ...newTicket, status: "OPEN" },
-          ticketId: props.ticket,
+          ticketId: props.ticket.id,
         });
         emit("ticket-updated");
       } else {
