@@ -46,13 +46,6 @@ public class SupportTicketController {
         return ResponseEntity.ok(ticketService.updateSupportTicket(id, supportTicketUpdateDTO));
     }
 
-    @PatchMapping("/{id}/status")
-    public ResponseEntity<SupportTicketResponseDTO> updateStatus(
-            @PathVariable Long id,
-            @RequestBody SupportTicketUpdateDTO updateDTO) {
-        return ResponseEntity.ok(ticketService.updateSupportTicket(id, updateDTO));
-    }
-
     @PostMapping("/{id}/messages")
     public ResponseEntity<MessageResponseDTO> addMessage(
             @PathVariable Long id,

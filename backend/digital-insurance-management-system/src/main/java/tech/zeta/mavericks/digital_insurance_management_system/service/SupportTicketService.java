@@ -19,10 +19,8 @@ import tech.zeta.mavericks.digital_insurance_management_system.repository.Policy
 import tech.zeta.mavericks.digital_insurance_management_system.repository.SupportTicketRepository;
 import tech.zeta.mavericks.digital_insurance_management_system.repository.UserRepository;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.TicketStatus;
-import java.sql.Date;
-import java.sql.Time;
+
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -151,7 +149,7 @@ public class SupportTicketService {
         message.setTicket(ticket);
         message.setAuthor(author);
         message.setContent(request.getContent());
-        message.setTimestamp(Date.valueOf(LocalDate.now()));
+        message.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
 
         ticket.getResponses().add(message);
         supportTicketRepository.save(ticket);
