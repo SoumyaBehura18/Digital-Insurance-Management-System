@@ -104,7 +104,6 @@ const actions = {
       commit("SET_LOADING", false);
     }
   },
-
   async updateTicketStatus({ commit, state }, status, ticketId) {
     commit("SET_LOADING", true);
     try {
@@ -117,6 +116,26 @@ const actions = {
       commit("SET_ERROR", null);
     } catch (error) {
       commit("SET_ERROR", error.response?.data || "Failed to create ticket");
+    } finally {
+      commit("SET_LOADING", false);
+    }
+  },
+  async addMessageToTicket({ commit, state }, { ticketId, message }) {
+    commit("SET_LOADING", true);
+    try {
+      const response = await requestWithAuth(
+        "POST",
+        `/tickets/${ticketId}/messages`,
+        message
+      );
+      const index = state.tickets.findIndex((p) => p.id === ticketId);
+      if (index !== -1) {
+        commit("SET_INDIVIDUAL_TICKET", state.tickets[index]);
+        state.tickets[index].messages.push(response.data);
+      }
+      commit("SET_ERROR", null);
+    } catch (error) {
+      commit("SET_ERROR", error.response?.data || "Failed to update ticket");
     } finally {
       commit("SET_LOADING", false);
     }

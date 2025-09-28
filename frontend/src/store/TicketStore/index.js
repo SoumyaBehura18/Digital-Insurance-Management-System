@@ -56,27 +56,10 @@ const actions = {
         `/tickets/${ticketId}`,
         ticketData
       );
-      commit("SET_TICKETS", [...state.tickets, response.data]); // fixed typo state.policies → state.tickets
+      commit("SET_TICKETS", [...state.tickets, response.data]);
       commit("SET_ERROR", null);
     } catch (error) {
       commit("SET_ERROR", error.response?.data || "Failed to update ticket");
-    } finally {
-      commit("SET_LOADING", false);
-    }
-  },
-
-  async updateTicketStatus({ commit, state }, status, ticketId) {
-    commit("SET_LOADING", true);
-    try {
-      const response = await requestWithAuth(
-        "PATCH",
-        `/${ticketId}/status`,
-        status
-      );
-      commit("SET_TICKETS", [...state.policies, response.data]);
-      commit("SET_ERROR", null);
-    } catch (error) {
-      commit("SET_ERROR", error.response?.data || "Failed to create ticket");
     } finally {
       commit("SET_LOADING", false);
     }
