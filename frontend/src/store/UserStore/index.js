@@ -60,6 +60,8 @@ const actions = {
       commit("SET_CURRENT_USER", response.data);
       localStorage.setItem("currentUser", JSON.stringify(response.data));
       commit("SET_ERROR", null);
+      commit("SET_LOADING", false);
+      return response.data;
     } catch (error) {
       commit("SET_ERROR", error.response?.data || "Failed to fetch user");
       commit("SET_CURRENT_USER", null);
@@ -85,10 +87,14 @@ const actions = {
   async createUser({ commit }, userData) {
     commit("SET_LOADING", true);
     try {
-      const response = await makeRequestWithoutToken("POST", `/register`, userData);
-      commit('SET_CURRENT_USER', response.data);
-      localStorage.setItem('currentUser', JSON.stringify(response.data));
-      commit('SET_ERROR', null);
+      const response = await makeRequestWithoutToken(
+        "POST",
+        `/register`,
+        userData
+      );
+      commit("SET_CURRENT_USER", response.data);
+      localStorage.setItem("currentUser", JSON.stringify(response.data));
+      commit("SET_ERROR", null);
     } catch (error) {
       commit("SET_ERROR", error.response?.data || "Failed to create user");
     } finally {
@@ -119,8 +125,7 @@ const actions = {
       };
       commit("SET_CURRENT_USER", normalizedUser);
       localStorage.setItem("currentUser", JSON.stringify(normalizedUser));
-      
-      
+
       commit("SET_ERROR", null);
     } catch (error) {
       commit("SET_ERROR", error.response?.data || "Invalid credentials");

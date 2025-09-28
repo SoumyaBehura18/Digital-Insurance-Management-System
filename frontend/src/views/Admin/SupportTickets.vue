@@ -408,12 +408,6 @@ const setIsCollapsed = (val) => {
 
 // Admin info (can be dynamic)
 const adminUser = ref({ name: "Admin User", email: "admin@example.com" });
-const adminUserInitials = computed(() =>
-  adminUser.value.name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-);
 
 const tickets = ref([]);
 const statusFilter = ref(null);
@@ -423,6 +417,7 @@ const itemsPerPage = ref(10);
 
 const isModalOpen = ref(false);
 const selectedTicket = ref(null);
+const userDetails = ref(null);
 
 const userCache = ref({});
 
@@ -521,9 +516,13 @@ const paginatedTickets = computed(() => {
 watch([statusFilter, searchQuery], () => (currentPage.value = 1));
 
 // Methods
-const viewTicket = (ticket) => {
+const viewTicket = async (ticket) => {
   selectedTicket.value = ticket;
   isModalOpen.value = true;
+  userDetails.value = await store.dispatch("user/fetchUsersByIds", [
+    selectedTicket.value.userId,
+  ]);
+  console.log("The user value is: ", selectedTicket.value, userDetails.value);
 };
 const handleCloseModal = () => {
   selectedTicket.value = null;
