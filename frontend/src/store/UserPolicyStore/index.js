@@ -31,9 +31,11 @@ const actions = {
     commit("SET_LOADING", true);
     try {
       const response = await requestWithAuth("GET", `/user/policies/${userId}`);
-      console.log("API Response:", response.data);
+      console.log("Policy API Response:", response.data);
       commit("SET_POLICIES", response.data);
       commit("SET_ERROR", null);
+      commit("SET_LOADING", false);
+      return response.data;
     } catch (error) {
       console.error("API Error:", error);
       commit("SET_ERROR", error.response?.data || "Failed to fetch policies");
@@ -151,7 +153,7 @@ const actions = {
     commit("SET_LOADING", true);
     try {
       const payload = {
-        premiumPaid:policy.premiumPaid,
+        premiumPaid: policy.premiumPaid,
         policyStatus: "CANCELLED",
         // premium remains the same
       };
@@ -169,7 +171,7 @@ const actions = {
           ? { ...p, status: "CANCELLED" }
           : p
       );
-       commit("SET_POLICIES", updatedPolicies);
+      commit("SET_POLICIES", updatedPolicies);
     } catch (error) {
       console.error(error);
     } finally {

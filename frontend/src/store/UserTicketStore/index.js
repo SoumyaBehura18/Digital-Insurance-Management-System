@@ -8,8 +8,8 @@ const state = {
 };
 
 const getters = {
-  getTickets: (state) => state.policies,
-  getIndividualTicket: (state) => state.policy,
+  getTickets: (state) => state.tickets,
+  getIndividualTicket: (state) => state.tickets,
   isLoading: (state) => state.loading,
   getError: (state) => state.error,
 };
@@ -65,7 +65,7 @@ const actions = {
         state.tickets.push(response.data);
       }
       commit("SET_ERROR", null);
-
+      commit("SET_LOADING", false);
       return response;
     } catch (error) {
       commit("SET_ERROR", error.response?.data || "Failed to fetch ticket");

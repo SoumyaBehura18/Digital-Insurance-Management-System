@@ -71,7 +71,7 @@
               <BaseButton
                 variant="outline"
                 size="sm"
-                @click="$emit('update-ticket', ticket.id)"
+                @click="$emit('update-ticket', ticket)"
                 class="flex items-center"
               >
                 <Pencil class="h-4" />

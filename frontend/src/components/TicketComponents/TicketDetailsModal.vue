@@ -162,7 +162,6 @@ const handleUpdateTicket = () => {
 
 const handleResolveOrCloseTicket = async (status) => {
   try {
-    console.log("Resolving ticket:", props.ticket);
     emit("resolve-ticket", props.ticket);
     const newTicket = { ...props.ticket, status: status };
     await store.dispatch("tickets/updateTicket", {
