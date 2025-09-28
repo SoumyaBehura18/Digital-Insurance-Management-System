@@ -1,4 +1,4 @@
-package tech.zeta.mavericks.digital_insurance_management_system.dto.premium;
+package tech.zeta.mavericks.digital_insurance_management_system.DTO.premium;
 
 import lombok.Data;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.HealthCondition;

@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class PolicyCustomRepositoryImpl implements PolicyRepository.PolicyCustomRepository {
 
     @PersistenceContext
-    private EntityManager em;
+    public EntityManager em;
 
     @Override
     public List<PolicyWithPremiumDTO> findPoliciesForUser(PolicyRequest policyRequest) {

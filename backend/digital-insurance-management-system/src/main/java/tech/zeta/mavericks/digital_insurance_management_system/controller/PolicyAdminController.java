@@ -2,9 +2,9 @@ package tech.zeta.mavericks.digital_insurance_management_system.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tech.zeta.mavericks.digital_insurance_management_system.dto.premium.HealthPremiumRequestDTO;
-import tech.zeta.mavericks.digital_insurance_management_system.dto.premium.LifePremiumRequestDTO;
-import tech.zeta.mavericks.digital_insurance_management_system.dto.premium.VehiclePremiumRequestDTO;
+import tech.zeta.mavericks.digital_insurance_management_system.DTO.premium.HealthPremiumRequestDTO;
+import tech.zeta.mavericks.digital_insurance_management_system.DTO.premium.LifePremiumRequestDTO;
+import tech.zeta.mavericks.digital_insurance_management_system.DTO.premium.VehiclePremiumRequestDTO;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.*;
 import tech.zeta.mavericks.digital_insurance_management_system.service.PolicyServiceAdmin;
 
