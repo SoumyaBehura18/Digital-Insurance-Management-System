@@ -2,9 +2,9 @@ package tech.zeta.mavericks.digital_insurance_management_system.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.premium.HealthPremiumRequestDTO;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.premium.LifePremiumRequestDTO;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.premium.VehiclePremiumRequestDTO;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.premium.HealthPremiumRequestDTO;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.premium.LifePremiumRequestDTO;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.premium.VehiclePremiumRequestDTO;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.*;
 import tech.zeta.mavericks.digital_insurance_management_system.service.PolicyServiceAdmin;
 
@@ -17,10 +17,10 @@ public class PolicyAdminController {
 
     private final PolicyServiceAdmin policyServiceAdmin;
 
-    @GetMapping
-    public ResponseEntity<List<Policy>> getAllPolicies() {
-        return ResponseEntity.ok(policyServiceAdmin.getAllPolicies());
-    }
+//    @GetMapping
+//    public ResponseEntity<List<Policy>> getAllPolicies() {
+//        return ResponseEntity.ok(policyServiceAdmin.getAllPolicies());
+//    }
 
 
     public PolicyAdminController(PolicyServiceAdmin policyServiceAdmin) {
@@ -32,6 +32,7 @@ public class PolicyAdminController {
     public ResponseEntity<Policy> createPolicy(@RequestBody Policy policy) {
         return ResponseEntity.ok(policyServiceAdmin.createPolicy(policy));
     }
+
 
     // 2️⃣ Add Health Policy Premium
     @PostMapping("/{policyId}/health-premium")
@@ -83,7 +84,8 @@ public class PolicyAdminController {
         double total = policyServiceAdmin.addVehiclePremium(
                 policyId,
                 request.getPremiumRate(),
-                request.getRenewalRate()
+                request.getRenewalRate(),
+                request.getVehicleAge()
         );
 
         return ResponseEntity.ok(total);
