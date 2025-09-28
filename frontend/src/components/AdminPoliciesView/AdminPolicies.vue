@@ -285,6 +285,7 @@ const createPolicy = async () => {
     }
 
     if (newPolicy.policyType === "VEHICLE") {
+      console.log("Creating vehicle premium with vehicle age:", newPolicy.vehicleAge);
       await axios.post(
         `http://localhost:9090/api/admin/policies/${created.id}/vehicle-premium`,
         {
