@@ -130,7 +130,10 @@ import {
   getStatusClasses,
   formatDate,
 } from "@/utils/helperFunctions";
+import { useStore } from "vuex";
+import { formatDateTime } from "@/utils/helperFunctions";
 
+const store = useStore();
 // Props
 const props = defineProps({
   isOpen: {
@@ -146,22 +149,22 @@ const props = defineProps({
 // Emits
 const emit = defineEmits(["close", "update-ticket", "resolve-ticket"]);
 
-const formatDateTime = (date) => {
-  return new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(date));
-};
-
 const handleUpdateTicket = () => {
   emit("update-ticket", props.ticket);
 };
 
-const handleResolveTicket = () => {
-  emit("resolve-ticket", props.ticket);
-  emit("close");
+const handleResolveTicket = async () => {
+  try {
+    console.log("Resolving ticket:", props.ticket);
+    emit("resolve-ticket", props.ticket);
+    const newTicket = { ...props.ticket, status: "RESOLVED" };
+    await store.dispatch("tickets/updateTicket", {
+      ticketData: newTicket,
+      ticketId: newTicket.id,
+    });
+    emit("close");
+  } catch (error) {
+    console.error("Error resolving ticket:", error);
+  }
 };
 </script>

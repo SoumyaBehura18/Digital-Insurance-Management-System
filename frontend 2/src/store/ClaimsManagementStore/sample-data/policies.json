@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "policyNumber": "POL-2024-001",
+    "policyType": "Life Insurance",
+    "name": "Comprehensive Life Insurance - Life",
+    "type": "Life",
+    "description": "Complete life insurance coverage with comprehensive benefits"
+  },
+  {
+    "id": 2,
+    "policyNumber": "POL-2024-002", 
+    "policyType": "Health Insurance",
+    "name": "Premium Health Coverage - Health",
+    "type": "Health", 
+    "description": "Premium health insurance with extensive medical coverage"
+  },
+  {
+    "id": 3,
+    "policyNumber": "POL-2024-003",
+    "policyType": "Dental Insurance",
+    "name": "Basic Dental Plan - Health",
+    "type": "Health",
+    "description": "Essential dental care coverage for routine and emergency treatments"
+  },
+  {
+    "id": 4,
+    "policyNumber": "POL-2024-004",
+    "policyType": "Critical Illness",
+    "name": "Critical Illness Cover - Health",
+    "type": "Health",
+    "description": "Specialized coverage for critical illness and major medical conditions"
+  },
+  {
+    "id": 5,
+    "policyNumber": "POL-2024-005",
+    "policyType": "Vehicle Insurance",
+    "name": "Vehicle Insurance Premium - Vehicle",
+    "type": "Vehicle",
+    "description": "Comprehensive vehicle insurance for accidents and damages"
+  },
+  {
+    "id": 6,
+    "policyNumber": "POL-2024-006",
+    "policyType": "Health Checkup",
+    "name": "Health Checkup Package - Health",
+    "type": "Health",
+    "description": "Regular health screening and preventive care package"
+  }
+]
