@@ -38,7 +38,7 @@
           <div class="flex justify-between items-start">
             <div>
               <h3 class="font-medium text-gray-900">{{ ticket.subject }}</h3>
-              <p class="text-sm text-gray-500 mt-1">
+              <p class="text-sm text-gray-500 mt-1 w-64 truncate">
                 {{ ticket.description }}
               </p>
               <div class="flex items-center gap-4 mt-2">
@@ -89,6 +89,7 @@
       @close="handleCloseModal"
       @update-ticket="handleUpdateTicket"
       @resolve-ticket="handleResolveTicket"
+      @close-ticket="handleCloseTicket"
     />
   </div>
 </template>
@@ -147,5 +148,9 @@ const handleUpdateTicket = (ticket) => {
 
 const handleResolveTicket = (ticket) => {
   emit("resolve-ticket", ticket);
+};
+
+const handleCloseTicket = (ticket) => {
+  emit("close-ticket", ticket);
 };
 </script>

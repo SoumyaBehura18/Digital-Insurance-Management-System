@@ -111,7 +111,7 @@
           Update Ticket
         </BaseButton>
         <BaseButton
-          v-if="ticket?.status !== 'RESOLVED'"
+          v-if="ticket?.status !== 'RESOLVED' && ticket?.status !== 'CLOSED'"
           customClass="bg-green-600 hover:bg-green-700"
           @click="handleResolveOrCloseTicket('RESOLVED')"
         >
@@ -154,7 +154,12 @@ const props = defineProps({
 });
 
 // Emits
-const emit = defineEmits(["close", "update-ticket", "resolve-ticket"]);
+const emit = defineEmits([
+  "close",
+  "update-ticket",
+  "resolve-ticket",
+  "close-ticket",
+]);
 
 const handleUpdateTicket = () => {
   emit("update-ticket", props.ticket);
@@ -162,12 +167,17 @@ const handleUpdateTicket = () => {
 
 const handleResolveOrCloseTicket = async (status) => {
   try {
-    emit("resolve-ticket", props.ticket);
+    if (status !== "RESOLVED" && status !== "CLOSED") return;
     const newTicket = { ...props.ticket, status: status };
     await store.dispatch("tickets/updateTicket", {
       ticketData: newTicket,
       ticketId: newTicket.id,
     });
+    if (status === "RESOLVED") {
+      emit("resolve-ticket", props.ticket);
+    } else if (status === "CLOSED") {
+      emit("close-ticket", props.ticket);
+    }
     emit("close");
   } catch (error) {
     console.error("Error resolving ticket:", error);
