@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.LoginRequest;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.request.RoleUpdateRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.UserUpdateRequest;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.response.LoginResponse;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.RoleType;
 import tech.zeta.mavericks.digital_insurance_management_system.service.JWTService;
@@ -97,6 +98,12 @@ public class UserController{
     public ResponseEntity<User> updateUserRole(@PathVariable Long id, @RequestBody RoleUpdateRequest request) {
         RoleType role = RoleType.valueOf(request.getRoleType().toUpperCase());
         return new ResponseEntity<>(service.updateUserRole(id, role), HttpStatus.OK);
+    }
+
+    @PutMapping("/updateUserDetails/{id}")
+    public ResponseEntity<User> updateUserDetails(@PathVariable Long id,@RequestBody UserUpdateRequest user){
+        return new ResponseEntity<>(service.updateUserDetails(id,user),HttpStatus.OK);
+
     }
 
 }

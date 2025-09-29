@@ -200,6 +200,7 @@ const errorMessage = ref("");
     }
 
     // Success → redirect
+    alert("Registration Sucessfull")
     successMessage.value = "Registration successful! Redirecting to login...";
     errorMessage.value = "";
     setTimeout(() => {
