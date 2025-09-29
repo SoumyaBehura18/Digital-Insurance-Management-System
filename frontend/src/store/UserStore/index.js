@@ -39,6 +39,56 @@ const mutations = {
 
 const actions = {
   // Add this action to your user store module
+  /**
+   * This function takes updated user data as input,
+   * sends a PUT request to the backend to update the user,
+   * and updates local storage with the new user data if successful.
+   */
+  async updateUser({ commit, state }, userData) {
+    try {
+      // Get the current user's token and id from local storage
+      const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+      const token = currentUser?.token;
+      const userId = currentUser?.id || currentUser?.userId;
+
+      // Prepare the request URL and headers
+
+      const url = `/updateUserDetails/${userId}`;
+
+      const response = await makeRequestWithToken("PUT", url, userData);
+
+      // If the update is successful, update local storage and state
+      if (response) {
+        const updatedUser = await response.data;
+
+        // Update local storage with new user data
+        localStorage.setItem(
+          "currentUser",
+          JSON.stringify({
+            ...currentUser,
+            ...updatedUser,
+            token, // keep the token
+            userId: updatedUser.id, // update userId if changed
+            role: updatedUser.roleType?.toLowerCase() || currentUser.role,
+          })
+        );
+
+        // Optionally, commit a mutation to update user in Vuex state
+        commit("SET_USER", updatedUser);
+
+        return updatedUser;
+      } else {
+        // If update fails, throw error with message from backend
+        console.log(response)
+        const errorData = await response.data;
+        throw new Error(errorData.message || "Failed to update user");
+      }
+    } catch (error) {
+      // Simple error handling: log and rethrow
+      console.error("Error updating user:", error);
+      throw error;
+    }
+  },
 
   async fetchUsersByIds({ commit }, userIds) {
     commit("SET_LOADING", true);

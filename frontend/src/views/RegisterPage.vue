@@ -168,7 +168,7 @@ onMounted(async () => {
       const storedUser = JSON.parse(localStorage.getItem("currentUser"));
       if (storedUser?.id) {
         const user = await store.dispatch("user/fetchUserById", storedUser.id);
-        
+
         // Prefill the form
         if (user) {
           name.value = user.name || "";
@@ -229,3 +229,4 @@ const handleRegister = async () => {
   }
 };
 </script>
+ 

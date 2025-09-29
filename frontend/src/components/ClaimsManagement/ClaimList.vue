@@ -107,9 +107,6 @@
               <td class="px-4 py-4 font-medium">
                 {{ claim.policyName || getPolicyLabel(claim.userPolicyId) }}
               </td>
-              <td class="px-4 py-4 font-medium">
-                {{ claim.policyName || getPolicyLabel(claim.userPolicyId) }}
-              </td>
               <td class="px-4 py-4 font-semibold text-green-600">
                 ₹{{ formatAmount(claim.claimAmount) }}
               </td>
