@@ -36,7 +36,7 @@ public class ClaimService {
         log.info("UserPolicy status: {}", userPolicy.getStatus());
         log.info("UserPolicy start date: {}, end date: {}", userPolicy.getStartDate(), userPolicy.getEndDate());
 
-        if (userPolicy.getStatus() != PolicyStatus.ACTIVE) {
+        if (userPolicy.getStatus() == PolicyStatus.EXPIRED || userPolicy.getStatus() == PolicyStatus.CANCELLED || userPolicy.getStatus() == PolicyStatus.RENEW_PENDING) {
             throw new RuntimeException("Cannot submit claim for non-active policy (status=" + userPolicy.getStatus() + ")");
         }
 
