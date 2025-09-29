@@ -63,4 +63,5 @@ function setIsCollapsed(value) {
 
 // View toggle state
 const view = ref("catalog");
+
 </script>
