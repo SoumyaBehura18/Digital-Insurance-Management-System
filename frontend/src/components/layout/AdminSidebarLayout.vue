@@ -37,22 +37,6 @@
 
     <!-- Footer -->
     <div class="p-4 border-t space-y-2">
-      <!-- Dark Mode Toggle -->
-      <div v-if="!isCollapsed" class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <Sun class="w-4 h-4 text-gray-900" />
-          <span class="text-sm text-gray-900">Dark Mode</span>
-        </div>
-        <input type="checkbox" class="toggle" v-model="darkModeLocal" @change="setIsDarkMode(darkModeLocal)" />
-      </div>
-
-      <div v-else class="flex justify-center">
-        <button class="p-2 rounded hover:bg-gray-200 text-gray-900" @click="setIsDarkMode(!isDarkMode)">
-          <Sun v-if="isDarkMode" class="w-4 h-4" />
-          <Moon v-else class="w-4 h-4" />
-        </button>
-      </div>
-
       <!-- Logout -->
       <button
         @click="handleLogout()"
@@ -80,9 +64,7 @@ import {
   Users,
   LogOut,
   ChevronLeft,
-  ChevronRight,
-  Sun,
-  Moon,
+  ChevronRight
 } from "lucide-vue-next";
 
 // Props
@@ -90,8 +72,6 @@ const props = defineProps({
   currentPage: { type: String, required: true },
   setCurrentPage: { type: Function, required: true },
   onLogout: { type: Function, required: true },
-  isDarkMode: { type: Boolean, default: false },
-  setIsDarkMode: { type: Function, required: true },
   isCollapsed: { type: Boolean, default: false },
   setIsCollapsed: { type: Function, required: true },
 });
@@ -105,14 +85,6 @@ const adminSidebarItems = [
   { id: "users", label: "Users", icon: Users },
 ];
 
-// Local dark mode sync
-const darkModeLocal = ref(props.isDarkMode);
-watch(
-  () => props.isDarkMode,
-  (val) => {
-    darkModeLocal.value = val;
-  }
-);
 
 const handleLogout = () => {
   // props.onLogout();
@@ -133,36 +105,3 @@ const handleClick = (id) => {
 };
 </script>
 
-<style scoped>
-/* Simple toggle */
-.toggle {
-  width: 2rem;
-  height: 1rem;
-  appearance: none;
-  background: #d1d5db;
-  border-radius: 9999px;
-  position: relative;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.toggle:checked {
-  background: #4f46e5;
-}
-
-.toggle::after {
-  content: '';
-  width: 0.875rem;
-  height: 0.875rem;
-  background: white;
-  border-radius: 9999px;
-  position: absolute;
-  top: 0.0625rem;
-  left: 0.0625rem;
-  transition: transform 0.3s;
-}
-
-.toggle:checked::after {
-  transform: translateX(1rem);
-}
-</style>
