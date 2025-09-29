@@ -13,7 +13,7 @@
       color="blue"
     />
     <KpiCard
-      title="Pending Tickets"
+      title="Total Tickets"
       :value="pendingTickets.length"
       icon="Ticket"
       color="purple"

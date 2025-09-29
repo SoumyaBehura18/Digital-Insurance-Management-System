@@ -2,7 +2,7 @@ package tech.zeta.mavericks.digital_insurance_management_system.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.premium.ConditionPremiumDTO;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.PolicyAdminResponse;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.*;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.HealthCondition;
 import tech.zeta.mavericks.digital_insurance_management_system.exception.PolicyNotFoundException;
@@ -10,6 +10,7 @@ import tech.zeta.mavericks.digital_insurance_management_system.repository.*;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class PolicyServiceAdmin {
@@ -34,11 +35,10 @@ public class PolicyServiceAdmin {
 
     // Create a new policy
     public Policy createPolicy(Policy policy) {
-
         return policyRepository.save(policy);
     }
     // Add Health Premium
-    public double addHealthPremium(Long policyId, Set<ConditionPremiumDTO> conditions,
+    public double addHealthPremium(Long policyId, Set<tech.zeta.mavericks.digital_insurance_management_system.dto.premium.ConditionPremium> conditions,
                                    Double premiumRate, Double renewalRate) {
         double total = 0.0;
 
@@ -69,13 +69,13 @@ public class PolicyServiceAdmin {
     }
 
 
-    public double addPreexistingCondition(Long policyId, Set<ConditionPremiumDTO> conditionPremiums) {
+    public double addPreexistingCondition(Long policyId, Set<tech.zeta.mavericks.digital_insurance_management_system.dto.premium.ConditionPremium> conditionPremiums) {
         double total = 0.0;
 
         Policy policy = policyRepository.findById(policyId)
                 .orElseThrow(() -> new PolicyNotFoundException("Policy not found"));
 
-        for (ConditionPremiumDTO dto : conditionPremiums) {
+        for (tech.zeta.mavericks.digital_insurance_management_system.dto.premium.ConditionPremium dto : conditionPremiums) {
             HealthPreexistingCondition preexisting = new HealthPreexistingCondition();
             preexisting.setPolicy(policy);
             preexisting.setCondition(HealthCondition.valueOf(dto.getCondition().toString().toUpperCase())); // enum
@@ -117,7 +117,7 @@ public class PolicyServiceAdmin {
 
 
     // Add Vehicle Premium
-    public double addVehiclePremium(Long policyId, Double premiumRate, Double renewalRate) {
+    public double addVehiclePremium(Long policyId, Double premiumRate, Double renewalRate,Integer vehicleAge) {
         double total = 0.0;
 
         // fetch base policy
@@ -129,15 +129,28 @@ public class PolicyServiceAdmin {
         base.setPolicy(policy);
         base.setPremiumRate(premiumRate);
         base.setRenewalRate(renewalRate);
-        base.setVehicleAge(5);  // mark max age in this slab
+        base.setVehicleAge(vehicleAge); // mark max age in this slab
         vehicleRepo.save(base);
 
         return total;
     }
 
-    public List<Policy> getAllPolicies() {
-        return policyRepository.findAll();
+    public List<PolicyAdminResponse> getAllPolicies() {
+        List<Policy> policies = policyRepository.findAll();
+
+        // Convert each Policy entity to PolicyAdminResponse DTO
+        return policies.stream()
+                .map(policy -> new PolicyAdminResponse(
+                        policy.getId(),
+                        policy.getName(),
+                        policy.getDescription(),
+                        policy.getType(),
+                        policy.getDurationMonths(),
+                        policy.getCoverageAmt() // adjust field name if different
+                ))
+                .collect(Collectors.toList());
     }
+
 
 
 }

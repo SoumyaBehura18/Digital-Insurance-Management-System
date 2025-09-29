@@ -31,6 +31,22 @@ const mutations = {
 };
 
 const actions = {
+  async fetchAllPolicies({ commit }) {
+    commit("SET_LOADING", true);
+    try {
+      const response = await requestWithAuth("GET", `/policies`);
+      console.log("API Response:", response.data);
+      commit("SET_POLICIES", response.data);
+      commit("SET_ERROR", null);
+      return response.data;
+    } catch (error) {
+      console.error("API Error:", error);
+      commit("SET_ERROR", error.response?.data || "Failed to fetch policies");
+      commit("SET_POLICIES", []);
+    } finally {
+      commit("SET_LOADING", false);
+    }
+  },
   // Fetch all policies for the current user
   async fetchUserPolicies({ commit }, userId) {
     console.log("Action fired with userId:", userId);

@@ -65,6 +65,7 @@ const updateAuthState = () => {
   userRole.value = role || '';
 };
 
+
 // Initialize authentication state on mount
 onMounted(() => {
   updateAuthState();

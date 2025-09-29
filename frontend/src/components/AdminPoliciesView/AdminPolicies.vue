@@ -3,7 +3,7 @@
     <!-- Main Content -->
     <main class="flex-1 p-6">
       <!-- Page Header -->
-      <header class="flex justify-between items-center mb-2">
+      <header class="flex justify-between items-center mb-6">
         <div>
           <h1 class="text-2xl font-bold">Manage Policies</h1>
           <p class="text-gray-500 text-sm">View and manage all insurance policies</p>
@@ -16,176 +16,262 @@
         </button>
       </header>
 
-      <!-- Policies Table -->
-      <div class="bg-white shadow rounded-xl overflow-hidden mt-6">
-        <div class="p-4 border-b">
-          <h2 class="font-medium text-gray-800">All Policies ({{ policies.length }})</h2>
+      <!-- Policies Table (Claims Style, no Actions) -->
+      <div class="bg-white shadow rounded-xl p-6">
+        <!-- Header with Search -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+          <h2 class="text-lg font-semibold text-gray-800">
+            Policies ({{ policies.length }})
+          </h2>
+          <input
+            type="text"
+            v-model="search"
+            placeholder="Search by name, type, or coverage..."
+            class="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-400 outline-none"
+          />
         </div>
 
-        <table class="w-full text-sm">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-4 py-3 text-left font-semibold text-gray-700">Policy Name</th>
-              <th class="px-4 py-3 text-left font-semibold text-gray-700">Type</th>
-              <th class="px-4 py-3 text-left font-semibold text-gray-700">Coverage</th>
-              <th class="px-4 py-3 text-left font-semibold text-gray-700">Premium</th>
-              <th class="px-4 py-3 text-left font-semibold text-gray-700">Renewal Rate</th>
-              <th class="px-4 py-3 text-left font-semibold text-gray-700">Duration</th>
-              <th class="px-4 py-3 text-center font-semibold text-gray-700">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="(policy, index) in policies"
-              :key="index"
-              class="border-t hover:bg-gray-50"
-            >
-              <td class="px-4 py-3">{{ policy.name }}</td>
-              <td class="px-4 py-3">
-                <span class="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                  {{ policy.type }}
-                </span>
-              </td>
-              <td class="px-4 py-3">{{ policy.coverageAmt }}</td>
-              <td class="px-4 py-3">{{ policy.premiumRate }}</td>
-              <td class="px-4 py-3">{{ policy.renewalRate }}</td>
-              <td class="px-4 py-3">{{ policy.durationMonths }}</td>
-              <td class="px-4 py-3 flex justify-center space-x-3">
-                <button class="text-gray-600 hover:text-indigo-600">
-                  <Pencil class="w-4 h-4" />
-                </button>
-                <button
-                  class="text-gray-600 hover:text-red-600"
-                  @click="removePolicy(policy.id, index)"
-                >
-                  <Trash class="w-4 h-4" />
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <!-- Filter Pills
+        <div class="flex flex-wrap gap-2 mb-4">
+          <button
+            v-for="filter in filters"
+            :key="filter"
+            @click="activeFilter = filter"
+            :class="[
+              'px-3 py-1 rounded-lg text-sm font-medium transition',
+              activeFilter === filter
+                ? 'bg-indigo-100 text-indigo-700'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            ]"
+          >
+            {{ filter }}
+          </button>
+        </div> -->
+
+        <!-- Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left font-semibold text-gray-600">ID</th>
+                <th class="px-4 py-3 text-left font-semibold text-gray-600">Name</th>
+                <th class="px-4 py-3 text-left font-semibold text-gray-600">Type</th>
+                <th class="px-4 py-3 text-left font-semibold text-gray-600">Coverage</th>
+                <th class="px-4 py-3 text-left font-semibold text-gray-600">Duration</th>
+                <th class="px-4 py-3 text-left font-semibold text-gray-600">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(policy, index) in filteredPolicies"
+                :key="index"
+                class="border-t hover:bg-gray-50 transition"
+              >
+                <td class="px-4 py-3">#{{ policy.policyId }}</td>
+                <td class="px-4 py-3 font-medium text-gray-900">{{ policy.policyName }}</td>
+                <td class="px-4 py-3">
+                  <span
+                    class="px-2 py-1 rounded-full text-xs font-semibold"
+                    :class="{
+                      'bg-pink-100 text-pink-700': policy.policyType === 'LIFE',
+                      'bg-green-100 text-green-700': policy.policyType === 'HEALTH',
+                      'bg-blue-100 text-blue-700': policy.policyType === 'VEHICLE'
+                    }"
+                  >
+                    {{ policy.policyType }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-gray-700">₹{{ policy.coverage }}</td>
+                <td class="px-4 py-3 text-gray-700">{{ policy.duration }} months</td>
+                <td class="px-4 py-3 text-gray-500 truncate max-w-[200px]">
+                  {{ policy.description || "No description" }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </main>
 
     <!-- Create Policy Modal -->
     <div
       v-if="showCreatePolicy"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
     >
-      <div class="bg-white shadow-xl rounded-xl p-6 max-w-2xl w-full relative">
+      <div
+        class="bg-white shadow-2xl rounded-2xl w-full max-w-3xl relative flex flex-col max-h-[90vh]"
+      >
         <!-- Header -->
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-xl font-bold text-gray-900">Create New Policy</h2>
-          <button class="text-gray-500 hover:text-gray-700" @click="showCreatePolicy = false">✕</button>
+        <div
+          class="flex justify-between items-center px-6 py-4 border-b sticky top-0 bg-white z-10"
+        >
+          <h2 class="text-xl md:text-2xl font-bold text-gray-900">Create New Policy</h2>
+          <button
+            class="text-gray-500 hover:text-gray-700 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+            @click="showCreatePolicy = false"
+          >
+            ✕
+          </button>
         </div>
 
-        <!-- Form -->
-        <div class="grid grid-cols-2 gap-4">
-          <!-- Policy Name -->
-          <div>
-            <label class="block text-gray-900 font-medium mb-1">Policy Name</label>
-            <input v-model="newPolicy.policyName" type="text" placeholder="Enter policy name"
-              class="w-full border rounded-lg px-3 py-2 focus:ring focus:outline-none" />
+        <!-- Scrollable Body -->
+        <div class="overflow-y-auto px-6 py-4 flex-1">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Policy Name -->
+            <div>
+              <label class="block text-gray-800 font-medium mb-1">Policy Name</label>
+              <input
+                v-model="newPolicy.policyName"
+                type="text"
+                placeholder="Enter policy name"
+                class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400 outline-none"
+              />
+            </div>
+
+            <!-- Policy Type -->
+            <div>
+              <label class="block text-gray-800 font-medium mb-1">Policy Type</label>
+              <select
+                v-model="newPolicy.policyType"
+                class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400 outline-none"
+              >
+                <option disabled value="">Select policy type</option>
+                <option value="LIFE">Life Insurance</option>
+                <option value="HEALTH">Health Insurance</option>
+                <option value="VEHICLE">Vehicle Insurance</option>
+              </select>
+            </div>
+
+            <!-- Coverage -->
+            <div>
+              <label class="block text-gray-800 font-medium mb-1">Coverage Amount (₹)</label>
+              <input
+                v-model="newPolicy.coverageAmount"
+                type="number"
+                placeholder="Enter coverage amount"
+                class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400 outline-none"
+              />
+            </div>
+
+            <!-- Premium -->
+            <div>
+              <label class="block text-gray-800 font-medium mb-1">Annual Premium (₹)</label>
+              <input
+                v-model="newPolicy.annualPremium"
+                type="number"
+                placeholder="Enter annual premium"
+                class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400 outline-none"
+              />
+            </div>
+
+            <!-- Duration -->
+            <div>
+              <label class="block text-gray-800 font-medium mb-1">Policy Duration (Months)</label>
+              <input
+                v-model="newPolicy.policyDuration"
+                type="number"
+                placeholder="e.g., 12"
+                class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400 outline-none"
+              />
+            </div>
+
+            <!-- Renewal Rate -->
+            <div>
+              <label class="block text-gray-800 font-medium mb-1">Renewal Rate (₹)</label>
+              <input
+                v-model="newPolicy.renewalRate"
+                type="number"
+                placeholder="Enter renewal rate"
+                class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400 outline-none"
+              />
+            </div>
+
+            <!-- Description -->
+            <div class="col-span-1 md:col-span-2">
+              <label class="block text-gray-800 font-medium mb-1">Description</label>
+              <textarea
+                v-model="newPolicy.description"
+                placeholder="Enter policy description"
+                class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400 outline-none min-h-[80px]"
+              ></textarea>
+            </div>
           </div>
 
-          <!-- Policy Type -->
-          <div>
-            <label class="block text-gray-900 font-medium mb-1">Policy Type</label>
-            <select v-model="newPolicy.policyType"
-              class="w-full border rounded-lg px-3 py-2 focus:ring focus:outline-none">
-              <option disabled value="">Select policy type</option>
-              <option value="LIFE">Life Insurance</option>
-              <option value="HEALTH">Health Insurance</option>
-              <option value="VEHICLE">Vehicle Insurance</option>
-            </select>
-          </div>
+          <!-- Eligibility Criteria -->
+          <div class="mt-6 border-t pt-4">
+            <label class="block text-gray-900 font-semibold mb-3">Eligibility Criteria</label>
 
-          <!-- Coverage -->
-          <div>
-            <label class="block text-gray-900 font-medium mb-1">Coverage Amount ($)</label>
-            <input v-model="newPolicy.coverageAmount" type="number" placeholder="Enter coverage amount"
-              class="w-full border rounded-lg px-3 py-2 focus:ring focus:outline-none" />
-          </div>
+            <!-- Vehicle -->
+            <div v-if="newPolicy.policyType === 'VEHICLE'" class="p-4 border rounded-lg bg-gray-50">
+              <label class="block text-sm font-semibold mb-2">Vehicle Age</label>
+              <input
+                v-model="newPolicy.vehicleAge"
+                type="number"
+                placeholder="Enter vehicle age"
+                class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400 outline-none"
+              />
+            </div>
 
-          <!-- Premium -->
-          <div>
-            <label class="block text-gray-900 font-medium mb-1">Annual Premium ($)</label>
-            <input v-model="newPolicy.annualPremium" type="number" placeholder="Enter annual premium"
-              class="w-full border rounded-lg px-3 py-2 focus:ring focus:outline-none" />
-          </div>
-
-          <!-- Duration -->
-          <div class="col-span-2">
-            <label class="block text-gray-900 font-medium mb-1">Policy Duration (Months)</label>
-            <input v-model="newPolicy.policyDuration" type="number" placeholder="e.g., 12"
-              class="w-full border rounded-lg px-3 py-2 focus:ring focus:outline-none" />
-          </div>
-        </div>
-
-        <!-- Renewal Rate -->
-        <div class="mt-4">
-          <label class="block text-gray-900 font-medium mb-1">Renewal Rate ($)</label>
-          <input v-model="newPolicy.renewalRate" type="number" placeholder="Enter renewal rate"
-            class="w-full border rounded-lg px-3 py-2 focus:ring focus:outline-none" />
-        </div>
-
-        <!-- Eligibility Criteria -->
-        <div class="mt-6">
-          <label class="block text-gray-900 font-medium mb-2">Eligibility Criteria</label>
-
-          <!-- Vehicle -->
-          <div v-if="newPolicy.policyType === 'VEHICLE'" class="p-4 border rounded-lg bg-gray-50">
-            <label class="block text-sm font-semibold mb-2">Vehicle Age</label>
-            <input v-model="newPolicy.vehicleAge" type="number" placeholder="Enter vehicle age"
-              class="w-full border rounded-lg px-3 py-2 focus:ring focus:outline-none" />
-          </div>
-
-          <!-- Health -->
-          <div v-if="newPolicy.policyType === 'HEALTH'">
-            <div v-for="(condition, index) in newPolicy.conditions" :key="index"
-              class="p-4 border rounded-lg mb-3 bg-gray-50">
-              <p class="text-sm font-semibold mb-2">Condition {{ index + 1 }}</p>
-
-              <div class="grid grid-cols-2 gap-3">
-                <!-- Condition Enum -->
-                <select v-model="condition.condition" class="border rounded-lg px-2 py-2">
-                  <option disabled value="">Select condition</option>
-                  <option value="TB">TB</option>
-                  <option value="BP">BP</option>
-                  <option value="DIABETES">Diabetes</option>
-                  <option value="CANCER">Cancer</option>
-                </select>
-
-                <!-- Extra Premium -->
-                <input v-model="condition.extraPremium" type="number" placeholder="Extra premium"
-                  class="border rounded-lg px-2 py-2" />
+            <!-- Health -->
+            <div v-if="newPolicy.policyType === 'HEALTH'">
+              <div
+                v-for="(condition, index) in newPolicy.conditions"
+                :key="index"
+                class="p-4 border rounded-lg mb-3 bg-gray-50"
+              >
+                <p class="text-sm font-semibold mb-2">Condition {{ index + 1 }}</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <select v-model="condition.condition" class="border rounded-lg px-2 py-2">
+                    <option disabled value="">Select condition</option>
+                    <option value="TB">TB</option>
+                    <option value="BP">BP</option>
+                    <option value="DIABETES">Diabetes</option>
+                    <option value="CANCER">Cancer</option>
+                  </select>
+                  <input
+                    v-model="condition.extraPremium"
+                    type="number"
+                    placeholder="Extra premium"
+                    class="border rounded-lg px-2 py-2"
+                  />
+                </div>
+                <button
+                  class="text-gray-600 hover:text-red-600 mt-2"
+                  @click="removeCondition(index)"
+                >
+                  <Trash class="w-4 h-4" />
+                </button>
               </div>
-
-              <button class="text-gray-600 hover:text-red-600" @click="removeCondition(index)">
-                <Trash class="w-4 h-4" />
+              <button
+                type="button"
+                @click="addCondition"
+                class="text-indigo-600 hover:underline text-sm font-medium"
+              >
+                + Add Condition
               </button>
             </div>
 
-            <button type="button" @click="addCondition"
-              class="text-indigo-600 hover:underline text-sm font-medium">
-              + Add Condition
-            </button>
+            <!-- Life -->
+            <p v-if="newPolicy.policyType === 'LIFE'" class="text-gray-500 text-sm">
+              No eligibility criteria for Life policies.
+            </p>
           </div>
-
-          <!-- Life -->
-          <p v-if="newPolicy.policyType === 'LIFE'" class="text-gray-500 text-sm">
-            No eligibility criteria for Life policies.
-          </p>
         </div>
 
         <!-- Footer -->
-        <div class="flex justify-end space-x-3 mt-6">
-          <button @click="showCreatePolicy = false"
-            class="border border-gray-400 px-6 py-2 rounded-lg hover:bg-gray-100">
+        <div
+          class="flex justify-end space-x-3 px-6 py-4 border-t sticky bottom-0 bg-white"
+        >
+          <button
+            @click="showCreatePolicy = false"
+            class="border border-gray-400 px-6 py-2 rounded-lg hover:bg-gray-100"
+          >
             Cancel
           </button>
-          <button @click="createPolicy"
-            class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700">
+          <button
+            @click="createPolicy"
+            class="bg-indigo-600 text-white px-6 py-2 rounded-lg shadow hover:bg-indigo-700"
+          >
             Create Policy
           </button>
         </div>
@@ -193,19 +279,18 @@
     </div>
   </div>
 </template>
-
 <script setup>
-import { reactive, ref, onMounted } from "vue";
-import axios from "axios";
+import { reactive, ref, computed, onMounted } from "vue";
 import { useStore } from "vuex";
-import { Pencil, Trash } from "lucide-vue-next";
-
-const showCreatePolicy = ref(false);
-const policies = ref([]);
+import { Trash } from "lucide-vue-next";
 
 const store = useStore();
-const currentUser = store.getters["user/getCurrentUser"];
-const token = currentUser?.token;
+
+// Modal & form state
+const showCreatePolicy = ref(false);
+const search = ref("");
+const filters = ["All", "LIFE", "HEALTH", "VEHICLE"];
+const activeFilter = ref("All");
 
 const newPolicy = reactive({
   policyName: "",
@@ -216,96 +301,30 @@ const newPolicy = reactive({
   renewalRate: "",
   vehicleAge: "",
   conditions: [],
+  description: ""
 });
 
-// Add condition
+// Policies from store
+const policies = computed(() => store.getters["adminPolicyStore/getPolicies"]);
+
+// Filtered policies for table
+const filteredPolicies = computed(() => {
+  return policies.value.filter((p) => {
+    const matchesSearch =
+      p.policyName.toLowerCase().includes(search.value.toLowerCase()) ||
+      p.policyType.toLowerCase().includes(search.value.toLowerCase());
+    const matchesFilter = activeFilter.value === "All" || p.policyType === activeFilter.value;
+    return matchesSearch && matchesFilter;
+  });
+});
+
+// Add / Remove conditions for Health policies
 const addCondition = () => {
   newPolicy.conditions.push({ condition: "", extraPremium: 0 });
 };
 
-// Remove condition
 const removeCondition = (index) => {
   newPolicy.conditions.splice(index, 1);
-};
-
-// Create policy
-const createPolicy = async () => {
-  try {
-    const user = JSON.parse(localStorage.getItem("currentUser"));
-    const token = user?.token;
-    if (!token) {
-      alert("No token found. Please login again.");
-      return;
-    }
-
-    // Step 1: Build base policy payload
-    let payload = {
-      name: newPolicy.policyName,
-      type: newPolicy.policyType,
-      coverageAmt: newPolicy.coverageAmount,
-      premiumRate: newPolicy.annualPremium,
-      durationMonths: newPolicy.policyDuration,
-      renewalRate: newPolicy.renewalRate,
-    };
-
-    // Step 2: Create base policy
-    const response = await axios.post(
-      "http://localhost:9090/api/admin/policies",
-      payload,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-
-    const created = response.data; // <-- now you have policy.id
-
-    // Step 3: Call premium API depending on type
-    if (newPolicy.policyType === "LIFE") {
-      await axios.post(
-        `http://localhost:9090/api/admin/policies/${created.id}/life-premium`,
-        {
-          premiumRate: newPolicy.annualPremium,
-          renewalRate: newPolicy.renewalRate,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-    }
-
-    if (newPolicy.policyType === "HEALTH") {
-      await axios.post(
-        `http://localhost:9090/api/admin/policies/${created.id}/health-premium`,
-        {
-          premiumRate: newPolicy.annualPremium,
-          renewalRate: newPolicy.renewalRate,
-          conditionPremiums: newPolicy.conditions.map((c) => ({
-            condition: c.condition,
-            extraPremium: c.extraPremium,
-          })),
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-    }
-
-    if (newPolicy.policyType === "VEHICLE") {
-      console.log("Creating vehicle premium with vehicle age:", newPolicy.vehicleAge);
-      await axios.post(
-        `http://localhost:9090/api/admin/policies/${created.id}/vehicle-premium`,
-        {
-          premiumRate: newPolicy.annualPremium,
-          renewalRate: newPolicy.renewalRate,
-          vehicleAge: newPolicy.vehicleAge,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-    }
-
-    // Step 4: Update UI
-    policies.value.push(created);
-    alert("Policy created successfully!");
-    resetNewPolicy();
-    showCreatePolicy.value = false;
-  } catch (error) {
-    console.error("Error creating policy:", error);
-    alert("Failed to create policy");
-  }
 };
 
 // Reset form
@@ -319,37 +338,25 @@ const resetNewPolicy = () => {
     renewalRate: "",
     vehicleAge: "",
     conditions: [],
+    description: ""
   });
 };
 
-// Delete policy
-const removePolicy = async (policyId, index) => {
-  if (confirm("Are you sure you want to delete this policy?")) {
-    try {
-      const user = JSON.parse(localStorage.getItem("currentUser"));
-      const token = user?.token;
-      await axios.delete(`http://localhost:9090/api/admin/policies/${policyId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      policies.value.splice(index, 1);
-    } catch (error) {
-      console.error("Error deleting policy:", error);
-      alert("Failed to delete policy");
-    }
+// Create policy using store action
+const createPolicy = async () => {
+  try {
+    await store.dispatch("adminPolicyStore/createPolicy", newPolicy);
+    alert("Policy created successfully!");
+    resetNewPolicy();
+    showCreatePolicy.value = false;
+  } catch (error) {
+    console.error("Error creating policy:", error);
+    alert("Failed to create policy. Check console for details.");
   }
 };
 
-// Load policies on mount
-onMounted(async () => {
-  try {
-    const user = JSON.parse(localStorage.getItem("currentUser"));
-    const token = user?.token;
-    const response = await axios.get("http://localhost:9090/api/admin/policies", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    policies.value = response.data;
-  } catch (error) {
-    console.error("Error fetching policies:", error);
-  }
+// Load all policies on mount
+onMounted(() => {
+  store.dispatch("adminPolicyStore/fetchPolicies");
 });
 </script>

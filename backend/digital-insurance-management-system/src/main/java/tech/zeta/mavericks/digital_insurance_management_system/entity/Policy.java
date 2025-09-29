@@ -11,7 +11,7 @@ import java.util.List;
 
 @Data
 @Entity
-@Table(name = "policies")
+@Table(name = "policy")
 public class Policy {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,8 +25,6 @@ public class Policy {
     private Double coverageAmt;
 
     private Integer durationMonths;
-
-    private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
     private PolicyType type;

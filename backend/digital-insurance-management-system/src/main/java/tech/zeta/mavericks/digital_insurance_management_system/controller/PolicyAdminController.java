@@ -2,14 +2,11 @@ package tech.zeta.mavericks.digital_insurance_management_system.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.premium.HealthPremiumRequestDTO;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.premium.LifePremiumRequestDTO;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.premium.VehiclePremiumRequestDTO;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.PolicyAdminResponse;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.*;
 import tech.zeta.mavericks.digital_insurance_management_system.service.PolicyServiceAdmin;
 
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/api/admin/policies")
@@ -18,7 +15,7 @@ public class PolicyAdminController {
     private final PolicyServiceAdmin policyServiceAdmin;
 
     @GetMapping
-    public ResponseEntity<List<Policy>> getAllPolicies() {
+    public ResponseEntity<List<PolicyAdminResponse>> getAllPolicies() {
         return ResponseEntity.ok(policyServiceAdmin.getAllPolicies());
     }
 
@@ -33,16 +30,17 @@ public class PolicyAdminController {
         return ResponseEntity.ok(policyServiceAdmin.createPolicy(policy));
     }
 
+
     // 2️⃣ Add Health Policy Premium
     @PostMapping("/{policyId}/health-premium")
     public ResponseEntity<?> addHealthPremium(
             @PathVariable Long policyId,
-            @RequestBody HealthPremiumRequestDTO healthPremiumRequestDTO) {
+            @RequestBody tech.zeta.mavericks.digital_insurance_management_system.dto.premium.HealthPremiumRequest healthPremiumRequest) {
         return ResponseEntity.ok(policyServiceAdmin.addHealthPremium(
                 policyId,
-                healthPremiumRequestDTO.getConditionPremiums(),   // expects Set<ConditionPremiumDTO>
-                healthPremiumRequestDTO.getPremiumRate(),
-                healthPremiumRequestDTO.getRenewalRate()
+                healthPremiumRequest.getConditionPremiums(),   // expects Set<ConditionPremiumDTO>
+                healthPremiumRequest.getPremiumRate(),
+                healthPremiumRequest.getRenewalRate()
         ));
     }
 
@@ -50,7 +48,7 @@ public class PolicyAdminController {
     @PostMapping("/{policyId}/preexisting-condition")
     public ResponseEntity<?> addPreexistingCondition(
             @PathVariable Long policyId,
-            @RequestBody HealthPremiumRequestDTO request) {
+            @RequestBody tech.zeta.mavericks.digital_insurance_management_system.dto.premium.HealthPremiumRequest request) {
         return ResponseEntity.ok(
                 policyServiceAdmin.addPreexistingCondition(
                         policyId,
@@ -63,7 +61,7 @@ public class PolicyAdminController {
     @PostMapping("/{policyId}/life-premium")
     public ResponseEntity<Double> addLifePremium(
             @PathVariable Long policyId,
-            @RequestBody LifePremiumRequestDTO request) {
+            @RequestBody tech.zeta.mavericks.digital_insurance_management_system.dto.premium.LifePremiumRequest request) {
 
         double total = policyServiceAdmin.addLifePremium(
                 policyId,
@@ -78,12 +76,13 @@ public class PolicyAdminController {
     @PostMapping("/{policyId}/vehicle-premium")
     public ResponseEntity<Double> addVehiclePremium(
             @PathVariable Long policyId,
-            @RequestBody VehiclePremiumRequestDTO request) {
+            @RequestBody tech.zeta.mavericks.digital_insurance_management_system.dto.premium.VehiclePremiumRequest request) {
 
         double total = policyServiceAdmin.addVehiclePremium(
                 policyId,
                 request.getPremiumRate(),
-                request.getRenewalRate()
+                request.getRenewalRate(),
+                request.getVehicleAge()
         );
 
         return ResponseEntity.ok(total);

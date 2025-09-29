@@ -39,6 +39,9 @@
           <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
           <input v-model="phone" type="tel" placeholder="Enter your phone number"
             class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" required />
+          <p v-if="phone && !/^[0-9]{10}$/.test(phone)" class="text-red-600 text-xs mt-1">
+            Phone number must be exactly 10 digits.
+          </p>
         </div>
 
         <!-- Address -->
@@ -53,6 +56,10 @@
           <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
           <input v-model="password" type="password" placeholder="Enter your password"
             class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" required />
+          <!-- Inline error -->
+          <p v-if="password && !passwordRegex.test(password)" class="text-red-600 text-xs mt-1">
+            Password must be at least 8 characters, include one uppercase letter and one special character.
+          </p>
         </div>
 
         <!-- Smoking -->
@@ -79,19 +86,20 @@
         <!-- Vehicle Type -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Vehicle Type</label>
-          <select v-model="vehicleType" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+          <select v-model="vehicleType" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" required>
             <option value="">Select type</option>
+            <option value="NULL">No Vehicle</option>
             <option value="CAR">Car</option>
             <option value="BIKE">Bike</option>
             <option value="HEAVY_VEHICLE">Heavy Vehicle</option>
           </select>
         </div>
 
-        <!-- Vehicle Age -->
-        <div>
+        <!-- Vehicle Age (only if not NONE) -->
+        <div v-if="vehicleType && vehicleType !== 'NULL'">
           <label class="block text-sm font-medium text-gray-700 mb-1">Vehicle Age</label>
           <input v-model="vehicleAge" type="number" placeholder="Enter your vehicle's age"
-            class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" required />
+            class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" />
         </div>
 
         <!-- Register Button -->
@@ -128,14 +136,37 @@ const age = ref("");
 const phone = ref("");
 const address = ref("");
 const password = ref("");
-const smoking = ref(""); // "yes" / "no"
-const preexisting = ref([]); // array of conditions
+const smoking = ref(""); 
+const preexisting = ref([]); 
 const vehicleType = ref("");
 const vehicleAge = ref("");
 const errorMessage = ref("");
 const successMessage = ref("");
 
+// ✅ Password validation regex
+const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+
 const handleRegister = async () => {
+  // Validate password
+  if (!passwordRegex.test(password.value)) {
+    errorMessage.value = "Password must be at least 8 characters, include one uppercase letter and one special character.";
+    return;
+  }
+
+  // Validate phone number
+  if (!/^\d{10}$/.test(phone.value)) {
+    errorMessage.value = "Phone number must be exactly 10 digits.";
+    return;
+  }
+
+  // Vehicle logic
+  let vehicleTypeValue = vehicleType.value === "NULL" ? "NULL" : vehicleType.value;
+  let vehicleAgeValue = vehicleType.value === "NULL" ? 0 : Number(vehicleAge.value) || 0;
+  let preexistingConditionsValue = preexisting.value.length > 0 ? preexisting.value : ["NONE"];
+
+  const successMessage = ref("");
+const errorMessage = ref("");
+
   try {
     const userData = {
       name: name.value,
@@ -145,22 +176,39 @@ const handleRegister = async () => {
       address: address.value,
       password: password.value,
       smokingDrinking: smoking.value === "yes",
-      preexistingConditions: preexisting.value, // uppercase already
-      vehicleType: vehicleType.value,
-      vehicleAge: Number(vehicleAge.value) || 0,
-      roleType: "USER" // default for registration
+      preexistingConditions: preexisting.value,
+      vehicleType: vehicleType.value==="NULL" ? "NULL" : vehicleType.value,
+      vehicleAge:
+        vehicleType.value === "NULL"
+          ? 0
+          : Number(vehicleAge.value) ,
+      roleType: "USER",
     };
 
-    // 🔑 Call Vuex action
+    // Dispatch store action
     await store.dispatch("user/createUser", userData);
 
+    // Check if store has any error
+    const storeError = store.getters["user/getError"];
+    if (storeError) {
+      // Error exists → show popup
+      errorMessage.value =
+        storeError.message || storeError || "Unable to register user.";
+      alert(errorMessage.value);
+      successMessage.value = "";
+      return;
+    }
+
+    // Success → redirect
     successMessage.value = "Registration successful! Redirecting to login...";
+    errorMessage.value = "";
     setTimeout(() => {
       router.push("/login");
     }, 1500);
   } catch (err) {
-    errorMessage.value = err.response?.data?.message || "Something went wrong during registration.";
+    errorMessage.value =
+      err.response?.data?.message || "Something went wrong during registration.";
+    successMessage.value = "";
   }
 };
 </script>
-

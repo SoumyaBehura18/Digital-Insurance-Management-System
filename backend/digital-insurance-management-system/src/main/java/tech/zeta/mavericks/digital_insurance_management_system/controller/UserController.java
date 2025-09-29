@@ -8,16 +8,15 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.LoginRequest;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.RoleUpdateRequest;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.LoginResponse;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.LoginRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.RoleUpdateRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.LoginResponse;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.RoleType;
 import tech.zeta.mavericks.digital_insurance_management_system.service.JWTService;
 import tech.zeta.mavericks.digital_insurance_management_system.service.UserService;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.UserPrincipal;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.User;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
