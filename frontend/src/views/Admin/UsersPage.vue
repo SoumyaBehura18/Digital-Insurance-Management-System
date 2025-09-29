@@ -41,33 +41,33 @@
           </thead>
           <tbody>
             <tr
-              v-for="(user, index) in users"
-              :key="user.id"
+              v-for="(userItem, index) in users"
+              :key="userItem.id"
               :class="index % 2 === 0 ? 'bg-white' : 'bg-purple-50'"
               class="hover:bg-purple-100 transition-colors"
             >
-              <td class="px-4 py-3 text-gray-800">{{ user.id }}</td>
+              <td class="px-4 py-3 text-gray-800">{{ userItem.id }}</td>
               <td class="px-4 py-3 text-gray-800 font-medium">
-                {{ user.name }}
+                {{ userItem.name }}
               </td>
-              <td class="px-4 py-3 text-gray-700">{{ user.email }}</td>
+              <td class="px-4 py-3 text-gray-700">{{ userItem.email }}</td>
               <td class="px-4 py-3">
                 <span
                   :class="{
-                    'bg-green-100 text-green-800': user.roleType === 'ADMIN',
-                    'bg-blue-100 text-blue-800': user.roleType === 'USER',
+                    'bg-green-100 text-green-800': userItem.roleType === 'ADMIN',
+                    'bg-blue-100 text-blue-800': userItem.roleType === 'USER',
                   }"
                   class="px-3 py-1 rounded-full text-xs font-semibold"
                 >
-                  {{ user.roleType }}
+                  {{ userItem.roleType }}
                 </span>
               </td>
-              <td class="px-4 py-3 text-gray-700">{{ user.phone }}</td>
-              <td class="px-4 py-3 text-gray-700">{{ user.age }}</td>
+              <td class="px-4 py-3 text-gray-700">{{ userItem.phone }}</td>
+              <td class="px-4 py-3 text-gray-700">{{ userItem.age }}</td>
               <td class="px-4 py-3 text-center">
                 <button
                   class="bg-purple-500 hover:bg-purple-600 text-white text-xs font-medium px-3 py-1 rounded-full transition"
-                  @click="openUpdateModal(user)"
+                  @click="openUpdateModal(userItem)"
                 >
                   Update
                 </button>
