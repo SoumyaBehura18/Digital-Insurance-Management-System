@@ -37,20 +37,20 @@
         >
           <div class="flex justify-between items-start">
             <div>
-              <h3 class="font-medium text-gray-900">{{ ticket.title }}</h3>
-              <p class="text-sm text-gray-500 mt-1">
+              <h3 class="font-medium text-gray-900">{{ ticket.subject }}</h3>
+              <p class="text-sm text-gray-500 mt-1 w-64 truncate">
                 {{ ticket.description }}
               </p>
               <div class="flex items-center gap-4 mt-2">
                 <span
                   class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                  :class="getStatusClasses(ticket.status)"
+                  :class="getStatusClasses(ticket.status ?? 'OPEN')"
                 >
                   <component
-                    :is="getStatusClassIcon(ticket.status)"
+                    :is="getStatusClassIcon(ticket.status ?? 'OPEN')"
                     class="w-3 h-3 mr-1"
                   />
-                  {{ ticket.status }}
+                  {{ ticket.status ?? "OPEN" }}
                 </span>
                 <span class="text-xs text-gray-500">{{
                   formatDate(ticket.createdAt)
@@ -71,7 +71,7 @@
               <BaseButton
                 variant="outline"
                 size="sm"
-                @click="$emit('create-first-ticket', ticket.id)"
+                @click="$emit('update-ticket', ticket)"
                 class="flex items-center"
               >
                 <Pencil class="h-4" />
@@ -89,6 +89,7 @@
       @close="handleCloseModal"
       @update-ticket="handleUpdateTicket"
       @resolve-ticket="handleResolveTicket"
+      @close-ticket="handleCloseTicket"
     />
   </div>
 </template>
@@ -97,7 +98,7 @@
 import { ref } from "vue";
 import BaseButton from "@/components/BaseButton.vue";
 import TicketDetailsModal from "@/components/TicketComponents/TicketDetailsModal.vue";
-import { Pencil, Eye, AlertCircle, CheckCircle, X } from "lucide-vue-next";
+import { Pencil, Eye } from "lucide-vue-next";
 import {
   getStatusClassIcon,
   getStatusClasses,
@@ -109,6 +110,11 @@ const props = defineProps({
   tickets: {
     type: Array,
     required: true,
+    default: () => [],
+  },
+  ticketSelected: {
+    type: Object,
+    default: null,
   },
 });
 
@@ -142,5 +148,9 @@ const handleUpdateTicket = (ticket) => {
 
 const handleResolveTicket = (ticket) => {
   emit("resolve-ticket", ticket);
+};
+
+const handleCloseTicket = (ticket) => {
+  emit("close-ticket", ticket);
 };
 </script>

@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from "vue-router";
 import DashboardPage from "@/views/User/DashboardPage.vue";
 import PoliciesPage from "@/views/User/PoliciesPage.vue";
 import ClaimsPage from "@/views/User/ClaimsPage.vue";
-import ChatbotPage from "@/views/User/ChatbotPage.vue";
 import TicketsPage from "@/views/User/TicketsPage.vue";
 import LandingPage from "@/views/LandingPage.vue";
 import LoginPage from "../views/LoginPage.vue";
@@ -13,14 +12,14 @@ import ManagePolicies from "@/views/Admin/ManagePolicies.vue";
 import ManageClaims from "@/views/Admin/ManageClaims.vue";
 import SupportTickets from "@/views/Admin/SupportTickets.vue";
 import UsersPage from "@/views/Admin/UsersPage.vue";
- 
-// import RegisterPage from "../views/RegisterPage.vue";
+import RegisterPage from "../views/RegisterPage.vue";
  
  
 const routes = [
   // Public routes
   { path: "/", component: LandingPage },
   { path: "/login", component: LoginPage },
+  {path: "/register", component: RegisterPage },
   
   // User Routes - direct paths (no prefix)
   {
@@ -41,11 +40,6 @@ const routes = [
   {
     path: "/submit-claim",
     component: ClaimsPage,
-    meta: { requiresAuth: true, role: 'user' }
-  },
-  {
-    path: "/chatbot",
-    component: ChatbotPage,
     meta: { requiresAuth: true, role: 'user' }
   },
   {

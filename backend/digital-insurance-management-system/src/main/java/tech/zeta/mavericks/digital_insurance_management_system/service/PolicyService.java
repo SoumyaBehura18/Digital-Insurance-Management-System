@@ -1,8 +1,8 @@
 package tech.zeta.mavericks.digital_insurance_management_system.service;
 
 import org.springframework.stereotype.Service;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.PolicyWithPremiumDTO;
-import tech.zeta.mavericks.digital_insurance_management_system.entity.User;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.PolicyRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.PolicyWithPremium;
 import tech.zeta.mavericks.digital_insurance_management_system.repository.PolicyRepository;
 
 import java.util.List;
@@ -16,40 +16,27 @@ public class PolicyService {
         this.policyRepo = policyRepo;
     }
 
-    public List<PolicyWithPremiumDTO> getPoliciesForUser(User user) {
-        System.out.println(user.toString());
+    public List<PolicyWithPremium> getPoliciesForUser(PolicyRequest policyRequest) {
         return policyRepo.findPoliciesForUser(
-                user.getSmokingDrinking(),
-                user.getVehicleType(),
-                user.getVehicleAge(),
-                user.getPreexistingConditions()
+                policyRequest
         );
     }
 
-    public List<PolicyWithPremiumDTO> getVehiclePoliciesForUser(User user){
+    public List<PolicyWithPremium> getVehiclePoliciesForUser(PolicyRequest policyRequest){
         return policyRepo.findVehiclePoliciesForUser(
-                user.getSmokingDrinking(),
-                user.getVehicleType(),
-                user.getVehicleAge(),
-                user.getPreexistingConditions()
+              policyRequest
         );
     }
 
-    public List<PolicyWithPremiumDTO> getLifePoliciesForUser(User user){
+    public List<PolicyWithPremium> getLifePoliciesForUser(PolicyRequest policyRequest){
         return policyRepo.findLifePoliciesForUser(
-                user.getSmokingDrinking(),
-                user.getVehicleType(),
-                user.getVehicleAge(),
-                user.getPreexistingConditions()
+               policyRequest
         );
     }
 
-    public List<PolicyWithPremiumDTO> getHealthPoliciesForUser(User user){
+    public List<PolicyWithPremium> getHealthPoliciesForUser(PolicyRequest policyRequest){
         return policyRepo.findHealthPoliciesForUser(
-                user.getSmokingDrinking(),
-                user.getVehicleType(),
-                user.getVehicleAge(),
-                user.getPreexistingConditions()
+                policyRequest
         );
     }
 }

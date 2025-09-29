@@ -3,72 +3,73 @@ package tech.zeta.mavericks.digital_insurance_management_system.repository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.PolicyWithPremiumDTO;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.PolicyRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.PolicyWithPremium;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.HealthPolicyPremium;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.HealthPreexistingCondition;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.LifePolicyPremium;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.VehiclePolicyPremium;
-import tech.zeta.mavericks.digital_insurance_management_system.enums.HealthCondition;
-import tech.zeta.mavericks.digital_insurance_management_system.enums.VehicleType;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Repository
 public class PolicyCustomRepositoryImpl implements PolicyRepository.PolicyCustomRepository {
 
     @PersistenceContext
-    private EntityManager em;
+    public EntityManager em;
 
     @Override
-    public List<PolicyWithPremiumDTO> findPoliciesForUser(Boolean smokingDrinking, VehicleType vehicleType,
-                                                          Integer vehicleAge, Set<HealthCondition> preexistingConditions) {
+    public List<PolicyWithPremium> findPoliciesForUser(PolicyRequest policyRequest) {
 
-        List<PolicyWithPremiumDTO> allPolicies = new ArrayList<>();
-        allPolicies.addAll(findVehiclePoliciesForUser(smokingDrinking, vehicleType, vehicleAge, preexistingConditions));
-        allPolicies.addAll(findLifePoliciesForUser(smokingDrinking, vehicleType, vehicleAge, preexistingConditions));
-        allPolicies.addAll(findHealthPoliciesForUser(smokingDrinking, vehicleType, vehicleAge, preexistingConditions));
+        List<PolicyWithPremium> allPolicies = new ArrayList<>();
+        allPolicies.addAll(findVehiclePoliciesForUser(policyRequest));
+        allPolicies.addAll(findLifePoliciesForUser(policyRequest));
+        allPolicies.addAll(findHealthPoliciesForUser(policyRequest));
 
         return allPolicies;
     }
 
     @Override
-    public List<PolicyWithPremiumDTO> findVehiclePoliciesForUser(Boolean smokingDrinking, VehicleType vehicleType, Integer vehicleAge, Set<HealthCondition> preexistingConditions) {
+    public List<PolicyWithPremium> findVehiclePoliciesForUser(PolicyRequest policyRequest) {
         List<VehiclePolicyPremium> vehiclePolicies = em.createQuery(
-                        "SELECT v FROM VehiclePolicyPremium v JOIN FETCH v.policy WHERE v.vehicleAge >= :vehicleAge", VehiclePolicyPremium.class)
-                .setParameter("vehicleAge", vehicleAge)
+                        "SELECT v FROM VehiclePolicyPremium v JOIN FETCH v.policy WHERE v.vehicleAge >= :vehicleAge and :vehicleAge!=0", VehiclePolicyPremium.class)
+                .setParameter("vehicleAge", policyRequest.getVehicleAge())
                 .getResultList();
 
-        List<PolicyWithPremiumDTO> dtos = vehiclePolicies.stream()
-                .map(v -> new PolicyWithPremiumDTO(
+        List<PolicyWithPremium> dtos = vehiclePolicies.stream()
+                .map(v -> new PolicyWithPremium(
                         v.getPolicy().getId(),
                         v.getPolicy().getName(),
                         v.getPolicy().getType(),
                         v.getPremiumRate(),
-                        v.getRenewalRate()))
+                        v.getRenewalRate(),
+                        v.getPolicy().getDurationMonths(),
+                        v.getPolicy().getCoverageAmt()))
                 .collect(Collectors.toList());
         return dtos;
     }
 
     @Override
-    public List<PolicyWithPremiumDTO> findLifePoliciesForUser(Boolean smokingDrinking, VehicleType vehicleType, Integer vehicleAge, Set<HealthCondition> preexistingConditions) {
-        System.out.println("Smoking drinking: "+smokingDrinking);
+    public List<PolicyWithPremium> findLifePoliciesForUser(PolicyRequest policyRequest) {
+        System.out.println("Smoking drinking: "+policyRequest);
         List<LifePolicyPremium> lifePolicies = em.createQuery(
                         "SELECT l FROM LifePolicyPremium l JOIN FETCH l.policy " +
                                 "WHERE l.smokingDrinking = :smokingDrinking",
                         LifePolicyPremium.class)
-                .setParameter("smokingDrinking", smokingDrinking)
+                .setParameter("smokingDrinking", policyRequest.getSmokingDrinking())
                 .getResultList();
 
-        List<PolicyWithPremiumDTO> dtos = lifePolicies.stream()
-                .map(l -> new PolicyWithPremiumDTO(
+        List<PolicyWithPremium> dtos = lifePolicies.stream()
+                .map(l -> new PolicyWithPremium(
                         l.getPolicy().getId(),
                         l.getPolicy().getName(),
                         l.getPolicy().getType(),
                         l.getPremiumRate(),
-                        l.getRenewalRate()))
+                        l.getRenewalRate(),
+                        l.getPolicy().getDurationMonths(),
+                        l.getPolicy().getCoverageAmt()))
                 .collect(Collectors.toList());
 
         return  dtos;
@@ -76,15 +77,15 @@ public class PolicyCustomRepositoryImpl implements PolicyRepository.PolicyCustom
     }
 
     @Override
-    public List<PolicyWithPremiumDTO> findHealthPoliciesForUser(Boolean smokingDrinking, VehicleType vehicleType, Integer vehicleAge, Set<HealthCondition> preexistingConditions) {
+    public List<PolicyWithPremium> findHealthPoliciesForUser(PolicyRequest policyRequest) {
         List<HealthPolicyPremium> healthPolicies = em.createQuery(
                 "SELECT h FROM HealthPolicyPremium h JOIN FETCH h.policy",
                 HealthPolicyPremium.class
         ).getResultList();
 
-        List<PolicyWithPremiumDTO> dtos = healthPolicies.stream()
+        List<PolicyWithPremium> dtos = healthPolicies.stream()
                 // Filter for smoker/non-smoker
-                .filter(h -> Boolean.TRUE.equals(h.getSmokingDrinking()) == Boolean.TRUE.equals(smokingDrinking))
+                .filter(h -> Boolean.TRUE.equals(h.getSmokingDrinking()) == Boolean.TRUE.equals(policyRequest.getSmokingDrinking()))
                 .map(h -> {
                     // Base premium for this policy
                     double basePremium = h.getPremiumRate() != null ? h.getPremiumRate() : 0.0;
@@ -95,23 +96,31 @@ public class PolicyCustomRepositoryImpl implements PolicyRepository.PolicyCustom
 
                     // Sum only premiums for the conditions the user has
                     double additionalPremium = 0.0;
-                    if (policyConditions != null && preexistingConditions != null) {
+                    double additionalRenewal=0.0;
+                    if (policyConditions != null && policyRequest.getPreexistingConditions() != null) {
                         additionalPremium = policyConditions.stream()
-                                .filter(cond -> preexistingConditions.contains(cond.getCondition()))
+                                .filter(cond -> policyRequest.getPreexistingConditions().contains(cond.getCondition()))
+                                .mapToDouble(HealthPreexistingCondition::getAdditionalPremium)
+                                .sum();
+                        additionalRenewal=policyConditions.stream()
+                                .filter(cond -> policyRequest.getPreexistingConditions().contains(cond.getCondition()))
                                 .mapToDouble(HealthPreexistingCondition::getAdditionalPremium)
                                 .sum();
                     }
 
                     // Total premium = base + additional
                     double totalPremium = basePremium + additionalPremium;
+                    double totalRenewalPremium=renewalRate+additionalRenewal;
 
                     // Create DTO
-                    return new PolicyWithPremiumDTO(
+                    return new PolicyWithPremium(
                             h.getPolicy().getId(),
                             h.getPolicy().getName(),
                             h.getPolicy().getType(),
                             totalPremium,
-                            renewalRate
+                            totalRenewalPremium,
+                            h.getPolicy().getDurationMonths(),
+                            h.getPolicy().getCoverageAmt()
                     );
                 })
                 .collect(Collectors.toList());

@@ -7,13 +7,16 @@ import tech.zeta.mavericks.digital_insurance_management_system.enums.RoleType;
 
 import java.util.Collection;
 import java.util.Collections;
-
 public class UserPrincipal implements UserDetails {
 
     private User user;
 
     public UserPrincipal(User user) {
         this.user = user;
+    }
+
+    public User getUser() {
+        return this.user;
     }
 
     @Override
@@ -32,30 +35,19 @@ public class UserPrincipal implements UserDetails {
     }
 
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+    public boolean isAccountNonExpired() { return true; }
 
     @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+    public boolean isAccountNonLocked() { return true; }
 
     @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+    public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isEnabled() {
-        return true;
-    }
+    public boolean isEnabled() { return true; }
 
     public String getRole() {
-        if(user.getRoleType() == RoleType.ADMIN){
-            return RoleType.ADMIN.name();
-        }
-        return   RoleType.USER.name();
+        return user.getRoleType() == RoleType.ADMIN ? "ADMIN" : "USER";
     }
 
     public Long getId() {

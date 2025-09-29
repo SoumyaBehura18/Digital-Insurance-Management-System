@@ -13,11 +13,7 @@
                     <!-- Right side -->
                     <div class="flex items-center gap-4">
                         <!-- Dark Mode Toggle -->
-                        <div class="flex items-center gap-2">
-                            <Sun class="w-4 h-4" />
-                            <SwitchComponent v-model="isDarkMode" />
-                            <Moon class="w-4 h-4" />
-                        </div>
+                      
 
                         <!-- Auth Buttons -->
                         <div class="flex items-center gap-2">
@@ -306,7 +302,6 @@
 
 import { ref } from "vue";
 import CardComponent from "@/components/UI/CardComponent.vue";
-import SwitchComponent from "@/components/UI/SwitchComponent.vue";
 import {
     Shield,
     FileText,
@@ -330,18 +325,6 @@ const goToRegister = () => {
   router.push("/register");
 };
 
-// Dark mode state
-const isDarkMode = ref(false);
-
-// Function to toggle dark mode
-const toggleDarkMode = (value) => {
-    isDarkMode.value = value;
-};
-
-// Show auth modal
-const showAuth = () => {
-    console.log("Auth modal should open");
-};
 </script>
 
 

@@ -31,4 +31,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
     public ResponseEntity<String> handleUserPolicyNotFoundException(UserPolicyNotFoundException exception){
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(UserAlreadyExistException.class)
+    public ResponseEntity<String> handleUserAlreadyExistException(UserAlreadyExistException exception){
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.FOUND);
+    }
 }

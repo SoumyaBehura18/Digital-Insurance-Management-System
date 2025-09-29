@@ -4,15 +4,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.zeta.mavericks.digital_insurance_management_system.dto.ClaimRequestDto;
-import tech.zeta.mavericks.digital_insurance_management_system.dto.ClaimResponseDto;
-import tech.zeta.mavericks.digital_insurance_management_system.dto.ClaimListResponseDto;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.ClaimRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.ClaimListResponse;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.RemainingCoverageResponse;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.Claim;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.UserPolicy;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.ClaimStatus;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.PolicyStatus;
-import tech.zeta.mavericks.digital_insurance_management_system.exceptions.ClaimSubmissionException;
-import tech.zeta.mavericks.digital_insurance_management_system.exceptions.UserPolicyNotFoundException;
+import tech.zeta.mavericks.digital_insurance_management_system.exception.ClaimNotFoundException;
+import tech.zeta.mavericks.digital_insurance_management_system.exception.UserPolicyNotFoundException;
 import tech.zeta.mavericks.digital_insurance_management_system.repository.ClaimRepository;
 import tech.zeta.mavericks.digital_insurance_management_system.repository.UserPolicyRepository;
 
@@ -29,71 +29,34 @@ public class ClaimService {
     private final ClaimRepository claimRepository;
     private final UserPolicyRepository userPolicyRepository;
 
-    public ClaimResponseDto submitClaim(ClaimRequestDto claimRequestDto) {
-        try {
-            log.info("Submitting claim for user policy ID: {}", claimRequestDto.getUserPolicyId());
+    public ClaimListResponse.ClaimResponseDto submitClaim(ClaimRequest claimRequest) {
+        UserPolicy userPolicy = userPolicyRepository.findById(claimRequest.getUserPolicyId())
+                .orElseThrow(() -> new UserPolicyNotFoundException("User policy with ID " + claimRequest.getUserPolicyId() + " not found"));
 
-            // Validate if user policy exists and is active
-            UserPolicy userPolicy = userPolicyRepository.findById(claimRequestDto.getUserPolicyId())
-                    .orElseThrow(() -> new UserPolicyNotFoundException(
-                            "User policy with ID " + claimRequestDto.getUserPolicyId() + " not found"));
-
-            // Validate policy status (assuming you have status validation)
-            validatePolicyForClaim(userPolicy);
-
-            // Create new claim with default values
-            Claim claim = new Claim();
-            claim.setUserPolicy(userPolicy);
-            claim.setClaimDate(claimRequestDto.getClaimDate());
-            claim.setClaimAmount(claimRequestDto.getClaimAmount());
-            claim.setReason(claimRequestDto.getReason());
-            claim.setStatus(ClaimStatus.PENDING);
-            claim.setReviewerComment("");
-            claim.setResolvedDate(null);
-
-            // Save claim
-            Claim savedClaim = claimRepository.save(claim);
-            log.info("Claim submitted successfully with ID: {}", savedClaim.getId());
-
-            return convertToResponseDto(savedClaim);
-
-        } catch (UserPolicyNotFoundException ex) {
-            log.error("User policy not found: {}", ex.getMessage());
-            throw ex;
-        } catch (ClaimSubmissionException ex) {
-            log.error("Claim submission error: {}", ex.getMessage());
-            throw ex;
-        } catch (Exception ex) {
-            log.error("Unexpected error during claim submission: {}", ex.getMessage(), ex);
-            throw new ClaimSubmissionException("Failed to submit claim due to internal error");
-        }
-    }
-
-    private void validatePolicyForClaim(UserPolicy userPolicy) {
         log.info("UserPolicy status: {}", userPolicy.getStatus());
         log.info("UserPolicy start date: {}, end date: {}", userPolicy.getStartDate(), userPolicy.getEndDate());
 
-        // Check if policy status is ACTIVE
-//        if (!PolicyStatus.ACTIVE.equals(userPolicy.getStatus())) {
-//            throw new ClaimSubmissionException("Cannot submit claim for inactive policy. Policy status: " + userPolicy.getStatus());
-//        }
-//
-//        // Check if policy has started
-//        LocalDate currentDate = LocalDate.now();
-//        if (currentDate.isBefore(userPolicy.getStartDate())) {
-//            throw new ClaimSubmissionException("Cannot submit claim for policy that has not started yet. Policy start date: " + userPolicy.getStartDate());
-//        }
-//
-//        // Check if policy has not expired
-//        if (currentDate.isAfter(userPolicy.getEndDate())) {
-//            throw new ClaimSubmissionException("Cannot submit claim for expired policy. Policy end date: " + userPolicy.getEndDate());
-//        }
-//
-//        log.info("Policy validation passed for user policy ID: {}", userPolicy.getId());
+        if (userPolicy.getStatus() != PolicyStatus.ACTIVE) {
+            throw new RuntimeException("Cannot submit claim for non-active policy (status=" + userPolicy.getStatus() + ")");
+        }
+
+        Claim claim = new Claim();
+        claim.setUserPolicy(userPolicy);
+        claim.setClaimDate(claimRequest.getClaimDate());
+        claim.setClaimAmount(claimRequest.getClaimAmount());
+        claim.setReason(claimRequest.getReason());
+        claim.setStatus(ClaimStatus.PENDING);
+        claim.setReviewerComment("");
+        claim.setResolvedDate(null);
+
+        Claim savedClaim = claimRepository.save(claim);
+        log.info("Claim submitted successfully with ID: {}", savedClaim.getId());
+
+        return convertToResponseDto(savedClaim);
     }
 
-    private ClaimResponseDto convertToResponseDto(Claim claim) {
-        ClaimResponseDto responseDto = new ClaimResponseDto();
+    private ClaimListResponse.ClaimResponseDto convertToResponseDto(Claim claim) {
+        ClaimListResponse.ClaimResponseDto responseDto = new ClaimListResponse.ClaimResponseDto();
         responseDto.setId(claim.getId());
         responseDto.setUserPolicyId(claim.getUserPolicy().getId());
         responseDto.setClaimDate(claim.getClaimDate());
@@ -105,22 +68,22 @@ public class ClaimService {
         return responseDto;
     }
 
-    public List<ClaimListResponseDto> getAllClaimsDto() {
+    public List<ClaimListResponse> getAllClaimsDto() {
         List<Claim> claims = claimRepository.findAll();
         return claims.stream()
                 .map(this::convertToClaimListResponseDto)
                 .collect(Collectors.toList());
     }
 
-    public List<ClaimListResponseDto> getClaimsByUserIdDto(Long userId) {
+    public List<ClaimListResponse> getClaimsByUserIdDto(Long userId) {
         List<Claim> claims = claimRepository.findByUserPolicy_User_Id(userId);
         return claims.stream()
                 .map(this::convertToClaimListResponseDto)
                 .collect(Collectors.toList());
     }
 
-    private ClaimListResponseDto convertToClaimListResponseDto(Claim claim) {
-        ClaimListResponseDto dto = new ClaimListResponseDto();
+    private ClaimListResponse convertToClaimListResponseDto(Claim claim) {
+        ClaimListResponse dto = new ClaimListResponse();
         dto.setId(claim.getId());
         dto.setUserPolicyId(claim.getUserPolicy().getId());
         dto.setUserId(claim.getUserPolicy().getUser().getId());
@@ -136,25 +99,37 @@ public class ClaimService {
         return dto;
     }
 
-    // Keep existing methods for backward compatibility
-    public List<Claim> getAllClaims() {
-        return claimRepository.findAll();
-    }
-
-    public List<Claim> getClaimsByUserId(Long userId) {
-        return claimRepository.findByUserPolicy_User_Id(userId);
-    }
-
     public void updateCalimStatusAndReviewerComment(Long claimId, ClaimStatus status, String reviewerComment) {
         Claim claim = claimRepository.findById(claimId)
-                .orElseThrow(() -> new ClaimSubmissionException("Claim with ID " + claimId + " not found"));
+                .orElseThrow(() -> new ClaimNotFoundException("Claim with ID " + claimId + " not found"));
 
         claim.setStatus(status);
         claim.setReviewerComment(reviewerComment);
         if (status == ClaimStatus.APPROVED || status == ClaimStatus.REJECTED) {
             claim.setResolvedDate(LocalDate.now());
         }
-
         claimRepository.save(claim);
+    }
+
+    public List<UserPolicy> getUserPoliciesByUserId(Long userId) {
+        return userPolicyRepository.findByUser_Id(userId);
+    }
+
+    public RemainingCoverageResponse getRemainingCoverageAmount(Long userPolicyId) {
+        UserPolicy userPolicy = userPolicyRepository.findById(userPolicyId)
+                .orElseThrow(() -> new UserPolicyNotFoundException("User policy with ID " + userPolicyId + " not found"));
+
+        Double totalClaimedAmount = claimRepository.findByUserPolicy_Id(userPolicyId).stream()
+                .filter(claim -> claim.getStatus() == ClaimStatus.APPROVED)
+                .mapToDouble(claim -> claim.getClaimAmount().doubleValue())
+                .sum();
+
+        Double coverageAmount = userPolicy.getPolicy().getCoverageAmt();
+        Double remaining = coverageAmount - totalClaimedAmount;
+        return new RemainingCoverageResponse(userPolicyId, remaining);
+    }
+
+    public List<UserPolicy> getAllUserPolicies() {
+        return userPolicyRepository.findAll();
     }
 }

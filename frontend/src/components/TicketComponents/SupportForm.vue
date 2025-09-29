@@ -64,9 +64,13 @@
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none"
               >
                 <option value="" disabled>Select a policy if relevant</option>
-                <option value="policy1">Home Insurance Policy - HI001</option>
-                <option value="policy2">Auto Insurance Policy - AI002</option>
-                <option value="policy3">Life Insurance Policy - LI003</option>
+                <option
+                  v-for="policy in props.policies"
+                  :key="policy.id"
+                  :value="policy.id"
+                >
+                  {{ policy.policyName }}
+                </option>
               </select>
               <div
                 class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none"
@@ -103,9 +107,13 @@
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none"
               >
                 <option value="" disabled>Select a claim if relevant</option>
-                <option value="claim1">Water Damage Claim - WD001</option>
-                <option value="claim2">Car Accident Claim - CA002</option>
-                <option value="claim3">Medical Claim - MC003</option>
+                <option
+                  v-for="claim in props.claims"
+                  :key="claim.id"
+                  :value="claim.id"
+                >
+                  {{ claim.id }}
+                </option>
               </select>
               <div
                 class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none"
@@ -145,7 +153,13 @@
           customClass="bg-indigo-600 hover:bg-indigo-700 flex-1"
           :disabled="isSubmitting"
         >
-          {{ isSubmitting ? "Submitting..." : "Submit Ticket" }}
+          {{
+            props.ticket
+              ? "Update Ticket"
+              : isSubmitting
+              ? "Submitting..."
+              : "Submit Ticket"
+          }}
         </BaseButton>
       </div>
     </form>
@@ -153,46 +167,98 @@
 </template>
 
 <script setup>
-import { reactive, ref } from "vue";
+import { reactive, ref, watch } from "vue";
 import BaseButton from "@/components/BaseButton.vue";
+import { useStore } from "vuex";
 
-// Emits
-const emit = defineEmits(["ticket-created", "cancel"]);
+const props = defineProps({
+  userId: {
+    type: Number,
+    required: true,
+  },
+  ticket: {
+    type: Object,
+    default: () => null, // ✅ ensures ticket is never undefined
+  },
+  policies: {
+    type: Array,
+    default: () => [],
+  },
+  claims: {
+    type: Array,
+    default: () => [],
+  },
+});
 
-// Form state
+const emit = defineEmits(["ticket-created", "ticket-updated", "cancel"]);
+const store = useStore();
+
+// ✅ Form state safely initialized with optional chaining
 const form = reactive({
-  subject: "",
-  description: "",
-  relatedPolicy: "",
-  relatedClaim: "",
+  subject: props.ticket?.subject || "",
+  description: props.ticket?.description || "",
+  relatedPolicy: props.ticket?.relatedPolicy || "",
+  relatedClaim: props.ticket?.relatedClaim || "",
 });
 
 const isSubmitting = ref(false);
 
-// Methods
+// ✅ Watch ticket safely (only if it exists)
+watch(
+  () => props.ticket,
+  async (newTicket) => {
+    if (!newTicket || !newTicket.id) return; // ✅ prevent null access
+
+    try {
+      const response = await store.dispatch("tickets/fetchTicketById", newTicket.id);
+
+      if (response) {
+        console.log("Fetched ticket details:", response);
+        form.subject = response.subject || "";
+        form.description = response.description || "";
+        form.relatedPolicy = response.policyId || "";
+        form.relatedClaim = response.claimId || "";
+      }
+    } catch (err) {
+      console.error("Error fetching ticket:", err);
+    }
+  },
+  { immediate: true }
+);
+
+// ✅ Safe form submission handler
 const handleSubmit = async () => {
+  if (!props.userId) {
+    alert("User not found. Please log in again.");
+    return;
+  }
+
   isSubmitting.value = true;
 
   try {
-    // Simulate API call
-    console.log("Submitting ticket:", form);
-
-    // Here you would make your API call
-    // await createTicket(form);
-
-    // Create ticket object to emit
     const newTicket = {
-      title: form.subject,
-      description: form.description,
-      status: "OPEN",
-      relatedPolicy: form.relatedPolicy,
-      relatedClaim: form.relatedClaim,
+      subject: form.subject.trim(),
+      description: form.description.trim(),
+      policyId: form.relatedPolicy || null,
+      claimId: form.relatedClaim || null,
+      userId: props.userId,
     };
 
-    // Emit the new ticket to parent
-    emit("ticket-created", newTicket);
+    if (props.ticket && props.ticket.id) {
+      // ✅ Update existing ticket
+      await store.dispatch("tickets/updateTicket", {
+        ticketData: { ...newTicket, status: "OPEN" },
+        ticketId: props.ticket.id,
+      });
+      emit("ticket-updated");
+    } else {
+      // ✅ Create new ticket
+      const result = await store.dispatch("tickets/createTicket", newTicket);
+      console.log("Ticket created:", result);
+      emit("ticket-created", newTicket);
+    }
 
-    // Reset form after successful submission
+    // ✅ Reset form after successful submission
     Object.keys(form).forEach((key) => {
       form[key] = "";
     });

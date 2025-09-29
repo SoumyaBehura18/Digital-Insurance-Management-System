@@ -4,10 +4,10 @@ import jakarta.persistence.*;
 import lombok.Data;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.MessageStatus;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 @Entity
-@Table(name = "ticket_messages")
+@Table(name = "ticket_message")
 @Data
 public class Message {
 
@@ -31,5 +31,5 @@ public class Message {
     @Enumerated(EnumType.STRING)
     private MessageStatus status;
 
-    private Date timestamp;
+    private Timestamp timestamp;
 }

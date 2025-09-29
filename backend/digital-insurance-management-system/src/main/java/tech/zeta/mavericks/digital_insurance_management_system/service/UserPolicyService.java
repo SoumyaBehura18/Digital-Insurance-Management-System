@@ -2,8 +2,8 @@ package tech.zeta.mavericks.digital_insurance_management_system.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.UserPolicyRequest;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.UserPolicyResponse;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.UserPolicyRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.UserPolicyResponse;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.Policy;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.User;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.UserPolicy;
@@ -34,6 +34,7 @@ public class UserPolicyService {
         userPolicy.setEndDate(request.getEndDate());
         userPolicy.setStatus(PolicyStatus.valueOf(request.getStatus()));
         userPolicy.setPremiumPaid(request.getPremiumPaid());
+        userPolicy.setNoClaimBonus(false);
 
         UserPolicy saved = userPolicyRepository.save(userPolicy);
 
@@ -56,6 +57,36 @@ public class UserPolicyService {
         return mapToResponse(userPolicy);
     }
 
+    public UserPolicyResponse updateUserPolicyById(Long id) {
+        // Fetch existing policy
+        UserPolicy userPolicy = userPolicyRepository.findById(id)
+                .orElseThrow(() -> new PolicyNotFoundException("UserPolicy not found with id: " + id));
+
+        // Update the noClaimBonus field
+        userPolicy.setNoClaimBonus(true);
+
+        // Save the updated policy
+        UserPolicy updated = userPolicyRepository.save(userPolicy);
+
+        // Return mapped response
+        return mapToResponse(updated);
+    }
+
+    public UserPolicyResponse updateUserPolicyStatusById(Long id, PolicyStatus policyStatus,Double premiumRate){
+        UserPolicy userPolicy = userPolicyRepository.findById(id)
+                .orElseThrow(() -> new PolicyNotFoundException("UserPolicy not found with id: " + id));
+
+        userPolicy.setStatus(policyStatus);
+        userPolicy.setPremiumPaid(premiumRate);
+        UserPolicy updated = userPolicyRepository.save(userPolicy);
+
+        // Return mapped response
+        return mapToResponse(updated);
+
+    }
+
+
+
     private UserPolicyResponse mapToResponse(UserPolicy entity) {
         return new UserPolicyResponse(
                 entity.getId(),
@@ -64,7 +95,11 @@ public class UserPolicyService {
                 entity.getStartDate(),
                 entity.getEndDate(),
                 entity.getStatus().name(),
-                entity.getPremiumPaid()
+                entity.getPremiumPaid(),
+                entity.getPolicy().getName(),
+                entity.getPolicy().getType(),
+                entity.getNoClaimBonus(),
+                entity.getPolicy().getCoverageAmt()
         );
     }
 }

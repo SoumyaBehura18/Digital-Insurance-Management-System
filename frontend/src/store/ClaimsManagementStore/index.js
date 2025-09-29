@@ -1,122 +1,100 @@
-import { createStore } from 'vuex'
+import { requestWithAuth } from '@/utils/requests.js'
 
-// Mock data imports (need to be replaced with real API calls later)
-import claimsData from './sample-data/claims.json'
-import policiesData from './sample-data/policies.json'
-import adminClaimsData from './sample-data/admin-claims.json'
-
-export default createStore({
+export default {
+  namespaced: true,
+  
+  // Application state for claims management
   state: {
-    policies: [],
     claims: [],
     adminClaims: [],
+    policies: [],
     loading: false,
     error: null,
     successMessage: null
   },
 
+  // State update functions
   mutations: {
-    SET_POLICIES(state, policies) {
-      state.policies = policies
+    // This function takes claimsList array as input and updates user claims in state
+    SET_CLAIMS(state, claimsList) {
+      state.claims = claimsList
     },
-    SET_CLAIMS(state, claims) {
-      state.claims = claims
+    
+    // This function takes adminClaimsList array as input and updates admin claims in state
+    SET_ADMIN_CLAIMS(state, adminClaimsList) {
+      state.adminClaims = adminClaimsList
     },
-    SET_ADMIN_CLAIMS(state, adminClaims) {
-      state.adminClaims = adminClaims
+    
+    // This function takes policiesList array as input and updates policies in state
+    SET_POLICIES(state, policiesList) {
+      state.policies = policiesList
     },
-    ADD_CLAIM(state, claim) {
-      state.claims.push(claim)
+    
+    // This function takes newClaim object as input and adds it to user claims array
+    ADD_CLAIM(state, newClaim) {
+      state.claims.push(newClaim)
     },
-    UPDATE_CLAIM(state, updatedClaim) {
-      const index = state.claims.findIndex(claim => claim.id === updatedClaim.id)
-      if (index !== -1) {
-        state.claims[index] = { ...state.claims[index], ...updatedClaim }
-      }
+    
+    // This function takes loadingStatus boolean as input and updates loading state
+    SET_LOADING(state, loadingStatus) {
+      state.loading = loadingStatus
     },
-    UPDATE_ADMIN_CLAIM(state, updatedClaim) {
-      const index = state.adminClaims.findIndex(claim => claim.id === updatedClaim.id)
-      if (index !== -1) {
-        state.adminClaims[index] = { ...state.adminClaims[index], ...updatedClaim }
-      }
+    
+    // This function takes errorMessage string as input and sets error message in state
+    SET_ERROR(state, errorMessage) {
+      state.error = errorMessage
     },
-    SET_LOADING(state, loading) {
-      state.loading = loading
-    },
-    SET_ERROR(state, error) {
-      state.error = error
-    },
+    
+    // This function takes message string as input and sets success message in state
     SET_SUCCESS_MESSAGE(state, message) {
       state.successMessage = message
     },
+    
+    // This function takes no input and clears both error and success messages from state
     CLEAR_MESSAGES(state) {
       state.error = null
       state.successMessage = null
     }
   },
 
+  // API action functions
   actions: {
-    async fetchPolicies({ commit }) {
-      try {
-        commit('SET_LOADING', true)
-        const response = await claimService.getAllPolicies()
-        commit('SET_POLICIES', response.data)
-      } catch (error) {
-        commit('SET_ERROR', 'Failed to load policies')
-      } finally {
-        commit('SET_LOADING', false)
+    // This function takes optional userId as input and fetches claims for that user or current logged-in user
+    async fetchClaims({ dispatch }, providedUserId) {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}')
+      const currentUserId = parseInt(currentUser.userId)
+      const targetUserId = Number.isInteger(providedUserId) ? providedUserId : currentUserId
+      
+      if (targetUserId) {
+        return dispatch('fetchUserClaims', targetUserId)
       }
     },
 
-    async fetchClaims({ commit }, userId = null) {
-      try {
-        commit('SET_LOADING', true)
-        const response = userId 
-          ? await claimService.getUserClaims(userId)
-          : await claimService.getAllClaims()
-        commit('SET_CLAIMS', response.data)
-      } catch (error) {
-        commit('SET_ERROR', 'Failed to load claims')
-      } finally {
-        commit('SET_LOADING', false)
-      }
-    },
-
-    async submitClaim({ commit }, claimData) {
+    // This function takes userId as input and retrieves all claims belonging to that specific user
+    async fetchUserClaims({ commit }, userId) {
       try {
         commit('SET_LOADING', true)
         commit('CLEAR_MESSAGES')
-        const response = await claimService.submitClaim(claimData)
-        commit('ADD_CLAIM', response.data)
-        commit('SET_SUCCESS_MESSAGE', `Claim submitted successfully! Claim ID: ${response.data.id}`)
-        return response.data
+        
+        const response = await requestWithAuth('GET', `/claim/user/${userId}`)
+        commit('SET_CLAIMS', response.data)
+        
       } catch (error) {
-        commit('SET_ERROR', error.message || 'Failed to submit claim')
-        throw error
+        commit('SET_ERROR', 'Failed to load user claims')
       } finally {
         commit('SET_LOADING', false)
       }
     },
 
-    async updateClaimStatus({ commit }, { claimId, status, reviewerComment }) {
+    // This function takes no input and retrieves all claims from database for admin dashboard view
+    async fetchAllClaims({ commit }) {
       try {
         commit('SET_LOADING', true)
-        const response = await claimService.updateClaimStatus(claimId, status, reviewerComment)
-        commit('UPDATE_CLAIM', response.data)
-        commit('SET_SUCCESS_MESSAGE', `Claim ${status.toLowerCase()} successfully`)
-      } catch (error) {
-        commit('SET_ERROR', `Failed to ${status.toLowerCase()} claim`)
-        throw error
-      } finally {
-        commit('SET_LOADING', false)
-      }
-    },
-
-    async fetchAdminClaims({ commit }) {
-      try {
-        commit('SET_LOADING', true)
-        const response = await claimService.getAllAdminClaims()
+        commit('CLEAR_MESSAGES')
+        
+        const response = await requestWithAuth('GET', '/claim/claims')
         commit('SET_ADMIN_CLAIMS', response.data)
+        
       } catch (error) {
         commit('SET_ERROR', 'Failed to load admin claims')
       } finally {
@@ -124,129 +102,149 @@ export default createStore({
       }
     },
 
-    async updateAdminClaimStatus({ commit }, { claimId, status, reviewerComment }) {
+    // This function takes no input and fetches all active/renewed policies for current logged-in user
+    async fetchPolicies({ commit }) {
       try {
         commit('SET_LOADING', true)
-        const response = await claimService.updateAdminClaimStatus(claimId, status, reviewerComment)
-        commit('UPDATE_ADMIN_CLAIM', response.data)
-        commit('SET_SUCCESS_MESSAGE', `Claim ${status.toLowerCase()} successfully`)
+        commit('CLEAR_MESSAGES')
+
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}')
+        console.log("Current User:", currentUser)
+        const currentUserId = parseInt(currentUser.userId)
+        console.log("Current User ID:", currentUserId)
+        if (!currentUserId) {
+          
+          commit('SET_ERROR', 'User not authenticated')
+          return
+        }
+
+        // Get user policies from API
+        const policiesResponse = await requestWithAuth('GET', `/user/policies/${currentUserId}`)
+        const rawPoliciesList = Array.isArray(policiesResponse.data) ? policiesResponse.data : []
+
+        // Get user's claims to calculate remaining amounts
+        let userClaims = []
+        try {
+          const claimsResponse = await requestWithAuth('GET', `/claim/user/${currentUserId}`)
+          userClaims = Array.isArray(claimsResponse.data) ? claimsResponse.data : []
+        } catch (error) {
+          console.log("Could not fetch user claims for available amount calculation")
+        }
+
+        // Process each valid policy and calculate remaining claim amount
+        const processedPolicies = rawPoliciesList
+          .filter(policy => policy && policy.id) // Only valid policies
+          .filter(policy => policy.status === 'ACTIVE' || policy.status === 'RENEWED') // Only active policies
+          .map((policy) => {
+            const policyId = policy.id
+            const coverageAmount = policy.coverageAmount || 0
+
+            // Calculate total approved claims for this policy
+            const policyApprovedClaims = userClaims.filter(claim => 
+              claim.userPolicyId === policyId && (claim.status === 'APPROVED' || claim.status === 'PENDING')
+            )
+            const approvedClaimsTotal = policyApprovedClaims.reduce((total, claim) => 
+              total + (claim.claimAmount || 0), 0
+            )
+
+            // Calculate remaining available amount
+            const availableAmount = Math.max(0, coverageAmount - approvedClaimsTotal)
+
+            console.log(`Policy ${policyId}: Coverage=${coverageAmount}, Approved Claims=${approvedClaimsTotal}, Available=${availableAmount}`)
+
+            // Format policy data
+            return {
+              id: policy.id || policy.policyId,
+              policyType: policy.policyName || 'Policy',
+              policyNumber: `POL-${policy.policyId || policy.id}`,
+              description: policy.policyName || '',
+              coverageAmount: coverageAmount,
+              availableAmount: availableAmount
+            }
+          })
+
+        commit('SET_POLICIES', processedPolicies)
+
       } catch (error) {
-        commit('SET_ERROR', `Failed to ${status.toLowerCase()} claim`)
+        commit('SET_ERROR', 'Failed to load policies')
+      } finally {
+        commit('SET_LOADING', false)
+      }
+    },
+
+    // This function takes claimData object as input and submits a new insurance claim to the server
+    async submitClaim({ commit }, claimData) {
+      try {
+        commit('SET_LOADING', true)
+        commit('CLEAR_MESSAGES')
+        
+        const claimPayload = {
+          userPolicyId: Number(claimData.userPolicyId),
+          claimDate: claimData.claimDate,
+          claimAmount: Number(claimData.claimAmount),
+          reason: claimData.reason
+        }
+        
+        const response = await requestWithAuth('POST', '/claim', claimPayload)
+        commit('ADD_CLAIM', response.data)
+        commit('SET_SUCCESS_MESSAGE', `Claim submitted successfully! Claim ID: ${response.data.id}`)
+        
+        return response.data
+      } catch (error) {
+        commit('SET_ERROR', 'Failed to submit claim')
         throw error
       } finally {
         commit('SET_LOADING', false)
       }
     },
 
-    clearMessages({ commit }) {
-      commit('CLEAR_MESSAGES')
+    // This function takes claim review data as input and updates claim status to approved or rejected
+    async reviewClaim({ commit, dispatch }, { claimId, status, reviewComments, userPolicyId }) {
+      try {
+        commit('SET_LOADING', true)
+        commit('CLEAR_MESSAGES')
+        
+        const reviewPayload = { status, reviewComments }
+        await requestWithAuth('PUT', `/claim/${claimId}/review`, reviewPayload)
+        
+        commit('SET_SUCCESS_MESSAGE', `Claim ${status.toLowerCase()} successfully`)
+        dispatch('fetchAllClaims')
+
+        // Update no claim bonus if claim approved
+        if (status === 'APPROVED' && userPolicyId) {
+          await dispatch('updateNoClaimBonus', userPolicyId)
+        }
+
+      } catch (error) {
+        commit('SET_ERROR', 'Failed to review claim')
+        throw error
+      } finally {
+        commit('SET_LOADING', false)
+      }
+    },
+
+    // This function takes userPolicyId as input and updates no claim bonus status for that policy
+    async updateNoClaimBonus(context, userPolicyId) {
+      try {
+        await requestWithAuth('PATCH', `/user/policy/ncb/${userPolicyId}`)
+      } catch (error) {
+        console.log('Could not update no claim bonus for policy:', userPolicyId)
+      }
     }
   },
 
+
+  // Computed values from state
   getters: {
+    // User claims by status
     pendingClaims: (state) => state.claims.filter(claim => claim.status === 'PENDING'),
     approvedClaims: (state) => state.claims.filter(claim => claim.status === 'APPROVED'),
     rejectedClaims: (state) => state.claims.filter(claim => claim.status === 'REJECTED'),
+    allClaims: (state) => state.claims,
     
-    // Admin getters
+    // Admin claims by status
     adminPendingClaims: (state) => state.adminClaims.filter(claim => claim.status === 'PENDING'),
     adminApprovedClaims: (state) => state.adminClaims.filter(claim => claim.status === 'APPROVED'),
-    adminRejectedClaims: (state) => state.adminClaims.filter(claim => claim.status === 'REJECTED'),
-    adminClaimsByPriority: (state) => (priority) => state.adminClaims.filter(claim => claim.priority === priority)
-  }
-})
-
-/* ------------------------------------
-   claimService (sample implementation)
-   Later need to be replaced with Axios calls
------------------------------------- */
-let claims = [...claimsData]
-let policies = [...policiesData]
-let adminClaims = [...adminClaimsData]
-
-const delay = (ms = 500) => new Promise(resolve => setTimeout(resolve, ms))
-
-const getNextId = () => Math.max(...claims.map(c => c.id)) + 1
-
-export const claimService = {
-  async getUserClaims(userId) {
-    await delay()
-    const userClaims = claims.filter(c => c.userId === userId)
-    return { data: userClaims, status: 200, message: 'Claims retrieved successfully' }
-  },
-
-  async submitClaim(newClaim) {
-    await delay()
-    const claim = {
-      id: getNextId(),
-      ...newClaim,
-      status: 'PENDING',
-      reviewerComment: null,
-      resolvedDate: null,
-      claimDate: new Date().toISOString().split('T')[0]
-    }
-    claims.push(claim)
-    return { data: claim, status: 201, message: 'Claim submitted successfully' }
-  },
-
-  async getAllClaims() {
-    await delay()
-    return { data: claims, status: 200, message: 'All claims retrieved successfully' }
-  },
-
-  async updateClaimStatus(claimId, status, reviewerComment = null) {
-    await delay()
-    const idx = claims.findIndex(c => c.id === claimId)
-    if (idx === -1) throw { data: null, status: 404, message: 'Claim not found' }
-
-    claims[idx].status = status
-    claims[idx].reviewerComment = reviewerComment
-    claims[idx].resolvedDate = status !== 'PENDING' ? new Date().toISOString().split('T')[0] : null
-
-    return { data: claims[idx], status: 200, message: 'Claim status updated successfully' }
-  },
-
-  async getClaimById(claimId) {
-    await delay()
-    const claim = claims.find(c => c.id === claimId)
-    if (!claim) throw { data: null, status: 404, message: 'Claim not found' }
-    return { data: claim, status: 200, message: 'Claim retrieved successfully' }
-  },
-
-  async getAllPolicies() {
-    await delay()
-    return { data: policies, status: 200, message: 'Policies retrieved successfully' }
-  },
-
-  async getPolicyById(policyId) {
-    await delay()
-    const policy = policies.find(p => p.id === policyId)
-    if (!policy) throw { data: null, status: 404, message: 'Policy not found' }
-    return { data: policy, status: 200, message: 'Policy retrieved successfully' }
-  },
-
-  // Admin Claims Methods
-  async getAllAdminClaims() {
-    await delay()
-    return { data: adminClaims, status: 200, message: 'Admin claims retrieved successfully' }
-  },
-
-  async updateAdminClaimStatus(claimId, status, reviewerComment = null) {
-    await delay()
-    const idx = adminClaims.findIndex(c => c.id === claimId)
-    if (idx === -1) throw { data: null, status: 404, message: 'Claim not found' }
-
-    adminClaims[idx].status = status
-    adminClaims[idx].reviewerComment = reviewerComment
-    adminClaims[idx].resolvedDate = status !== 'PENDING' ? new Date().toISOString().split('T')[0] : null
-
-    return { data: adminClaims[idx], status: 200, message: 'Admin claim status updated successfully' }
-  },
-
-  async getAdminClaimById(claimId) {
-    await delay()
-    const claim = adminClaims.find(c => c.id === claimId)
-    if (!claim) throw { data: null, status: 404, message: 'Admin claim not found' }
-    return { data: claim, status: 200, message: 'Admin claim retrieved successfully' }
+    adminRejectedClaims: (state) => state.adminClaims.filter(claim => claim.status === 'REJECTED')
   }
 }

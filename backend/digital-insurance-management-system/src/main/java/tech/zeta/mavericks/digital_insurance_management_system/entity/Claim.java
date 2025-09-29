@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 @Data
 @Entity
-@Table(name = "claims")
+@Table(name = "claim")
 public class Claim {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

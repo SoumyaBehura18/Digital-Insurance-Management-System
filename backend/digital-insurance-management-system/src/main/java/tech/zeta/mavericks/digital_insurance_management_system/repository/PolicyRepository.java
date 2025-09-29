@@ -1,37 +1,23 @@
 package tech.zeta.mavericks.digital_insurance_management_system.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.PolicyWithPremiumDTO;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.PolicyRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.PolicyWithPremium;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.Policy;
-import tech.zeta.mavericks.digital_insurance_management_system.enums.HealthCondition;
-import tech.zeta.mavericks.digital_insurance_management_system.enums.VehicleType;
 
 import java.util.List;
-import java.util.Set;
 
 public interface PolicyRepository extends JpaRepository<Policy, Long> {
 
     interface PolicyCustomRepository {
-        List<PolicyWithPremiumDTO> findPoliciesForUser(Boolean smokingDrinking,
-                                                       VehicleType vehicleType,
-                                                       Integer vehicleAge,
-                                                       Set<HealthCondition> preexistingConditions);
+        List<PolicyWithPremium> findPoliciesForUser(PolicyRequest policyRequest);
 
-        List<PolicyWithPremiumDTO> findVehiclePoliciesForUser(Boolean smokingDrinking,
-                                                              VehicleType vehicleType,
-                                                              Integer vehicleAge,
-                                                              Set<HealthCondition> preexistingConditions);
+        List<PolicyWithPremium> findVehiclePoliciesForUser(PolicyRequest policyRequest);
 
 
-        List<PolicyWithPremiumDTO> findLifePoliciesForUser(Boolean smokingDrinking,
-                                                              VehicleType vehicleType,
-                                                              Integer vehicleAge,
-                                                              Set<HealthCondition> preexistingConditions);
+        List<PolicyWithPremium> findLifePoliciesForUser(PolicyRequest policyRequest);
 
 
-        List<PolicyWithPremiumDTO> findHealthPoliciesForUser(Boolean smokingDrinking,
-                                                              VehicleType vehicleType,
-                                                              Integer vehicleAge,
-                                                              Set<HealthCondition> preexistingConditions);
+        List<PolicyWithPremium> findHealthPoliciesForUser(PolicyRequest policyRequest);
     }
 }
