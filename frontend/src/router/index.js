@@ -19,7 +19,7 @@ const routes = [
   // Public routes
   { path: "/", component: LandingPage },
   { path: "/login", component: LoginPage },
-  {path: "/register", component: RegisterPage },
+  {path: "/register",name :"Register", component: RegisterPage },
   
   // User Routes - direct paths (no prefix)
   {

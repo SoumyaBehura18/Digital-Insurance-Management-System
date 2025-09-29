@@ -1,10 +1,10 @@
-
 import {
   makeRequestWithToken,
   makeRequestWithoutToken,
   requestWithAuth,
 } from "@/utils/requests";
 const state = {
+  user:null,
   currentUser: null, // logged-in user
   users: [], // all users (if admin view)
   loading: false,
@@ -12,6 +12,7 @@ const state = {
 };
 
 const getters = {
+  getUser: (state) => state.user,
   getCurrentUser: (state) => state.currentUser,
   getUsers: (state) => state.users,
   isLoading: (state) => state.loading,
@@ -19,6 +20,9 @@ const getters = {
 };
 
 const mutations = {
+  SET_USER(state, user) {
+    state.user = user;
+  },
   SET_CURRENT_USER(state, user) {
     state.currentUser = user;
   },
@@ -57,15 +61,14 @@ const actions = {
   async fetchUserById({ commit }, userId) {
     commit("SET_LOADING", true);
     try {
-      const response = await makeRequestWithToken("GET", `/users/${userId}`);
-      commit("SET_CURRENT_USER", response.data);
-      localStorage.setItem("currentUser", JSON.stringify(response.data));
+      const response = await makeRequestWithToken("GET", `/getUserDetailsById/${userId}`);
+      commit("SET_USER", response.data);
       commit("SET_ERROR", null);
       commit("SET_LOADING", false);
       return response.data;
     } catch (error) {
       commit("SET_ERROR", error.response?.data || "Failed to fetch user");
-      commit("SET_CURRENT_USER", null);
+      commit("SET_USER", null);
     } finally {
       commit("SET_LOADING", false);
     }

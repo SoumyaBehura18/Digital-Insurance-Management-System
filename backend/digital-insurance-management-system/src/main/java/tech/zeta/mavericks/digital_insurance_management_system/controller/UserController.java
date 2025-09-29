@@ -106,4 +106,9 @@ public class UserController{
 
     }
 
+    @GetMapping("/getUserDetailsById/{id}")
+    public ResponseEntity<User> getUserDetailsById(@PathVariable Long id){
+        return new ResponseEntity<>(service.getUserDetailsById(id),HttpStatus.OK);
+    }
+
 }
