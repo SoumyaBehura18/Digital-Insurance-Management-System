@@ -2,9 +2,8 @@ package tech.zeta.mavericks.digital_insurance_management_system.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.PolicyRequest;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.PolicyWithPremiumDTO;
-import tech.zeta.mavericks.digital_insurance_management_system.entity.User;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.PolicyRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.PolicyWithPremium;
 import tech.zeta.mavericks.digital_insurance_management_system.service.PolicyService;
 
 import java.util.List;
@@ -20,26 +19,26 @@ public class PolicyController {
     }
 
     @PostMapping("/allPolicies")
-    public ResponseEntity<List<PolicyWithPremiumDTO>> getPoliciesForUser(@RequestBody PolicyRequest policyRequest) {
-        List<PolicyWithPremiumDTO> policies = policyService.getPoliciesForUser(policyRequest);
+    public ResponseEntity<List<PolicyWithPremium>> getPoliciesForUser(@RequestBody PolicyRequest policyRequest) {
+        List<PolicyWithPremium> policies = policyService.getPoliciesForUser(policyRequest);
         return ResponseEntity.ok(policies);
     }
 
     @PostMapping("/vehiclePolicies")
-    public ResponseEntity<List<PolicyWithPremiumDTO>> getVehiclePoliciesForUser(@RequestBody PolicyRequest policyRequest) {
-        List<PolicyWithPremiumDTO> policies = policyService.getVehiclePoliciesForUser(policyRequest);
+    public ResponseEntity<List<PolicyWithPremium>> getVehiclePoliciesForUser(@RequestBody PolicyRequest policyRequest) {
+        List<PolicyWithPremium> policies = policyService.getVehiclePoliciesForUser(policyRequest);
         return ResponseEntity.ok(policies);
     }
 
     @PostMapping("/lifePolicies")
-    public ResponseEntity<List<PolicyWithPremiumDTO>> getLifePoliciesForUser(@RequestBody PolicyRequest policyRequest) {
-        List<PolicyWithPremiumDTO> policies = policyService.getLifePoliciesForUser(policyRequest);
+    public ResponseEntity<List<PolicyWithPremium>> getLifePoliciesForUser(@RequestBody PolicyRequest policyRequest) {
+        List<PolicyWithPremium> policies = policyService.getLifePoliciesForUser(policyRequest);
         return ResponseEntity.ok(policies);
     }
 
     @PostMapping("/healthPolicies")
-    public ResponseEntity<List<PolicyWithPremiumDTO>> getHealthPoliciesForUser(@RequestBody PolicyRequest policyRequest) {
-        List<PolicyWithPremiumDTO> policies = policyService.getHealthPoliciesForUser(policyRequest);
+    public ResponseEntity<List<PolicyWithPremium>> getHealthPoliciesForUser(@RequestBody PolicyRequest policyRequest) {
+        List<PolicyWithPremium> policies = policyService.getHealthPoliciesForUser(policyRequest);
         return ResponseEntity.ok(policies);
     }
 }

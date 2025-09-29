@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.ClaimReviewDTO;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.ClaimRequestDto;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.ClaimListResponseDto;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.RemainingCoverageResponseDto;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.ClaimReview;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.ClaimRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.ClaimListResponse;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.RemainingCoverageResponse;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.UserPolicy;
 import tech.zeta.mavericks.digital_insurance_management_system.service.ClaimService;
 
@@ -23,26 +23,26 @@ public class ClaimController {
     private final ClaimService claimService;
 
     @PostMapping
-    public ResponseEntity<ClaimListResponseDto.ClaimResponseDto> submitClaim(@Valid @RequestBody ClaimRequestDto claimRequestDto) {
-        ClaimListResponseDto.ClaimResponseDto response = claimService.submitClaim(claimRequestDto);
+    public ResponseEntity<ClaimListResponse.ClaimResponseDto> submitClaim(@Valid @RequestBody ClaimRequest claimRequest) {
+        ClaimListResponse.ClaimResponseDto response = claimService.submitClaim(claimRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/claims")
-    public ResponseEntity<List<ClaimListResponseDto>> getAllClaims() {
-        List<ClaimListResponseDto> claims = claimService.getAllClaimsDto();
+    public ResponseEntity<List<ClaimListResponse>> getAllClaims() {
+        List<ClaimListResponse> claims = claimService.getAllClaimsDto();
         return ResponseEntity.ok(claims);
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<ClaimListResponseDto>> getClaimsByUserId(@PathVariable Long userId) {
-        List<ClaimListResponseDto> claims = claimService.getClaimsByUserIdDto(userId);
+    public ResponseEntity<List<ClaimListResponse>> getClaimsByUserId(@PathVariable Long userId) {
+        List<ClaimListResponse> claims = claimService.getClaimsByUserIdDto(userId);
         return ResponseEntity.ok(claims);
     }
 
     @PutMapping("/{claimId}/review")
-    public ResponseEntity<Void> reviewClaim(@Valid @RequestBody ClaimReviewDTO claimReviewDTO, @PathVariable Long claimId) {
-        claimService.updateCalimStatusAndReviewerComment(claimId, claimReviewDTO.getStatus(), claimReviewDTO.getReviewComments());
+    public ResponseEntity<Void> reviewClaim(@Valid @RequestBody ClaimReview claimReview, @PathVariable Long claimId) {
+        claimService.updateCalimStatusAndReviewerComment(claimId, claimReview.getStatus(), claimReview.getReviewComments());
         return ResponseEntity.ok().build();
     }
 
@@ -53,8 +53,8 @@ public class ClaimController {
     }
 
     @GetMapping("/policy/remaining-amount/{policyId}")
-    public ResponseEntity<RemainingCoverageResponseDto> getRemainingClaimAmount(@PathVariable Long policyId) {
-        RemainingCoverageResponseDto response = claimService.getRemainingCoverageAmount(policyId);
+    public ResponseEntity<RemainingCoverageResponse> getRemainingClaimAmount(@PathVariable Long policyId) {
+        RemainingCoverageResponse response = claimService.getRemainingCoverageAmount(policyId);
         return ResponseEntity.ok(response);
     }
 

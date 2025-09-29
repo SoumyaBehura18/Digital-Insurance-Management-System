@@ -1,4 +1,4 @@
-package tech.zeta.mavericks.digital_insurance_management_system.DTO.request;
+package tech.zeta.mavericks.digital_insurance_management_system.dto.request;
 
 import lombok.Data;
 import jakarta.validation.constraints.*;
@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
-public class ClaimRequestDto {
+public class ClaimRequest {
 
     @NotNull(message = "User policy ID is required")
     private Long userPolicyId;

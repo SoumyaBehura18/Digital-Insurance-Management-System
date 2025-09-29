@@ -1,4 +1,4 @@
-package tech.zeta.mavericks.digital_insurance_management_system.DTO.response;
+package tech.zeta.mavericks.digital_insurance_management_system.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,7 +8,7 @@ import tech.zeta.mavericks.digital_insurance_management_system.enums.PolicyType;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PolicyWithPremiumDTO {
+public class PolicyWithPremium {
     private Long policyId;
     private String policyName;
     private PolicyType policyType;

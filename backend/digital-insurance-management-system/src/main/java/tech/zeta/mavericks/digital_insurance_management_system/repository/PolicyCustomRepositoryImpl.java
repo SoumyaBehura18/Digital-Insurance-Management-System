@@ -3,18 +3,15 @@ package tech.zeta.mavericks.digital_insurance_management_system.repository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.PolicyRequest;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.PolicyWithPremiumDTO;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.PolicyRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.PolicyWithPremium;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.HealthPolicyPremium;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.HealthPreexistingCondition;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.LifePolicyPremium;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.VehiclePolicyPremium;
-import tech.zeta.mavericks.digital_insurance_management_system.enums.HealthCondition;
-import tech.zeta.mavericks.digital_insurance_management_system.enums.VehicleType;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Repository
@@ -24,9 +21,9 @@ public class PolicyCustomRepositoryImpl implements PolicyRepository.PolicyCustom
     public EntityManager em;
 
     @Override
-    public List<PolicyWithPremiumDTO> findPoliciesForUser(PolicyRequest policyRequest) {
+    public List<PolicyWithPremium> findPoliciesForUser(PolicyRequest policyRequest) {
 
-        List<PolicyWithPremiumDTO> allPolicies = new ArrayList<>();
+        List<PolicyWithPremium> allPolicies = new ArrayList<>();
         allPolicies.addAll(findVehiclePoliciesForUser(policyRequest));
         allPolicies.addAll(findLifePoliciesForUser(policyRequest));
         allPolicies.addAll(findHealthPoliciesForUser(policyRequest));
@@ -35,14 +32,14 @@ public class PolicyCustomRepositoryImpl implements PolicyRepository.PolicyCustom
     }
 
     @Override
-    public List<PolicyWithPremiumDTO> findVehiclePoliciesForUser(PolicyRequest policyRequest) {
+    public List<PolicyWithPremium> findVehiclePoliciesForUser(PolicyRequest policyRequest) {
         List<VehiclePolicyPremium> vehiclePolicies = em.createQuery(
                         "SELECT v FROM VehiclePolicyPremium v JOIN FETCH v.policy WHERE v.vehicleAge >= :vehicleAge and :vehicleAge!=0", VehiclePolicyPremium.class)
                 .setParameter("vehicleAge", policyRequest.getVehicleAge())
                 .getResultList();
 
-        List<PolicyWithPremiumDTO> dtos = vehiclePolicies.stream()
-                .map(v -> new PolicyWithPremiumDTO(
+        List<PolicyWithPremium> dtos = vehiclePolicies.stream()
+                .map(v -> new PolicyWithPremium(
                         v.getPolicy().getId(),
                         v.getPolicy().getName(),
                         v.getPolicy().getType(),
@@ -55,7 +52,7 @@ public class PolicyCustomRepositoryImpl implements PolicyRepository.PolicyCustom
     }
 
     @Override
-    public List<PolicyWithPremiumDTO> findLifePoliciesForUser(PolicyRequest policyRequest) {
+    public List<PolicyWithPremium> findLifePoliciesForUser(PolicyRequest policyRequest) {
         System.out.println("Smoking drinking: "+policyRequest);
         List<LifePolicyPremium> lifePolicies = em.createQuery(
                         "SELECT l FROM LifePolicyPremium l JOIN FETCH l.policy " +
@@ -64,8 +61,8 @@ public class PolicyCustomRepositoryImpl implements PolicyRepository.PolicyCustom
                 .setParameter("smokingDrinking", policyRequest.getSmokingDrinking())
                 .getResultList();
 
-        List<PolicyWithPremiumDTO> dtos = lifePolicies.stream()
-                .map(l -> new PolicyWithPremiumDTO(
+        List<PolicyWithPremium> dtos = lifePolicies.stream()
+                .map(l -> new PolicyWithPremium(
                         l.getPolicy().getId(),
                         l.getPolicy().getName(),
                         l.getPolicy().getType(),
@@ -80,13 +77,13 @@ public class PolicyCustomRepositoryImpl implements PolicyRepository.PolicyCustom
     }
 
     @Override
-    public List<PolicyWithPremiumDTO> findHealthPoliciesForUser(PolicyRequest policyRequest) {
+    public List<PolicyWithPremium> findHealthPoliciesForUser(PolicyRequest policyRequest) {
         List<HealthPolicyPremium> healthPolicies = em.createQuery(
                 "SELECT h FROM HealthPolicyPremium h JOIN FETCH h.policy",
                 HealthPolicyPremium.class
         ).getResultList();
 
-        List<PolicyWithPremiumDTO> dtos = healthPolicies.stream()
+        List<PolicyWithPremium> dtos = healthPolicies.stream()
                 // Filter for smoker/non-smoker
                 .filter(h -> Boolean.TRUE.equals(h.getSmokingDrinking()) == Boolean.TRUE.equals(policyRequest.getSmokingDrinking()))
                 .map(h -> {
@@ -116,7 +113,7 @@ public class PolicyCustomRepositoryImpl implements PolicyRepository.PolicyCustom
                     double totalRenewalPremium=renewalRate+additionalRenewal;
 
                     // Create DTO
-                    return new PolicyWithPremiumDTO(
+                    return new PolicyWithPremium(
                             h.getPolicy().getId(),
                             h.getPolicy().getName(),
                             h.getPolicy().getType(),

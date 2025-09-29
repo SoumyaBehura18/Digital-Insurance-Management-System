@@ -31,7 +31,7 @@
           />
         </div>
 
-        <!-- Filter Pills -->
+        <!-- Filter Pills
         <div class="flex flex-wrap gap-2 mb-4">
           <button
             v-for="filter in filters"
@@ -46,7 +46,7 @@
           >
             {{ filter }}
           </button>
-        </div>
+        </div> -->
 
         <!-- Table -->
         <div class="overflow-x-auto">
@@ -67,22 +67,22 @@
                 :key="index"
                 class="border-t hover:bg-gray-50 transition"
               >
-                <td class="px-4 py-3">#{{ policy.id }}</td>
-                <td class="px-4 py-3 font-medium text-gray-900">{{ policy.name }}</td>
+                <td class="px-4 py-3">#{{ policy.policyId }}</td>
+                <td class="px-4 py-3 font-medium text-gray-900">{{ policy.policyName }}</td>
                 <td class="px-4 py-3">
                   <span
                     class="px-2 py-1 rounded-full text-xs font-semibold"
                     :class="{
-                      'bg-pink-100 text-pink-700': policy.type === 'LIFE',
-                      'bg-green-100 text-green-700': policy.type === 'HEALTH',
-                      'bg-blue-100 text-blue-700': policy.type === 'VEHICLE'
+                      'bg-pink-100 text-pink-700': policy.policyType === 'LIFE',
+                      'bg-green-100 text-green-700': policy.policyType === 'HEALTH',
+                      'bg-blue-100 text-blue-700': policy.policyType === 'VEHICLE'
                     }"
                   >
-                    {{ policy.type }}
+                    {{ policy.policyType }}
                   </span>
                 </td>
-                <td class="px-4 py-3 text-gray-700">₹{{ policy.coverageAmt }}</td>
-                <td class="px-4 py-3 text-gray-700">{{ policy.durationMonths }} months</td>
+                <td class="px-4 py-3 text-gray-700">₹{{ policy.coverage }}</td>
+                <td class="px-4 py-3 text-gray-700">{{ policy.duration }} months</td>
                 <td class="px-4 py-3 text-gray-500 truncate max-w-[200px]">
                   {{ policy.description || "No description" }}
                 </td>
@@ -144,7 +144,7 @@
 
             <!-- Coverage -->
             <div>
-              <label class="block text-gray-800 font-medium mb-1">Coverage Amount ($)</label>
+              <label class="block text-gray-800 font-medium mb-1">Coverage Amount (₹)</label>
               <input
                 v-model="newPolicy.coverageAmount"
                 type="number"
@@ -155,7 +155,7 @@
 
             <!-- Premium -->
             <div>
-              <label class="block text-gray-800 font-medium mb-1">Annual Premium ($)</label>
+              <label class="block text-gray-800 font-medium mb-1">Annual Premium (₹)</label>
               <input
                 v-model="newPolicy.annualPremium"
                 type="number"
@@ -177,7 +177,7 @@
 
             <!-- Renewal Rate -->
             <div>
-              <label class="block text-gray-800 font-medium mb-1">Renewal Rate ($)</label>
+              <label class="block text-gray-800 font-medium mb-1">Renewal Rate (₹)</label>
               <input
                 v-model="newPolicy.renewalRate"
                 type="number"
@@ -279,22 +279,18 @@
     </div>
   </div>
 </template>
-
 <script setup>
 import { reactive, ref, computed, onMounted } from "vue";
-import axios from "axios";
 import { useStore } from "vuex";
 import { Trash } from "lucide-vue-next";
 
+const store = useStore();
+
+// Modal & form state
 const showCreatePolicy = ref(false);
-const policies = ref([]);
 const search = ref("");
 const filters = ["All", "LIFE", "HEALTH", "VEHICLE"];
 const activeFilter = ref("All");
-
-const store = useStore();
-const currentUser = store.getters["user/getCurrentUser"];
-const token = currentUser?.token;
 
 const newPolicy = reactive({
   policyName: "",
@@ -308,99 +304,27 @@ const newPolicy = reactive({
   description: ""
 });
 
-// Filtered policies (search + filter)
+// Policies from store
+const policies = computed(() => store.getters["adminPolicyStore/getPolicies"]);
+
+// Filtered policies for table
 const filteredPolicies = computed(() => {
   return policies.value.filter((p) => {
     const matchesSearch =
-      p.name.toLowerCase().includes(search.value.toLowerCase()) ||
-      p.type.toLowerCase().includes(search.value.toLowerCase());
-    const matchesFilter = activeFilter.value === "All" || p.type === activeFilter.value;
+      p.policyName.toLowerCase().includes(search.value.toLowerCase()) ||
+      p.policyType.toLowerCase().includes(search.value.toLowerCase());
+    const matchesFilter = activeFilter.value === "All" || p.policyType === activeFilter.value;
     return matchesSearch && matchesFilter;
   });
 });
 
-// Add condition
+// Add / Remove conditions for Health policies
 const addCondition = () => {
   newPolicy.conditions.push({ condition: "", extraPremium: 0 });
 };
 
-// Remove condition
 const removeCondition = (index) => {
   newPolicy.conditions.splice(index, 1);
-};
-
-// Create policy
-const createPolicy = async () => {
-  try {
-    const user = JSON.parse(localStorage.getItem("currentUser"));
-    const token = user?.token;
-    if (!token) {
-      alert("No token found. Please login again.");
-      return;
-    }
-
-    let payload = {
-      name: newPolicy.policyName,
-      type: newPolicy.policyType,
-      coverageAmt: newPolicy.coverageAmount,
-      premiumRate: newPolicy.annualPremium,
-      durationMonths: newPolicy.policyDuration,
-      renewalRate: newPolicy.renewalRate,
-      description: newPolicy.description
-    };
-
-    const response = await axios.post(
-      "http://localhost:9090/api/admin/policies",
-      payload,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-
-    const created = response.data;
-
-    if (newPolicy.policyType === "LIFE") {
-      await axios.post(
-        `http://localhost:9090/api/admin/policies/${created.id}/life-premium`,
-        { premiumRate: newPolicy.annualPremium, renewalRate: newPolicy.renewalRate },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-    }
-
-    if (newPolicy.policyType === "HEALTH") {
-      await axios.post(
-        `http://localhost:9090/api/admin/policies/${created.id}/health-premium`,
-        {
-          premiumRate: newPolicy.annualPremium,
-          renewalRate: newPolicy.renewalRate,
-          conditionPremiums: newPolicy.conditions.map((c) => ({
-            condition: c.condition,
-            extraPremium: c.extraPremium
-          }))
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-    }
-
-    if (newPolicy.policyType === "VEHICLE") {
-      await axios.post(
-        `http://localhost:9090/api/admin/policies/${created.id}/vehicle-premium`,
-        {
-          premiumRate: newPolicy.annualPremium,
-          renewalRate: newPolicy.renewalRate,
-          vehicleAge: newPolicy.vehicleAge
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-    }
-
-    policies.value.push(created);
-
-    alert("Policy created successfully!");
-    resetNewPolicy();
-    showCreatePolicy.value = false;
-  } catch (error) {
-    console.error("Error creating policy:", error);
-    alert("Failed to create policy");
-  }
 };
 
 // Reset form
@@ -418,17 +342,21 @@ const resetNewPolicy = () => {
   });
 };
 
-// Load policies on mount
-onMounted(async () => {
+// Create policy using store action
+const createPolicy = async () => {
   try {
-    const user = JSON.parse(localStorage.getItem("currentUser"));
-    const token = user?.token;
-    const response = await axios.get("http://localhost:9090/api/admin/policies", {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    policies.value = response.data;
+    await store.dispatch("adminPolicyStore/createPolicy", newPolicy);
+    alert("Policy created successfully!");
+    resetNewPolicy();
+    showCreatePolicy.value = false;
   } catch (error) {
-    console.error("Error fetching policies:", error);
+    console.error("Error creating policy:", error);
+    alert("Failed to create policy. Check console for details.");
   }
+};
+
+// Load all policies on mount
+onMounted(() => {
+  store.dispatch("adminPolicyStore/fetchPolicies");
 });
 </script>

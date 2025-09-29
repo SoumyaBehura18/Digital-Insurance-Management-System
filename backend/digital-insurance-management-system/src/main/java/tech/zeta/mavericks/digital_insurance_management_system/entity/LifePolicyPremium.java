@@ -19,12 +19,7 @@ public class LifePolicyPremium {
 
     private Double renewalRate;
 
-    private Integer startAge;
-
-    private Integer endAge;
-
     private Boolean smokingDrinking;
 
-   private Double totalPremium;
 }
 

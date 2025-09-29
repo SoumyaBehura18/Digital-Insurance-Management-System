@@ -1,4 +1,4 @@
-package tech.zeta.mavericks.digital_insurance_management_system.DTO.response;
+package tech.zeta.mavericks.digital_insurance_management_system.dto.response;
 
 import lombok.Data;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.TicketStatus;
@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @Data
-public class SupportTicketResponseDTO {
+public class SupportTicketResponse {
     private Long id;
     private Long userId;
     private Long policyId;
@@ -19,6 +19,6 @@ public class SupportTicketResponseDTO {
     private Timestamp createdAt;
     private Timestamp resolvedAt;
 
-    private List<MessageResponseDTO> messages;
+    private List<MessageResponse> messages;
 }
 

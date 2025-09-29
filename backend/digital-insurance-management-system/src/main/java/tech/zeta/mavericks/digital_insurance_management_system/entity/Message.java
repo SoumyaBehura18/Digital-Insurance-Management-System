@@ -7,7 +7,7 @@ import tech.zeta.mavericks.digital_insurance_management_system.enums.MessageStat
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "ticket_messages")
+@Table(name = "ticket_message")
 @Data
 public class Message {
 

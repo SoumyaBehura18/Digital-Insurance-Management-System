@@ -167,7 +167,7 @@
 </template>
 
 <script setup>
-import { reactive, computed, ref, watch } from "vue";
+import { reactive, ref, watch } from "vue";
 import BaseButton from "@/components/BaseButton.vue";
 import { useStore } from "vuex";
 
@@ -178,7 +178,7 @@ const props = defineProps({
   },
   ticket: {
     type: Object,
-    default: null,
+    default: () => null, // ✅ ensures ticket is never undefined
   },
   policies: {
     type: Array,
@@ -190,20 +190,10 @@ const props = defineProps({
   },
 });
 
-// Emits
-const emit = defineEmits(["ticket-created", "cancel"]);
+const emit = defineEmits(["ticket-created", "ticket-updated", "cancel"]);
 const store = useStore();
 
-// const policies = computed(() => store.getters["userPolicies/getPolicies"]);
-// const claims = computed(() => store.getters["userClaims/getClaims"]);
-const error = computed(() => store.getters["userPolicies/getError"]);
-
-console.log(
-  "The value of claims and policies are:",
-  props.claims,
-  props.policies
-);
-// Form state
+// ✅ Form state safely initialized with optional chaining
 const form = reactive({
   subject: props.ticket?.subject || "",
   description: props.ticket?.description || "",
@@ -211,71 +201,72 @@ const form = reactive({
   relatedClaim: props.ticket?.relatedClaim || "",
 });
 
-console.log("The form is: ", props.ticket);
+const isSubmitting = ref(false);
 
+// ✅ Watch ticket safely (only if it exists)
 watch(
   () => props.ticket,
-  async () => {
-    const response = await store.dispatch(
-      "tickets/fetchTicketById",
-      props.ticket.id
-    );
+  async (newTicket) => {
+    if (!newTicket || !newTicket.id) return; // ✅ prevent null access
 
-    if (response) {
-      console.log("The response is: ", response);
-      form.subject = response.subject || "";
-      form.description = response.description || "";
-      form.relatedPolicy = response.policyId || "";
-      form.relatedClaim = response.claimId || "";
+    try {
+      const response = await store.dispatch("tickets/fetchTicketById", newTicket.id);
+
+      if (response) {
+        console.log("Fetched ticket details:", response);
+        form.subject = response.subject || "";
+        form.description = response.description || "";
+        form.relatedPolicy = response.policyId || "";
+        form.relatedClaim = response.claimId || "";
+      }
+    } catch (err) {
+      console.error("Error fetching ticket:", err);
     }
   },
   { immediate: true }
 );
 
-const isSubmitting = ref(false);
-
-// Methods
+// ✅ Safe form submission handler
 const handleSubmit = async () => {
-  if (props.userId) {
-    isSubmitting.value = true;
+  if (!props.userId) {
+    alert("User not found. Please log in again.");
+    return;
+  }
 
-    console.log("---", form.relatedClaim, form.relatedPolicy);
+  isSubmitting.value = true;
 
-    try {
-      // Create ticket object to emit
-      const newTicket = {
-        subject: form.subject,
-        description: form.description,
-        policyId: form.relatedPolicy !== "" ? form.relatedPolicy : null,
-        claimId: form.relatedClaim !== "" ? form.relatedClaim : null,
-        userId: props.userId,
-      };
+  try {
+    const newTicket = {
+      subject: form.subject.trim(),
+      description: form.description.trim(),
+      policyId: form.relatedPolicy || null,
+      claimId: form.relatedClaim || null,
+      userId: props.userId,
+    };
 
-      console.log("The new ticket is: ", newTicket);
-
-      if (props.ticket) {
-        await store.dispatch("tickets/updateTicket", {
-          ticketData: { ...newTicket, status: "OPEN" },
-          ticketId: props.ticket.id,
-        });
-        emit("ticket-updated");
-      } else {
-        const result = await store.dispatch("tickets/createTicket", newTicket);
-        console.log("Ticket created:", result);
-        // Emit the new ticket to parent
-        emit("ticket-created", newTicket);
-      }
-
-      // Reset form after successful submission
-      Object.keys(form).forEach((key) => {
-        form[key] = "";
+    if (props.ticket && props.ticket.id) {
+      // ✅ Update existing ticket
+      await store.dispatch("tickets/updateTicket", {
+        ticketData: { ...newTicket, status: "OPEN" },
+        ticketId: props.ticket.id,
       });
-    } catch (error) {
-      console.error("Error submitting ticket:", error);
-      alert("Error submitting ticket. Please try again.");
-    } finally {
-      isSubmitting.value = false;
+      emit("ticket-updated");
+    } else {
+      // ✅ Create new ticket
+      const result = await store.dispatch("tickets/createTicket", newTicket);
+      console.log("Ticket created:", result);
+      emit("ticket-created", newTicket);
     }
+
+    // ✅ Reset form after successful submission
+    Object.keys(form).forEach((key) => {
+      form[key] = "";
+    });
+  } catch (error) {
+    console.error("Error submitting ticket:", error);
+    alert("Error submitting ticket. Please try again.");
+  } finally {
+    isSubmitting.value = false;
   }
 };
 </script>

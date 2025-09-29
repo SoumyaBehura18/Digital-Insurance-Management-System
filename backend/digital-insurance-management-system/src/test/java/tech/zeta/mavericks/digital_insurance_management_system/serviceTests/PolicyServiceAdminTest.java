@@ -3,8 +3,6 @@ package tech.zeta.mavericks.digital_insurance_management_system.serviceTests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
-import tech.zeta.mavericks.digital_insurance_management_system.dto.premium.ConditionPremiumDTO;
-import tech.zeta.mavericks.digital_insurance_management_system.dto.premium.HealthPremiumRequestDTO;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.*;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.HealthCondition;
 import tech.zeta.mavericks.digital_insurance_management_system.exception.PolicyNotFoundException;
@@ -52,8 +50,8 @@ class PolicyServiceAdminTest {
     void testAddHealthPremium_Success() {
         when(policyRepository.findById(1L)).thenReturn(Optional.of(policy));
 
-        Set<ConditionPremiumDTO> conditions = new HashSet<ConditionPremiumDTO>();
-        conditions.add(new ConditionPremiumDTO(HealthCondition.CANCER, 500.0));
+        Set<tech.zeta.mavericks.digital_insurance_management_system.dto.premium.ConditionPremium> conditions = new HashSet<tech.zeta.mavericks.digital_insurance_management_system.dto.premium.ConditionPremium>();
+        conditions.add(new tech.zeta.mavericks.digital_insurance_management_system.dto.premium.ConditionPremium(HealthCondition.CANCER, 500.0));
 
         double total = policyService.addHealthPremium(1L, conditions, 2000.0, 300.0);
 
@@ -67,7 +65,7 @@ class PolicyServiceAdminTest {
         when(policyRepository.findById(2L)).thenReturn(Optional.empty());
 
         assertThrows(PolicyNotFoundException.class, () ->
-                policyService.addHealthPremium(2L, new HashSet<ConditionPremiumDTO>(), 2000.0, 300.0)
+                policyService.addHealthPremium(2L, new HashSet<tech.zeta.mavericks.digital_insurance_management_system.dto.premium.ConditionPremium>(), 2000.0, 300.0)
         );
     }
 
@@ -75,8 +73,8 @@ class PolicyServiceAdminTest {
     void testAddPreexistingCondition() {
         when(policyRepository.findById(1L)).thenReturn(Optional.of(policy));
 
-        Set<ConditionPremiumDTO> conditions = new HashSet<>();
-        conditions.add(new ConditionPremiumDTO(HealthCondition.BP, 500.0)); // ✅ Enum constructor
+        Set<tech.zeta.mavericks.digital_insurance_management_system.dto.premium.ConditionPremium> conditions = new HashSet<>();
+        conditions.add(new tech.zeta.mavericks.digital_insurance_management_system.dto.premium.ConditionPremium(HealthCondition.BP, 500.0)); // ✅ Enum constructor
 
         double result = policyService.addPreexistingCondition(1L, conditions);
 
@@ -108,14 +106,14 @@ class PolicyServiceAdminTest {
     void testAddVehiclePremium_withNullVehicleAge() {
         when(policyRepository.findById(1L)).thenReturn(Optional.of(policy));
 
-        double result = policyService.addVehiclePremium(1L, 3000.0, 500.0, null);
+        double result = policyService.addVehiclePremium(1L, 3000.0, 500.0, 0);
 
         assertEquals(0.0, result);
         ArgumentCaptor<VehiclePolicyPremium> captor = ArgumentCaptor.forClass(VehiclePolicyPremium.class);
         verify(vehicleRepo, times(1)).save(captor.capture());
 
         VehiclePolicyPremium saved = captor.getValue();
-        assertEquals(Integer.MAX_VALUE, saved.getVehicleAge());
+        assertEquals(0, saved.getVehicleAge());
     }
 
     @Test

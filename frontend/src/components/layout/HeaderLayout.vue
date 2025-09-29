@@ -27,8 +27,8 @@ import AvatarComponent from "../AvatarComponent.vue";
 
 const store = useStore();
 const user = ref(JSON.parse(localStorage.getItem("currentUser")));
-const currentUser = computed(() => store.getters["user/getCurrentUser"]);
-console.log("Current User from Store:", currentUser.value);   
+// const currentUser = computed(() => store.getters["user/getCurrentUser"]);
+// console.log("Current User from Store:", currentUser.value);   
 const email = user.value?.email;
 const name = user.value?.name;
 </script>

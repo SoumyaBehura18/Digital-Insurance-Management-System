@@ -48,6 +48,10 @@ onMounted(async () => {
     const ticketsActionName = store._actions['adminTickets/fetchAllTickets'] ? 'adminTickets/fetchAllTickets' : 'fetchAllTickets';
     await store.dispatch(ticketsActionName);
     console.log('Tickets data loaded for dashboard');
+
+    const policyStoreActionName = store._actions['adminPolicyStore/fetchPolicies'] ? 'adminPolicyStore/fetchPolicies' : 'fetchPolicies';
+    await store.dispatch(policyStoreActionName);
+    console.log('Policy store data loaded for dashboard');
     
     // Note: PolicyStore is designed for user-specific policy recommendations
     // For admin dashboard, we derive policy statistics from claims data

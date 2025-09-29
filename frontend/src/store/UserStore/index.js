@@ -85,6 +85,7 @@ const actions = {
   },
 
   async createUser({ commit }, userData) {
+    console.log("Creating user with data:", userData);
     commit("SET_LOADING", true);
     try {
       const response = await makeRequestWithoutToken(
@@ -92,6 +93,7 @@ const actions = {
         `/register`,
         userData
       );
+      console.log("User created:", response.data);
       commit("SET_CURRENT_USER", response.data);
       localStorage.setItem("currentUser", JSON.stringify(response.data));
       commit("SET_ERROR", null);

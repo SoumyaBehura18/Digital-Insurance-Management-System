@@ -1,9 +1,9 @@
-package tech.zeta.mavericks.digital_insurance_management_system.DTO.request;
+package tech.zeta.mavericks.digital_insurance_management_system.dto.request;
 
 import lombok.Data;
 
 @Data
-public class SupportTicketUpdateDTO {
+public class SupportTicketUpdate {
     private Long policyId;  // Optional
     private Long claimId;   // Optional
     private String subject;

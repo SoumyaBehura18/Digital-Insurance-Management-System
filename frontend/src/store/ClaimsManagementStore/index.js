@@ -109,8 +109,11 @@ export default {
         commit('CLEAR_MESSAGES')
 
         const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}')
+        console.log("Current User:", currentUser)
         const currentUserId = parseInt(currentUser.userId)
+        console.log("Current User ID:", currentUserId)
         if (!currentUserId) {
+          
           commit('SET_ERROR', 'User not authenticated')
           return
         }

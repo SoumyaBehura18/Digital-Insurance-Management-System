@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "vehicle_policy_premiums")
+@Table(name = "vehicle_policy_premium")
 public class VehiclePolicyPremium {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,11 +19,6 @@ public class VehiclePolicyPremium {
     private Double renewalRate;
 
     private Integer vehicleAge;
-
-    private Boolean noClaimBonus;
-
-    private Double idv; // Insured Declared Value
-
 
 }
 
