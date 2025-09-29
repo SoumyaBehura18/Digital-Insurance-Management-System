@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.request.ClaimRequest;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.response.ClaimListResponse;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.response.RemainingCoverageResponse;
@@ -28,6 +29,78 @@ public class ClaimService {
 
     private final ClaimRepository claimRepository;
     private final UserPolicyRepository userPolicyRepository;
+    private final SupabaseStorageService storageService;
+
+    /**
+     * Submit a new claim with mandatory document validation and upload
+     * 
+     * This method handles the complete business logic for claim submission:
+     * 1. Validates that document is provided and not empty
+     * 2. Creates ClaimRequest from provided parameters
+     * 3. Validates the user policy exists and is active
+     * 4. Submits the claim to database
+     * 5. Uploads the document to Supabase storage
+     * 6. Updates the claim with document URL
+     * 
+     * @param userPolicyId - ID of the user's policy to claim against
+     * @param claimAmount - Amount being claimed (as String)
+     * @param reason - Detailed reason/description for the claim
+     * @param claimDate - Date of the incident (optional)
+     * @param document - MANDATORY supporting document file
+     * @return ClaimResponseDto with claim details including document link
+     * @throws RuntimeException if document is missing or upload fails
+     */
+    public ClaimListResponse.ClaimResponseDto submitClaimWithDocument(
+            Long userPolicyId, String claimAmount, String reason, String claimDate, MultipartFile document) {
+        
+        // MANDATORY DOCUMENT VALIDATION
+        if (document == null || document.isEmpty()) {
+            log.error("Document is mandatory but not provided for claim submission");
+            throw new RuntimeException("Document is mandatory for claim submission");
+        }
+        
+        // Create ClaimRequest object with all required data
+        ClaimRequest claimRequest = new ClaimRequest();
+        claimRequest.setUserPolicyId(userPolicyId);
+        claimRequest.setClaimAmount(new java.math.BigDecimal(claimAmount));
+        claimRequest.setReason(reason);
+        
+        // Set claim date - use provided date or current date as fallback
+        if (claimDate != null && !claimDate.isEmpty()) {
+            claimRequest.setClaimDate(java.time.LocalDate.parse(claimDate));
+        } else {
+            claimRequest.setClaimDate(java.time.LocalDate.now());
+        }
+        
+        // Submit claim to database first using existing method
+        ClaimListResponse.ClaimResponseDto response = submitClaim(claimRequest);
+        
+        // MANDATORY DOCUMENT UPLOAD
+        try {
+            log.info("Uploading mandatory document: {} for claim ID: {}", 
+                    document.getOriginalFilename(), response.getId());
+            log.info("File size: {} bytes, Content type: {}", 
+                    document.getSize(), document.getContentType());
+            
+            // Upload to Supabase storage
+            String documentUrl = storageService.uploadFile(document, response.getId());
+            log.info("Document uploaded successfully: {}", documentUrl);
+            
+            // Update the claim record with the document URL
+            updateClaimDocument(response.getId(), documentUrl);
+            response.setDocumentLink(documentUrl);
+            
+        } catch (Exception uploadException) {
+            // Since document is mandatory, we should handle this error appropriately
+            log.error("CRITICAL: Failed to upload mandatory document for claim {}", response.getId(), uploadException);
+            
+            // In production, consider deleting the claim if document upload fails
+            // For now, we'll throw an exception to indicate the failure
+            throw new RuntimeException("Failed to upload mandatory document: " + uploadException.getMessage());
+        }
+        
+        return response;
+    }
 
     public ClaimListResponse.ClaimResponseDto submitClaim(ClaimRequest claimRequest) {
         UserPolicy userPolicy = userPolicyRepository.findById(claimRequest.getUserPolicyId())
@@ -65,6 +138,7 @@ public class ClaimService {
         responseDto.setStatus(claim.getStatus());
         responseDto.setReviewerComment(claim.getReviewerComment());
         responseDto.setResolvedDate(claim.getResolvedDate());
+        responseDto.setDocumentLink(claim.getDocumentLink());
         return responseDto;
     }
 
@@ -96,6 +170,7 @@ public class ClaimService {
         dto.setStatus(claim.getStatus());
         dto.setReviewerComment(claim.getReviewerComment());
         dto.setResolvedDate(claim.getResolvedDate());
+        dto.setDocumentLink(claim.getDocumentLink());
         return dto;
     }
 
@@ -131,5 +206,12 @@ public class ClaimService {
 
     public List<UserPolicy> getAllUserPolicies() {
         return userPolicyRepository.findAll();
+    }
+
+    public void updateClaimDocument(Long claimId, String documentUrl) {
+        Claim claim = claimRepository.findById(claimId)
+                .orElseThrow(() -> new ClaimNotFoundException("Claim with ID " + claimId + " not found"));
+        claim.setDocumentLink(documentUrl);
+        claimRepository.save(claim);
     }
 }

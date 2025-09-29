@@ -20,6 +20,7 @@ public class ClaimListResponse {
     private ClaimStatus status;
     private String reviewerComment;
     private LocalDate resolvedDate;
+    private String documentLink;
 
     @Data
     public static class ClaimResponseDto {
@@ -31,5 +32,6 @@ public class ClaimListResponse {
         private ClaimStatus status;
         private String reviewerComment;
         private LocalDate resolvedDate;
+        private String documentLink;
     }
 }

@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.request.ClaimReview;
-import tech.zeta.mavericks.digital_insurance_management_system.dto.request.ClaimRequest;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.response.ClaimListResponse;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.response.RemainingCoverageResponse;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.UserPolicy;
@@ -23,8 +23,15 @@ public class ClaimController {
     private final ClaimService claimService;
 
     @PostMapping
-    public ResponseEntity<ClaimListResponse.ClaimResponseDto> submitClaim(@Valid @RequestBody ClaimRequest claimRequest) {
-        ClaimListResponse.ClaimResponseDto response = claimService.submitClaim(claimRequest);
+    public ResponseEntity<ClaimListResponse.ClaimResponseDto> submitClaim(
+            @RequestParam("userPolicyId") Long userPolicyId,
+            @RequestParam("claimAmount") String claimAmount,
+            @RequestParam("reason") String reason,
+            @RequestParam(value = "claimDate", required = false) String claimDate,
+            @RequestParam("document") MultipartFile document) {
+        
+        ClaimListResponse.ClaimResponseDto response = claimService.submitClaimWithDocument(
+                userPolicyId, claimAmount, reason, claimDate, document);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

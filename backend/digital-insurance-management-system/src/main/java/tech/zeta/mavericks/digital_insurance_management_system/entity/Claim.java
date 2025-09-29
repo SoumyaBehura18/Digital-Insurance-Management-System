@@ -36,5 +36,8 @@ public class Claim {
 
     private LocalDate resolvedDate;
 
+    // Document link for storing Supabase file URL
+    @Column(columnDefinition = "TEXT")
+    private String documentLink;
 
 }
