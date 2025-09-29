@@ -8,7 +8,7 @@ import tech.zeta.mavericks.digital_insurance_management_system.enums.HealthCondi
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ConditionPremiumDTO {
+public class ConditionPremium {
     private HealthCondition condition;
     private Double extraPremium;
 }

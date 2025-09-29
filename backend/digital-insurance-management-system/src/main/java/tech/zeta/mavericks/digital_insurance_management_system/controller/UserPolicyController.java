@@ -4,10 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.PolicyStatusRequest;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.UserPolicyRequest;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.UserPolicyResponse;
-import tech.zeta.mavericks.digital_insurance_management_system.enums.PolicyStatus;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.PolicyStatusRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.UserPolicyRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.UserPolicyResponse;
 import tech.zeta.mavericks.digital_insurance_management_system.service.UserPolicyService;
 
 import java.util.List;

@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.ClaimRequestDto;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.ClaimListResponseDto;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.RemainingCoverageResponseDto;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.ClaimRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.ClaimListResponse;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.RemainingCoverageResponse;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.Claim;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.UserPolicy;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.ClaimStatus;
@@ -29,9 +29,9 @@ public class ClaimService {
     private final ClaimRepository claimRepository;
     private final UserPolicyRepository userPolicyRepository;
 
-    public ClaimListResponseDto.ClaimResponseDto submitClaim(ClaimRequestDto claimRequestDto) {
-        UserPolicy userPolicy = userPolicyRepository.findById(claimRequestDto.getUserPolicyId())
-                .orElseThrow(() -> new UserPolicyNotFoundException("User policy with ID " + claimRequestDto.getUserPolicyId() + " not found"));
+    public ClaimListResponse.ClaimResponseDto submitClaim(ClaimRequest claimRequest) {
+        UserPolicy userPolicy = userPolicyRepository.findById(claimRequest.getUserPolicyId())
+                .orElseThrow(() -> new UserPolicyNotFoundException("User policy with ID " + claimRequest.getUserPolicyId() + " not found"));
 
         log.info("UserPolicy status: {}", userPolicy.getStatus());
         log.info("UserPolicy start date: {}, end date: {}", userPolicy.getStartDate(), userPolicy.getEndDate());
@@ -42,9 +42,9 @@ public class ClaimService {
 
         Claim claim = new Claim();
         claim.setUserPolicy(userPolicy);
-        claim.setClaimDate(claimRequestDto.getClaimDate());
-        claim.setClaimAmount(claimRequestDto.getClaimAmount());
-        claim.setReason(claimRequestDto.getReason());
+        claim.setClaimDate(claimRequest.getClaimDate());
+        claim.setClaimAmount(claimRequest.getClaimAmount());
+        claim.setReason(claimRequest.getReason());
         claim.setStatus(ClaimStatus.PENDING);
         claim.setReviewerComment("");
         claim.setResolvedDate(null);
@@ -55,8 +55,8 @@ public class ClaimService {
         return convertToResponseDto(savedClaim);
     }
 
-    private ClaimListResponseDto.ClaimResponseDto convertToResponseDto(Claim claim) {
-        ClaimListResponseDto.ClaimResponseDto responseDto = new ClaimListResponseDto.ClaimResponseDto();
+    private ClaimListResponse.ClaimResponseDto convertToResponseDto(Claim claim) {
+        ClaimListResponse.ClaimResponseDto responseDto = new ClaimListResponse.ClaimResponseDto();
         responseDto.setId(claim.getId());
         responseDto.setUserPolicyId(claim.getUserPolicy().getId());
         responseDto.setClaimDate(claim.getClaimDate());
@@ -68,22 +68,22 @@ public class ClaimService {
         return responseDto;
     }
 
-    public List<ClaimListResponseDto> getAllClaimsDto() {
+    public List<ClaimListResponse> getAllClaimsDto() {
         List<Claim> claims = claimRepository.findAll();
         return claims.stream()
                 .map(this::convertToClaimListResponseDto)
                 .collect(Collectors.toList());
     }
 
-    public List<ClaimListResponseDto> getClaimsByUserIdDto(Long userId) {
+    public List<ClaimListResponse> getClaimsByUserIdDto(Long userId) {
         List<Claim> claims = claimRepository.findByUserPolicy_User_Id(userId);
         return claims.stream()
                 .map(this::convertToClaimListResponseDto)
                 .collect(Collectors.toList());
     }
 
-    private ClaimListResponseDto convertToClaimListResponseDto(Claim claim) {
-        ClaimListResponseDto dto = new ClaimListResponseDto();
+    private ClaimListResponse convertToClaimListResponseDto(Claim claim) {
+        ClaimListResponse dto = new ClaimListResponse();
         dto.setId(claim.getId());
         dto.setUserPolicyId(claim.getUserPolicy().getId());
         dto.setUserId(claim.getUserPolicy().getUser().getId());
@@ -115,7 +115,7 @@ public class ClaimService {
         return userPolicyRepository.findByUser_Id(userId);
     }
 
-    public RemainingCoverageResponseDto getRemainingCoverageAmount(Long userPolicyId) {
+    public RemainingCoverageResponse getRemainingCoverageAmount(Long userPolicyId) {
         UserPolicy userPolicy = userPolicyRepository.findById(userPolicyId)
                 .orElseThrow(() -> new UserPolicyNotFoundException("User policy with ID " + userPolicyId + " not found"));
 
@@ -126,7 +126,7 @@ public class ClaimService {
 
         Double coverageAmount = userPolicy.getPolicy().getCoverageAmt();
         Double remaining = coverageAmount - totalClaimedAmount;
-        return new RemainingCoverageResponseDto(userPolicyId, remaining);
+        return new RemainingCoverageResponse(userPolicyId, remaining);
     }
 
     public List<UserPolicy> getAllUserPolicies() {

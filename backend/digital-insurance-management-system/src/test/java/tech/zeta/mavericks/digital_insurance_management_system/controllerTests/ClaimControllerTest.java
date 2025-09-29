@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import java.util.Map;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.ClaimRequestDto;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.ClaimReviewDTO;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.ClaimListResponseDto;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.RemainingCoverageResponseDto;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.ClaimRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.ClaimReview;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.ClaimListResponse;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.RemainingCoverageResponse;
 import tech.zeta.mavericks.digital_insurance_management_system.controller.ClaimController;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.Policy;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.User;
@@ -31,7 +31,6 @@ import tech.zeta.mavericks.digital_insurance_management_system.service.ClaimServ
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -51,12 +50,12 @@ class ClaimControllerTest {
 
     private ObjectMapper objectMapper;
 
-    private ClaimRequestDto claimRequestDto;
-    private ClaimListResponseDto claimListDto;
-    private ClaimListResponseDto.ClaimResponseDto claimResponseDto;
-    private ClaimReviewDTO claimReviewDTO;
+    private ClaimRequest claimRequest;
+    private ClaimListResponse claimListDto;
+    private ClaimListResponse.ClaimResponseDto claimResponseDto;
+    private ClaimReview claimReview;
     private UserPolicy userPolicy;
-    private RemainingCoverageResponseDto remainingCoverageResponseDto;
+    private RemainingCoverageResponse remainingCoverageResponse;
 
     @BeforeEach
     void setup() {
@@ -69,13 +68,13 @@ class ClaimControllerTest {
     }
 
     private void initData() {
-        claimRequestDto = new ClaimRequestDto();
-        claimRequestDto.setUserPolicyId(1L);
-        claimRequestDto.setClaimDate(LocalDate.now());
-        claimRequestDto.setClaimAmount(new BigDecimal("5000.00"));
-        claimRequestDto.setReason("Medical emergency treatment required");
+        claimRequest = new ClaimRequest();
+        claimRequest.setUserPolicyId(1L);
+        claimRequest.setClaimDate(LocalDate.now());
+        claimRequest.setClaimAmount(new BigDecimal("5000.00"));
+        claimRequest.setReason("Medical emergency treatment required");
 
-        claimListDto = new ClaimListResponseDto();
+        claimListDto = new ClaimListResponse();
         claimListDto.setId(1L);
         claimListDto.setUserPolicyId(1L);
         claimListDto.setUserId(10L);
@@ -87,7 +86,7 @@ class ClaimControllerTest {
         claimListDto.setReason("Medical emergency treatment required");
         claimListDto.setStatus(ClaimStatus.PENDING);
 
-        claimResponseDto = new ClaimListResponseDto.ClaimResponseDto();
+        claimResponseDto = new ClaimListResponse.ClaimResponseDto();
         claimResponseDto.setId(1L);
         claimResponseDto.setUserPolicyId(1L);
         claimResponseDto.setClaimDate(LocalDate.now());
@@ -95,9 +94,9 @@ class ClaimControllerTest {
         claimResponseDto.setReason("Medical emergency treatment required");
         claimResponseDto.setStatus(ClaimStatus.PENDING);
 
-        claimReviewDTO = new ClaimReviewDTO();
-        claimReviewDTO.setStatus(ClaimStatus.APPROVED);
-        claimReviewDTO.setReviewComments("Docs verified");
+        claimReview = new ClaimReview();
+        claimReview.setStatus(ClaimStatus.APPROVED);
+        claimReview.setReviewComments("Docs verified");
 
         User user = new User();
         user.setId(10L);
@@ -117,7 +116,7 @@ class ClaimControllerTest {
         userPolicy.setEndDate(LocalDate.now().plusMonths(6));
         userPolicy.setStatus(PolicyStatus.ACTIVE);
 
-        remainingCoverageResponseDto = new RemainingCoverageResponseDto(1L, 45000.0);
+        remainingCoverageResponse = new RemainingCoverageResponse(1L, 45000.0);
     }
 
     @Test
@@ -125,7 +124,7 @@ class ClaimControllerTest {
         when(claimService.submitClaim(any())).thenReturn(claimResponseDto);
         mockMvc.perform(post("/claim")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(claimRequestDto)))
+                .content(objectMapper.writeValueAsString(claimRequest)))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.id").value(1L))
             .andExpect(jsonPath("$.status").value("PENDING"))
@@ -134,7 +133,7 @@ class ClaimControllerTest {
 
     @Test
     void submitClaim_ShouldFailValidation() throws Exception {
-        ClaimRequestDto invalid = new ClaimRequestDto();
+        ClaimRequest invalid = new ClaimRequest();
         mockMvc.perform(post("/claim")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalid)))
@@ -170,7 +169,7 @@ class ClaimControllerTest {
     void reviewClaim_ShouldReturnOk() throws Exception {
         mockMvc.perform(put("/claim/1/review")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(claimReviewDTO)))
+                .content(objectMapper.writeValueAsString(claimReview)))
             .andExpect(status().isOk());
     }
 
@@ -182,7 +181,7 @@ class ClaimControllerTest {
 
         mockMvc.perform(put("/claim/99/review")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(claimReviewDTO)))
+                .content(objectMapper.writeValueAsString(claimReview)))
             .andExpect(status().isInternalServerError())
             .andExpect(jsonPath("$.error").value("not found"));
     }
@@ -198,7 +197,7 @@ class ClaimControllerTest {
 
     @Test
     void getRemainingCoverage_ShouldReturnValue() throws Exception {
-        when(claimService.getRemainingCoverageAmount(1L)).thenReturn(remainingCoverageResponseDto);
+        when(claimService.getRemainingCoverageAmount(1L)).thenReturn(remainingCoverageResponse);
         mockMvc.perform(get("/claim/policy/remaining-amount/1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.policyId").value(1L))

@@ -7,6 +7,7 @@ import userPoliciesStore from "@/store/UserPolicyStore/index.js";
 import policiesStore from "@/store/PolicyStore/index.js";
 import ticketStore from "@/store/UserTicketStore/index.js";
 import adminTicketStore from "@/store/TicketStore/index.js";
+import adminPolicyStore from "@/store/AdminPolicyStore/index.js";
 
 export default createStore({
   modules: {
@@ -16,5 +17,6 @@ export default createStore({
     policies: policiesStore, // module name for all policies
     tickets: ticketStore, // module name for tickets
     adminTickets: adminTicketStore,
+    adminPolicyStore: adminPolicyStore,
   },
 });

@@ -5,12 +5,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.PolicyRequest;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.PolicyWithPremiumDTO;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.PolicyRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.PolicyWithPremium;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.*;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.HealthCondition;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.PolicyType;
-import tech.zeta.mavericks.digital_insurance_management_system.enums.VehicleType;
 import tech.zeta.mavericks.digital_insurance_management_system.repository.PolicyCustomRepositoryImpl;
 import tech.zeta.mavericks.digital_insurance_management_system.repository.PolicyRepository;
 import tech.zeta.mavericks.digital_insurance_management_system.repository.UserRepository;
@@ -108,7 +107,7 @@ class PolicyCustomRepositoryImplTest {
         PolicyRequest request = new PolicyRequest();
         request.setVehicleAge(2);
 
-        List<PolicyWithPremiumDTO> results = policyCustomRepository.findVehiclePoliciesForUser(request);
+        List<PolicyWithPremium> results = policyCustomRepository.findVehiclePoliciesForUser(request);
         assertThat(results).hasSize(1);
         assertThat(results.get(0).getPolicyName()).isEqualTo("Car Insurance");
         assertThat(results.get(0).getPolicyType().toString()).isEqualTo("VEHICLE");
@@ -120,7 +119,7 @@ class PolicyCustomRepositoryImplTest {
         PolicyRequest request = new PolicyRequest();
         request.setSmokingDrinking(true);
 
-        List<PolicyWithPremiumDTO> results = policyCustomRepository.findLifePoliciesForUser(request);
+        List<PolicyWithPremium> results = policyCustomRepository.findLifePoliciesForUser(request);
         assertThat(results).hasSize(1);
         assertThat(results.get(0).getPolicyName()).isEqualTo("Life Insurance");
         assertThat(results.get(0).getPolicyType().toString()).isEqualTo("LIFE");
@@ -133,7 +132,7 @@ class PolicyCustomRepositoryImplTest {
         request.setSmokingDrinking(true);
         request.setPreexistingConditions(Set.of(HealthCondition.DIABETES));
 
-        List<PolicyWithPremiumDTO> results = policyCustomRepository.findHealthPoliciesForUser(request);
+        List<PolicyWithPremium> results = policyCustomRepository.findHealthPoliciesForUser(request);
         assertThat(results).hasSize(1);
         assertThat(results.get(0).getPolicyName()).isEqualTo("Health Insurance");
         assertThat(results.get(0).getPolicyType().toString()).isEqualTo("HEALTH");
@@ -147,7 +146,7 @@ class PolicyCustomRepositoryImplTest {
         request.setSmokingDrinking(true);
         request.setPreexistingConditions(Set.of(HealthCondition.DIABETES));
 
-        List<PolicyWithPremiumDTO> results = policyCustomRepository.findPoliciesForUser(request);
+        List<PolicyWithPremium> results = policyCustomRepository.findPoliciesForUser(request);
         assertThat(results).hasSize(3); // vehicle + life + health
     }
 }

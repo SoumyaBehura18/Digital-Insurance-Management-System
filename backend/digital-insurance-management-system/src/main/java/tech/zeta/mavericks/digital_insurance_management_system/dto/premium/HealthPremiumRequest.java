@@ -3,8 +3,8 @@ import lombok.Data;
 import java.util.Set;
 
 @Data
-public class HealthPremiumRequestDTO {
-    private Set<ConditionPremiumDTO> conditionPremiums;
+public class HealthPremiumRequest {
+    private Set<ConditionPremium> conditionPremiums;
     private Double premiumRate;
     private Double renewalRate;
 }

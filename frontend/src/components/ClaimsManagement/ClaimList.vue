@@ -220,7 +220,8 @@ export default {
   },
   computed: {
     userId() {
-      return parseInt(localStorage.getItem("userId")) || null;
+      const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+      return currentUser?.userId || null;
     },
   },
   async mounted() {

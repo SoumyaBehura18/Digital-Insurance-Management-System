@@ -1,4 +1,4 @@
-package tech.zeta.mavericks.digital_insurance_management_system.DTO.response;
+package tech.zeta.mavericks.digital_insurance_management_system.dto.response;
 
 import lombok.Data;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.ClaimStatus;
@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
-public class ClaimListResponseDto {
+public class ClaimListResponse {
     private Long id;
     private Long userPolicyId;
     private Long userId;
