@@ -112,9 +112,6 @@ const actions = {
     const endDate = new Date(policy.endDate);
     const diffDays = (now - endDate) / (1000 * 60 * 60 * 24); // how many days since expiry
 
-    // Case 1️⃣: Policy is still active → do nothing
-    
-
     // Case 2️⃣: Expired but within 15 days → set RENEW_PENDING
     if (diffDays >= 0 && diffDays <= 15 && policy.status !== "RENEW_PENDING") {
       console.log(
@@ -183,6 +180,8 @@ async renewablePolicy({ commit, state }, policy) {
       const payload = {
         premiumRate: policy.renewalRate || policy.premiumPaid,
         policyStatus: "RENEWED",
+        startDate: policy.startDate,
+        endDate: policy.endDate
       };
 
       console.log("Renewal payload:", payload);

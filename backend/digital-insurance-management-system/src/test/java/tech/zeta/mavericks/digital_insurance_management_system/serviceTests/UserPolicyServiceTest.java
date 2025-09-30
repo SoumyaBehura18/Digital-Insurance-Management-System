@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.PolicyStatusRequest;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.request.UserPolicyRequest;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.response.UserPolicyResponse;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.Policy;
@@ -25,7 +25,6 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -143,8 +142,10 @@ class UserPolicyServiceTest {
     void testGetUserPoliciesByUserId_NotFound() {
         when(userPolicyRepository.findByUserId(1L)).thenReturn(new ArrayList<>());
 
-        PolicyNotFoundException exception = assertThrows(PolicyNotFoundException.class,
-                () -> userPolicyService.getUserPoliciesByUserId(1L));
+        PolicyNotFoundException exception = assertThrows(
+                PolicyNotFoundException.class,
+                () -> userPolicyService.getUserPoliciesByUserId(1L)
+        );
         assertEquals("No policies found for user with ID 1", exception.getMessage());
     }
 
@@ -166,8 +167,12 @@ class UserPolicyServiceTest {
     void testGetUserPolicyById_NotFound() {
         when(userPolicyRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class,
-                () -> userPolicyService.getUserPolicyById(1L));
+        PolicyNotFoundException exception = assertThrows(
+                PolicyNotFoundException.class,
+                () -> userPolicyService.getUserPolicyById(1L)
+        );
+        assertEquals("UserPolicy not found with id: 1", exception.getMessage());
+
         verify(userPolicyRepository, times(1)).findById(1L);
     }
 
@@ -175,7 +180,6 @@ class UserPolicyServiceTest {
     void testUpdateUserPolicyById_Success() {
         when(userPolicyRepository.findById(1L)).thenReturn(Optional.of(userPolicy));
 
-        // Create a copy of userPolicy with noClaimBonus set to true for the save return
         UserPolicy updatedUserPolicy = new UserPolicy();
         updatedUserPolicy.setId(1L);
         updatedUserPolicy.setUser(user);
@@ -211,20 +215,26 @@ class UserPolicyServiceTest {
     void testUpdateUserPolicyStatusById_Success() {
         when(userPolicyRepository.findById(1L)).thenReturn(Optional.of(userPolicy));
 
-        // Create updated policy with new status and premium
         UserPolicy updatedUserPolicy = new UserPolicy();
         updatedUserPolicy.setId(1L);
         updatedUserPolicy.setUser(user);
         updatedUserPolicy.setPolicy(policy);
-        updatedUserPolicy.setStartDate(userPolicy.getStartDate());
-        updatedUserPolicy.setEndDate(userPolicy.getEndDate());
+        updatedUserPolicy.setStartDate(LocalDate.now());
+        updatedUserPolicy.setEndDate(LocalDate.now().plusYears(1));
         updatedUserPolicy.setStatus(PolicyStatus.EXPIRED);
         updatedUserPolicy.setPremiumPaid(15000.0);
         updatedUserPolicy.setNoClaimBonus(false);
 
         when(userPolicyRepository.save(any(UserPolicy.class))).thenReturn(updatedUserPolicy);
 
-        UserPolicyResponse response = userPolicyService.updateUserPolicyStatusById(1L, PolicyStatus.EXPIRED, 15000.0);
+        // Create PolicyStatusRequest payload
+        PolicyStatusRequest request = new PolicyStatusRequest();
+        request.setPolicyStatus(PolicyStatus.EXPIRED);
+        request.setPremiumRate(15000.0);
+        request.setStartDate(LocalDate.now());
+        request.setEndDate(LocalDate.now().plusYears(1));
+
+        UserPolicyResponse response = userPolicyService.updateUserPolicyStatusById(1L, request);
 
         assertNotNull(response);
         assertEquals(PolicyStatus.EXPIRED.name(), response.getStatus());
@@ -237,22 +247,26 @@ class UserPolicyServiceTest {
     void testUpdateUserPolicyStatusById_NotFound() {
         when(userPolicyRepository.findById(1L)).thenReturn(Optional.empty());
 
+        PolicyStatusRequest request = new PolicyStatusRequest();
+        request.setPolicyStatus(PolicyStatus.EXPIRED);
+        request.setPremiumRate(15000.0);
+        request.setStartDate(LocalDate.now());
+        request.setEndDate(LocalDate.now().plusYears(1));
+
         PolicyNotFoundException exception = assertThrows(PolicyNotFoundException.class,
-                () -> userPolicyService.updateUserPolicyStatusById(1L, PolicyStatus.EXPIRED, 15000.0));
+                () -> userPolicyService.updateUserPolicyStatusById(1L, request));
         assertEquals("UserPolicy not found with id: 1", exception.getMessage());
 
         verify(userPolicyRepository, never()).save(any());
     }
 
+
     @Test
     void testMapToResponse_AllFields() {
-        // This test ensures the private mapToResponse method is fully covered
-        // by testing through a public method that uses it
         when(userPolicyRepository.findById(1L)).thenReturn(Optional.of(userPolicy));
 
         UserPolicyResponse response = userPolicyService.getUserPolicyById(1L);
 
-        // Verify all fields are properly mapped
         assertEquals(userPolicy.getId(), response.getId());
         assertEquals(userPolicy.getUser().getId(), response.getUserId());
         assertEquals(userPolicy.getPolicy().getId(), response.getPolicyId());
