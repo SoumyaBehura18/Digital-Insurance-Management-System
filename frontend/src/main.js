@@ -6,5 +6,5 @@ import './assets/main.css'
 
 const app = createApp(App)
 app.use(router)
-app.use(store)              // <-- use the Vuex store here
-app.mount('#app')
+app.use(store)
+app.mount('#InsureCore')   // <-- change from '#app' to '#InsureCore'

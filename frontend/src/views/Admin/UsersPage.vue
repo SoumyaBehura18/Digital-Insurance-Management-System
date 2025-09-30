@@ -25,8 +25,8 @@
         {{ error }}
       </div>
 
-      <!-- Users Table -->
-      <div v-else class="bg-white shadow-md rounded-lg overflow-hidden">
+      <!-- Desktop Table (md and up) -->
+      <div v-else class="bg-white shadow-md rounded-lg overflow-hidden hidden md:block">
         <table class="min-w-full border-collapse">
           <thead class="bg-gray-50 text-[#6c63ff]">
             <tr>
@@ -77,6 +77,47 @@
         </table>
       </div>
 
+      <!-- Mobile Cards (sm screens) -->
+      <div
+  v-if="!loading && !error"
+  class="flex flex-col gap-4 md:hidden"
+>
+        <div
+          v-for="userItem in users"
+          :key="userItem.id"
+          class="bg-white shadow-md rounded-lg p-4 border space-y-2"
+        >
+          <div class="flex justify-between items-center">
+            <h3 class="font-semibold text-gray-800">{{ userItem.name }}</h3>
+            <span
+              :class="{
+                'bg-green-100 text-green-800': userItem.roleType === 'ADMIN',
+                'bg-blue-100 text-blue-800': userItem.roleType === 'USER',
+              }"
+              class="px-2 py-1 rounded-full text-xs font-semibold"
+            >
+              {{ userItem.roleType }}
+            </span>
+          </div>
+
+          <div class="text-gray-700 text-sm">
+            <p><span class="font-medium">ID:</span> {{ userItem.id }}</p>
+            <p><span class="font-medium">Email:</span> {{ userItem.email }}</p>
+            <p><span class="font-medium">Phone:</span> {{ userItem.phone }}</p>
+            <p><span class="font-medium">Age:</span> {{ userItem.age }}</p>
+          </div>
+
+          <div class="flex justify-end">
+            <button
+              class="bg-purple-500 hover:bg-purple-600 text-white text-xs font-medium px-3 py-1 rounded-full transition"
+              @click="openUpdateModal(userItem)"
+            >
+              Update
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Update Modal -->
       <div
         v-if="selectedUser"
@@ -85,8 +126,7 @@
         <div class="bg-white p-6 rounded-lg w-[24rem] space-y-4 shadow-xl">
           <h3 class="font-bold text-lg">Update User Role</h3>
           <p class="text-gray-600">
-            Update the role for <strong>{{ selectedUser.name }}</strong
-            >.
+            Update the role for <strong>{{ selectedUser.name }}</strong>.
           </p>
 
           <select v-model="newRole" class="border rounded-lg w-full px-3 py-2">
@@ -119,7 +159,7 @@
         </div>
       </div>
     </main>
-  </div>
+</div>
 </template>
 
 <script setup>
