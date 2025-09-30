@@ -31,6 +31,10 @@ public class SupportTicketController {
     @Autowired
     private SupportTicketService ticketService;
 
+    public SupportTicketController(SupportTicketService ticketService) {
+        this.ticketService = ticketService;
+    }
+
     /**
      * Create a new support ticket.
      *
