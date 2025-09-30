@@ -821,7 +821,7 @@ export default {
     },
     async updateClaimStatus(claim, newStatus) {
       if (!claim.tempComment?.trim()) {
-        toast.warn("Review comment is required.");
+        this.toast.warn("Review comment is required.");
 
         return;
       }
@@ -839,7 +839,7 @@ export default {
 
         // Show success message
         const action = newStatus === "APPROVED" ? "approved" : "rejected";
-        toast.success(`Claim #${claim.id} ${action} successfully!`);
+        this.toast.success(`Claim #${claim.id} ${action} successfully!`);
 
         // Close modal if it's open
         if (this.showModal) {
@@ -847,7 +847,7 @@ export default {
         }
       } catch (error) {
         console.error("Failed to update claim status:", error);
-        toast.error("Error updating claim status.");
+        this.toast.error("Error updating claim status.");
       }
     },
     openClaimModal(claim) {
@@ -864,7 +864,7 @@ export default {
     // Download document from Supabase URL
     downloadDocument(documentUrl, claimId) {
       if (!documentUrl) {
-        toast.error("No document available for download.");
+        this.toast.error("No document available for download.");
         return;
       }
 
