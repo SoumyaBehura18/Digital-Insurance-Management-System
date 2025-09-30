@@ -139,7 +139,9 @@ async function confirmPurchase() {
       // Renewal via Vuex
       updatedPolicy = await store.dispatch("userPolicies/renewPolicy", {
         ...props.policy,
-        premiumPaid: premiumToPay.value
+        premiumPaid: premiumToPay.value, 
+        startDate: startDate.toISOString().split("T")[0],
+        endDate: endDate.value.toISOString().split("T")[0]
       });
     } else {
       // Purchase new
