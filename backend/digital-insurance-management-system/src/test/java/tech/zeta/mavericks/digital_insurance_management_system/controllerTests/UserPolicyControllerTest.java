@@ -126,13 +126,18 @@ class UserPolicyControllerTest {
 
     @Test
     void updateUserPolicyStatusById_ShouldReturnUpdatedPolicy() throws Exception {
+        // Prepare the request
         PolicyStatusRequest request = new PolicyStatusRequest();
         request.setPolicyStatus(PolicyStatus.EXPIRED);
         request.setPremiumRate(6000.0);
+        request.setStartDate(LocalDate.now());
+        request.setEndDate(LocalDate.now().plusYears(1));
 
-        Mockito.when(userPolicyService.updateUserPolicyStatusById(eq(1L), eq(PolicyStatus.EXPIRED), eq(6000.0)))
+        // Mock service call
+        Mockito.when(userPolicyService.updateUserPolicyStatusById(eq(1L), any(PolicyStatusRequest.class)))
                 .thenReturn(response);
 
+        // Perform PATCH request
         mockMvc.perform(patch("/user/policy/status/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -140,4 +145,5 @@ class UserPolicyControllerTest {
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.policyName").value("Health Policy"));
     }
+
 }

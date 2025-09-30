@@ -77,7 +77,7 @@ public class UserPolicyController {
      * Update the status or premium rate of a user policy.
      *
      * @param id User policy ID
-     * @param request Request containing new policy status and premium rate
+     * @param request Request containing new policy status, premium rate, startDate, endDate
      * @return Updated user policy details
      */
     @PatchMapping("/policy/status/{id}")
@@ -85,7 +85,7 @@ public class UserPolicyController {
             @PathVariable Long id,
             @RequestBody PolicyStatusRequest request) {
         return new ResponseEntity<>(
-                userPolicyService.updateUserPolicyStatusById(id, request.getPolicyStatus(), request.getPremiumRate()),
+                userPolicyService.updateUserPolicyStatusById(id, request),
                 HttpStatus.OK
         );
     }

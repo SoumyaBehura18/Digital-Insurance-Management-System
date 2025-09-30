@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.PolicyStatusRequest;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.request.UserPolicyRequest;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.response.UserPolicyResponse;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.Policy;
@@ -16,6 +17,8 @@ import tech.zeta.mavericks.digital_insurance_management_system.repository.Policy
 import tech.zeta.mavericks.digital_insurance_management_system.repository.UserPolicyRepository;
 import tech.zeta.mavericks.digital_insurance_management_system.repository.UserRepository;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -135,12 +138,11 @@ public class UserPolicyService {
      * Updates the status and premium paid for a UserPolicy.
      *
      * @param id          the UserPolicy ID
-     * @param policyStatus the new policy status
-     * @param premiumRate  the updated premium
+     * @param request     New policy status, premium rate, startDate, endDate
      * @return the updated UserPolicyResponse DTO
      */
-    public UserPolicyResponse updateUserPolicyStatusById(Long id, PolicyStatus policyStatus, Double premiumRate) {
-        logger.info("Updating status for UserPolicy ID: {} to {} with premium: {}", id, policyStatus, premiumRate);
+    public UserPolicyResponse updateUserPolicyStatusById(Long id, PolicyStatusRequest request) {
+        logger.info("Updating status for UserPolicy ID: {} to {} with premium: {}", id, request.getPolicyStatus(), request.getPremiumRate(),request.getStartDate(),request.getEndDate());
 
         UserPolicy userPolicy = userPolicyRepository.findById(id)
                 .orElseThrow(() -> {
@@ -148,8 +150,12 @@ public class UserPolicyService {
                     return new PolicyNotFoundException("UserPolicy not found with id: " + id);
                 });
 
-        userPolicy.setStatus(policyStatus);
-        userPolicy.setPremiumPaid(premiumRate);
+        System.out.println("Start Date: "+request.getStartDate());
+
+        userPolicy.setStatus(request.getPolicyStatus());
+        userPolicy.setStartDate(request.getStartDate());
+        userPolicy.setEndDate(request.getEndDate());
+        userPolicy.setPremiumPaid(request.getPremiumRate());
 
         UserPolicy updated = userPolicyRepository.save(userPolicy);
         logger.info("UserPolicy ID {} updated successfully", id);

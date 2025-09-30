@@ -74,9 +74,12 @@
   </div>
 </template>
 
+
 <script setup>
 import { ref, computed } from "vue";
 import { useStore } from "vuex";
+import { useRouter } from "vue-router";
+import { useToast } from "vue-toast-notification"; // ✅ Make sure toast library is installed
 import { makeRequestWithToken } from "@/utils/requests";
 
 const props = defineProps({
@@ -85,6 +88,8 @@ const props = defineProps({
 const emits = defineEmits(["close", "purchased"]);
 
 const store = useStore();
+const router = useRouter();
+const toast = useToast();
 
 const loading = ref(false);
 const error = ref(null);
@@ -165,12 +170,21 @@ async function confirmPurchase() {
       store.commit("userPolicies/SET_POLICIES", [...store.state.userPolicies.policies, updatedPolicy]);
     }
 
-    // Notify and close modal
+    // Show toast and redirect
+    const message = props.policy.isRenewal
+      ? "Policy renewed successfully 🎉"
+      : "Policy purchased successfully 🎉";
+
+    toast.success(message, { timeout: 3000, position: "top-right" });
+
+    // Emit events
     emits("purchased", updatedPolicy);
     emits("close");
     success.value = true;
+
   } catch (err) {
     error.value = err.response?.data || err.message || "Action failed";
+    toast.error(error.value, { timeout: 4000, position: "top-right" });
   } finally {
     loading.value = false;
   }

@@ -9,6 +9,7 @@ import tech.zeta.mavericks.digital_insurance_management_system.entity.User;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.RoleType;
 import tech.zeta.mavericks.digital_insurance_management_system.exception.PolicyNotFoundException;
 import tech.zeta.mavericks.digital_insurance_management_system.exception.UserAlreadyExistException;
+import tech.zeta.mavericks.digital_insurance_management_system.exception.UserNotFoundException;
 import tech.zeta.mavericks.digital_insurance_management_system.repository.UserRepository;
 import tech.zeta.mavericks.digital_insurance_management_system.service.JWTService;
 import tech.zeta.mavericks.digital_insurance_management_system.service.UserService;
@@ -98,7 +99,7 @@ class UserServiceTest {
     void testUpdateUserRoleNotFound() {
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(PolicyNotFoundException.class, () -> userService.updateUserRole(99L, RoleType.ADMIN));
+        assertThrows(UserNotFoundException.class, () -> userService.updateUserRole(99L, RoleType.ADMIN));
     }
 
     // Test: get users by ids
