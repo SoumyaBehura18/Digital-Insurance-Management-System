@@ -309,6 +309,7 @@ frontend/
 
 ### Backend Jar File
 ```
+https://drive.google.com/file/d/1oAqOwcWJe5H06ULgsKa94gThlDRy9Pcf/view?usp=sharing
 ```
 ---
 
