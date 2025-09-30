@@ -14,6 +14,8 @@ import java.time.LocalDate;
  * including policy details, coverage, premium paid, status, and no-claim bonus.
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserPolicyResponse {
 
     /** Unique ID of the user policy */
