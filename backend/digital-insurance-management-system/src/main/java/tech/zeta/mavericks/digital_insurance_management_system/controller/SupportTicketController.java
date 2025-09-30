@@ -19,6 +19,10 @@ public class SupportTicketController {
     @Autowired
     private SupportTicketService ticketService;
 
+    public SupportTicketController(SupportTicketService ticketService) {
+        this.ticketService = ticketService;
+    }
+
     @PostMapping
     public ResponseEntity<SupportTicketResponse> createTicket(@RequestBody SupportTicketRequest request) {
         return ResponseEntity.ok(ticketService.createSupportTicket(request));
