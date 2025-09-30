@@ -123,12 +123,44 @@
                   @click="downloadDocument(claim.documentLink, claim.id)"
                   class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 transition-colors"
                 >
+                  <svg
+                    class="w-3 h-3 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
                   View
                 </button>
                 <span
                   v-else
                   class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-400 bg-gray-50 rounded"
                 >
+                  <svg
+                    class="w-3 h-3 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
                   No doc
                 </span>
               </td>
@@ -245,8 +277,16 @@
 
 
 <script>
+import { useToast } from "vue-toast-notification";
+
 export default {
   name: "ClaimList",
+  setup() {
+    const toast = useToast();
+    return {
+      toast,
+    };
+  },
   data() {
     return {
       showModal: false,
@@ -336,39 +376,41 @@ export default {
     /**
      * DOCUMENT VIEW FUNCTIONALITY
      * Opens the supporting document for a claim from Supabase storage in a new tab
-     * 
+     *
      * @param {string} documentUrl - The public URL of the document in Supabase
      * @param {number} claimId - The ID of the claim (used for filename)
      */
     downloadDocument(documentUrl, claimId) {
       // Validate that document URL exists
       if (!documentUrl) {
-        alert('No document available for this claim');
+        toast.error("No document available for this claim.");
         return;
       }
 
       try {
         // Extract filename from URL or create a default one
         // Supabase URLs typically end with the actual filename
-        const urlParts = documentUrl.split('/');
-        const filename = urlParts[urlParts.length - 1] || `claim-${claimId}-document`;
-        
+        const urlParts = documentUrl.split("/");
+        const filename =
+          urlParts[urlParts.length - 1] || `claim-${claimId}-document`;
+
         // Create a temporary anchor element to view document in new tab
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = documentUrl;
-        link.target = '_blank'; // Open in new tab to view the document
-        
+        link.target = "_blank"; // Open in new tab to view the document
+
         // Temporarily add to DOM, click, and remove
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
-        console.log(`Document opened for viewing for claim ${claimId}: ${filename}`);
-        
+
+        console.log(
+          `Document opened for viewing for claim ${claimId}: ${filename}`
+        );
       } catch (error) {
-        console.error('Error opening document:', error);
+        console.error("Error opening document:", error);
         // Fallback: open in new tab directly
-        window.open(documentUrl, '_blank');
+        window.open(documentUrl, "_blank");
       }
     },
   },

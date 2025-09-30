@@ -6,7 +6,9 @@
       <header class="flex justify-between items-center mb-6">
         <div>
           <h1 class="text-2xl font-bold">Manage Policies</h1>
-          <p class="text-gray-500 text-sm">View and manage all insurance policies</p>
+          <p class="text-gray-500 text-sm">
+            View and manage all insurance policies
+          </p>
         </div>
         <button
           class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2"
@@ -19,7 +21,9 @@
       <!-- Policies Table (Claims Style, no Actions) -->
       <div class="bg-white shadow rounded-xl p-6">
         <!-- Header with Search -->
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+        <div
+          class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4"
+        >
           <h2 class="text-lg font-semibold text-gray-800">
             Policies ({{ policies.length }})
           </h2>
@@ -53,12 +57,24 @@
           <table class="w-full text-sm">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-4 py-3 text-left font-semibold text-gray-600">ID</th>
-                <th class="px-4 py-3 text-left font-semibold text-gray-600">Name</th>
-                <th class="px-4 py-3 text-left font-semibold text-gray-600">Type</th>
-                <th class="px-4 py-3 text-left font-semibold text-gray-600">Coverage</th>
-                <th class="px-4 py-3 text-left font-semibold text-gray-600">Duration</th>
-                <th class="px-4 py-3 text-left font-semibold text-gray-600">Description</th>
+                <th class="px-4 py-3 text-left font-semibold text-gray-600">
+                  ID
+                </th>
+                <th class="px-4 py-3 text-left font-semibold text-gray-600">
+                  Name
+                </th>
+                <th class="px-4 py-3 text-left font-semibold text-gray-600">
+                  Type
+                </th>
+                <th class="px-4 py-3 text-left font-semibold text-gray-600">
+                  Coverage
+                </th>
+                <th class="px-4 py-3 text-left font-semibold text-gray-600">
+                  Duration
+                </th>
+                <th class="px-4 py-3 text-left font-semibold text-gray-600">
+                  Description
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -68,21 +84,27 @@
                 class="border-t hover:bg-gray-50 transition"
               >
                 <td class="px-4 py-3">#{{ policy.policyId }}</td>
-                <td class="px-4 py-3 font-medium text-gray-900">{{ policy.policyName }}</td>
+                <td class="px-4 py-3 font-medium text-gray-900">
+                  {{ policy.policyName }}
+                </td>
                 <td class="px-4 py-3">
                   <span
                     class="px-2 py-1 rounded-full text-xs font-semibold"
                     :class="{
                       'bg-pink-100 text-pink-700': policy.policyType === 'LIFE',
-                      'bg-green-100 text-green-700': policy.policyType === 'HEALTH',
-                      'bg-blue-100 text-blue-700': policy.policyType === 'VEHICLE'
+                      'bg-green-100 text-green-700':
+                        policy.policyType === 'HEALTH',
+                      'bg-blue-100 text-blue-700':
+                        policy.policyType === 'VEHICLE',
                     }"
                   >
                     {{ policy.policyType }}
                   </span>
                 </td>
                 <td class="px-4 py-3 text-gray-700">₹{{ policy.coverage }}</td>
-                <td class="px-4 py-3 text-gray-700">{{ policy.duration }} months</td>
+                <td class="px-4 py-3 text-gray-700">
+                  {{ policy.duration }} months
+                </td>
                 <td class="px-4 py-3 text-gray-500 truncate max-w-[200px]">
                   {{ policy.description || "No description" }}
                 </td>
@@ -105,7 +127,9 @@
         <div
           class="flex justify-between items-center px-6 py-4 border-b sticky top-0 bg-white z-10"
         >
-          <h2 class="text-xl md:text-2xl font-bold text-gray-900">Create New Policy</h2>
+          <h2 class="text-xl md:text-2xl font-bold text-gray-900">
+            Create New Policy
+          </h2>
           <button
             class="text-gray-500 hover:text-gray-700 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
             @click="showCreatePolicy = false"
@@ -119,7 +143,9 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Policy Name -->
             <div>
-              <label class="block text-gray-800 font-medium mb-1">Policy Name</label>
+              <label class="block text-gray-800 font-medium mb-1"
+                >Policy Name</label
+              >
               <input
                 v-model="newPolicy.policyName"
                 type="text"
@@ -130,7 +156,9 @@
 
             <!-- Policy Type -->
             <div>
-              <label class="block text-gray-800 font-medium mb-1">Policy Type</label>
+              <label class="block text-gray-800 font-medium mb-1"
+                >Policy Type</label
+              >
               <select
                 v-model="newPolicy.policyType"
                 class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400 outline-none"
@@ -144,7 +172,9 @@
 
             <!-- Coverage -->
             <div>
-              <label class="block text-gray-800 font-medium mb-1">Coverage Amount (₹)</label>
+              <label class="block text-gray-800 font-medium mb-1"
+                >Coverage Amount (₹)</label
+              >
               <input
                 v-model="newPolicy.coverageAmount"
                 type="number"
@@ -155,7 +185,9 @@
 
             <!-- Premium -->
             <div>
-              <label class="block text-gray-800 font-medium mb-1">Annual Premium (₹)</label>
+              <label class="block text-gray-800 font-medium mb-1"
+                >Annual Premium (₹)</label
+              >
               <input
                 v-model="newPolicy.annualPremium"
                 type="number"
@@ -166,7 +198,9 @@
 
             <!-- Duration -->
             <div>
-              <label class="block text-gray-800 font-medium mb-1">Policy Duration (Months)</label>
+              <label class="block text-gray-800 font-medium mb-1"
+                >Policy Duration (Months)</label
+              >
               <input
                 v-model="newPolicy.policyDuration"
                 type="number"
@@ -177,7 +211,9 @@
 
             <!-- Renewal Rate -->
             <div>
-              <label class="block text-gray-800 font-medium mb-1">Renewal Rate (₹)</label>
+              <label class="block text-gray-800 font-medium mb-1"
+                >Renewal Rate (₹)</label
+              >
               <input
                 v-model="newPolicy.renewalRate"
                 type="number"
@@ -188,7 +224,9 @@
 
             <!-- Description -->
             <div class="col-span-1 md:col-span-2">
-              <label class="block text-gray-800 font-medium mb-1">Description</label>
+              <label class="block text-gray-800 font-medium mb-1"
+                >Description</label
+              >
               <textarea
                 v-model="newPolicy.description"
                 placeholder="Enter policy description"
@@ -199,11 +237,18 @@
 
           <!-- Eligibility Criteria -->
           <div class="mt-6 border-t pt-4">
-            <label class="block text-gray-900 font-semibold mb-3">Eligibility Criteria</label>
+            <label class="block text-gray-900 font-semibold mb-3"
+              >Eligibility Criteria</label
+            >
 
             <!-- Vehicle -->
-            <div v-if="newPolicy.policyType === 'VEHICLE'" class="p-4 border rounded-lg bg-gray-50">
-              <label class="block text-sm font-semibold mb-2">Vehicle Age</label>
+            <div
+              v-if="newPolicy.policyType === 'VEHICLE'"
+              class="p-4 border rounded-lg bg-gray-50"
+            >
+              <label class="block text-sm font-semibold mb-2"
+                >Vehicle Age</label
+              >
               <input
                 v-model="newPolicy.vehicleAge"
                 type="number"
@@ -219,9 +264,14 @@
                 :key="index"
                 class="p-4 border rounded-lg mb-3 bg-gray-50"
               >
-                <p class="text-sm font-semibold mb-2">Condition {{ index + 1 }}</p>
+                <p class="text-sm font-semibold mb-2">
+                  Condition {{ index + 1 }}
+                </p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <select v-model="condition.condition" class="border rounded-lg px-2 py-2">
+                  <select
+                    v-model="condition.condition"
+                    class="border rounded-lg px-2 py-2"
+                  >
                     <option disabled value="">Select condition</option>
                     <option value="TB">TB</option>
                     <option value="BP">BP</option>
@@ -252,7 +302,10 @@
             </div>
 
             <!-- Life -->
-            <p v-if="newPolicy.policyType === 'LIFE'" class="text-gray-500 text-sm">
+            <p
+              v-if="newPolicy.policyType === 'LIFE'"
+              class="text-gray-500 text-sm"
+            >
               No eligibility criteria for Life policies.
             </p>
           </div>
@@ -283,8 +336,10 @@
 import { reactive, ref, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 import { Trash } from "lucide-vue-next";
+import { useToast } from "vue-toast-notification";
 
 const store = useStore();
+const toast = useToast();
 
 // Modal & form state
 const showCreatePolicy = ref(false);
@@ -301,7 +356,7 @@ const newPolicy = reactive({
   renewalRate: "",
   vehicleAge: "",
   conditions: [],
-  description: ""
+  description: "",
 });
 
 // Policies from store
@@ -313,7 +368,8 @@ const filteredPolicies = computed(() => {
     const matchesSearch =
       p.policyName.toLowerCase().includes(search.value.toLowerCase()) ||
       p.policyType.toLowerCase().includes(search.value.toLowerCase());
-    const matchesFilter = activeFilter.value === "All" || p.policyType === activeFilter.value;
+    const matchesFilter =
+      activeFilter.value === "All" || p.policyType === activeFilter.value;
     return matchesSearch && matchesFilter;
   });
 });
@@ -338,7 +394,7 @@ const resetNewPolicy = () => {
     renewalRate: "",
     vehicleAge: "",
     conditions: [],
-    description: ""
+    description: "",
   });
 };
 
@@ -346,12 +402,14 @@ const resetNewPolicy = () => {
 const createPolicy = async () => {
   try {
     await store.dispatch("adminPolicyStore/createPolicy", newPolicy);
-    alert("Policy created successfully!");
+    toast.success("Policy created successfully!", { position: "top-right" });
     resetNewPolicy();
     showCreatePolicy.value = false;
   } catch (error) {
     console.error("Error creating policy:", error);
-    alert("Failed to create policy. Check console for details.");
+    toast.error("Failed to create policy. Please try again.", {
+      position: "top-right",
+    });
   }
 };
 
