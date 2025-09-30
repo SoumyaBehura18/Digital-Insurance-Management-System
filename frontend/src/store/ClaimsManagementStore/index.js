@@ -172,26 +172,37 @@ export default {
       }
     },
 
-    // This function takes claimData object as input and submits a new insurance claim to the server
-    async submitClaim({ commit }, claimData) {
+    // This function takes FormData as input and submits a claim with document attachment
+    async submitClaimWithDocument({ commit }, formData) {
       try {
         commit('SET_LOADING', true)
         commit('CLEAR_MESSAGES')
         
-        const claimPayload = {
-          userPolicyId: Number(claimData.userPolicyId),
-          claimDate: claimData.claimDate,
-          claimAmount: Number(claimData.claimAmount),
-          reason: claimData.reason
+        // Use fetch for multipart/form-data instead of our regular request helper
+        // Now using the main /claim endpoint since document is mandatory
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}')
+        const token = currentUser.token || localStorage.getItem('token')
+        
+        const response = await fetch('http://localhost:9090/claim', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        })
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
         }
         
-        const response = await requestWithAuth('POST', '/claim', claimPayload)
-        commit('ADD_CLAIM', response.data)
-        commit('SET_SUCCESS_MESSAGE', `Claim submitted successfully! Claim ID: ${response.data.id}`)
+        const responseData = await response.json()
+        commit('ADD_CLAIM', responseData)
+        commit('SET_SUCCESS_MESSAGE', `Claim submitted successfully with document! Claim ID: ${responseData.id}`)
         
-        return response.data
+        return responseData
       } catch (error) {
-        commit('SET_ERROR', 'Failed to submit claim')
+        console.error('Submit claim with document error:', error)
+        commit('SET_ERROR', 'Failed to submit claim with document')
         throw error
       } finally {
         commit('SET_LOADING', false)

@@ -1,10 +1,10 @@
-
 import {
   makeRequestWithToken,
   makeRequestWithoutToken,
   requestWithAuth,
 } from "@/utils/requests";
 const state = {
+  user:null,
   currentUser: null, // logged-in user
   users: [], // all users (if admin view)
   loading: false,
@@ -12,6 +12,7 @@ const state = {
 };
 
 const getters = {
+  getUser: (state) => state.user,
   getCurrentUser: (state) => state.currentUser,
   getUsers: (state) => state.users,
   isLoading: (state) => state.loading,
@@ -19,6 +20,9 @@ const getters = {
 };
 
 const mutations = {
+  SET_USER(state, user) {
+    state.user = user;
+  },
   SET_CURRENT_USER(state, user) {
     state.currentUser = user;
   },
@@ -35,6 +39,56 @@ const mutations = {
 
 const actions = {
   // Add this action to your user store module
+  /**
+   * This function takes updated user data as input,
+   * sends a PUT request to the backend to update the user,
+   * and updates local storage with the new user data if successful.
+   */
+  async updateUser({ commit, state }, userData) {
+    try {
+      // Get the current user's token and id from local storage
+      const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+      const token = currentUser?.token;
+      const userId = currentUser?.id || currentUser?.userId;
+
+      // Prepare the request URL and headers
+
+      const url = `/updateUserDetails/${userId}`;
+
+      const response = await makeRequestWithToken("PUT", url, userData);
+
+      // If the update is successful, update local storage and state
+      if (response) {
+        const updatedUser = await response.data;
+
+        // Update local storage with new user data
+        localStorage.setItem(
+          "currentUser",
+          JSON.stringify({
+            ...currentUser,
+            ...updatedUser,
+            token, // keep the token
+            userId: updatedUser.id, // update userId if changed
+            role: updatedUser.roleType?.toLowerCase() || currentUser.role,
+          })
+        );
+
+        // Optionally, commit a mutation to update user in Vuex state
+        commit("SET_USER", updatedUser);
+
+        return updatedUser;
+      } else {
+        // If update fails, throw error with message from backend
+        console.log(response)
+        const errorData = await response.data;
+        throw new Error(errorData.message || "Failed to update user");
+      }
+    } catch (error) {
+      // Simple error handling: log and rethrow
+      console.error("Error updating user:", error);
+      throw error;
+    }
+  },
 
   async fetchUsersByIds({ commit }, userIds) {
     commit("SET_LOADING", true);
@@ -57,15 +111,14 @@ const actions = {
   async fetchUserById({ commit }, userId) {
     commit("SET_LOADING", true);
     try {
-      const response = await makeRequestWithToken("GET", `/users/${userId}`);
-      commit("SET_CURRENT_USER", response.data);
-      localStorage.setItem("currentUser", JSON.stringify(response.data));
+      const response = await makeRequestWithToken("GET", `/getUserDetailsById/${userId}`);
+      commit("SET_USER", response.data);
       commit("SET_ERROR", null);
       commit("SET_LOADING", false);
       return response.data;
     } catch (error) {
       commit("SET_ERROR", error.response?.data || "Failed to fetch user");
-      commit("SET_CURRENT_USER", null);
+      commit("SET_USER", null);
     } finally {
       commit("SET_LOADING", false);
     }

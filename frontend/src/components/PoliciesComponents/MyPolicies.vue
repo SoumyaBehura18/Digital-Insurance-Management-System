@@ -149,54 +149,6 @@
     />
   </div>
 
-  <!-- Error -->
-  <div v-else-if="error" class="text-red-600 py-2 text-center">
-    {{ error }}
-  </div>
-
-  <!-- Policies Table -->
-  <table v-else class="w-full table-auto">
-    <thead>
-      <tr class="bg-gray-100">
-        <th class="px-4 py-2 text-left">Policy Name</th>
-        <th class="px-4 py-2 text-left">Type</th>
-        <th class="px-4 py-2 text-left">Start Date</th>
-        <th class="px-4 py-2 text-left">End Date</th>
-        <th class="px-4 py-2 text-left">Status</th>
-        <th class="px-4 py-2 text-left">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="policy in policies" :key="policy.id" class="border-b">
-        <td class="px-4 py-2 font-medium">{{ policy.policyName }}</td>
-        <td class="px-4 py-2">{{ policy.policyType }}</td>
-        <td class="px-4 py-2">{{ formatDate(policy.startDate) }}</td>
-        <td class="px-4 py-2">{{ formatDate(policy.endDate) }}</td>
-        <td class="px-4 py-2">
-          <span
-            :class="policy.status === 'ACTIVE'
-              ? 'bg-green-100 text-green-800 px-2 py-1 rounded text-sm'
-              : 'bg-gray-100 text-gray-600 px-2 py-1 rounded text-sm'"
-          >
-            {{ policy.status }}
-          </span>
-        </td>
-        <td class="px-4 py-2">
-          <button
-            v-if="canRenew(policy)"
-            class="border px-2 py-1 rounded text-sm"
-            @click="$emit('renew', policy)"
-          >
-            Renew
-            <span v-if="policy.status === 'EXPIRED'">
-              ({{ 15 - daysSinceExpiry(policy) }} days left to renew)
-            </span>
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
 </template>
 
 <script setup>

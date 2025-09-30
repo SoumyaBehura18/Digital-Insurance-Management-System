@@ -204,16 +204,41 @@
                 </span>
               </td>
               <td class="px-6 py-4">
-                <button 
-                  @click="openClaimModal(claim)"
-                  class="inline-flex items-center px-3 py-1 text-xs font-medium text-indigo-600 bg-indigo-50 rounded-md hover:bg-indigo-100 transition-colors"
-                >
-                  <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
-                  </svg>
-                  View
-                </button>
+                <div class="flex space-x-2">
+                  <button 
+                    @click="openClaimModal(claim)"
+                    class="inline-flex items-center px-3 py-1 text-xs font-medium text-indigo-600 bg-indigo-50 rounded-md hover:bg-indigo-100 transition-colors"
+                  >
+                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                      <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                    </svg>
+                    View
+                  </button>
+                  
+                  <button 
+                    v-if="claim.documentLink"
+                    @click="downloadDocument(claim.documentLink, claim.id)"
+                    class="inline-flex items-center px-3 py-1 text-xs font-medium text-green-600 bg-green-50 rounded-md hover:bg-green-100 transition-colors"
+                    title="Download supporting document"
+                  >
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Document
+                  </button>
+                  
+                  <span 
+                    v-if="!claim.documentLink"
+                    class="inline-flex items-center px-3 py-1 text-xs font-medium text-gray-400 bg-gray-50 rounded-md"
+                    title="No document attached"
+                  >
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    No doc
+                  </span>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -258,6 +283,38 @@
           <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Claim</label>
           <div class="bg-gray-50 rounded-lg p-4">
             <p class="text-gray-900">{{ selectedClaim?.reason || 'No reason provided' }}</p>
+          </div>
+        </div>
+
+        <!-- Supporting Document -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Supporting Document</label>
+          <div v-if="selectedClaim?.documentLink" class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span class="text-blue-900 font-medium">Document attached</span>
+              </div>
+              <button 
+                @click="downloadDocument(selectedClaim.documentLink, selectedClaim.id)"
+                class="inline-flex items-center px-3 py-1 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+              >
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Download
+              </button>
+            </div>
+          </div>
+          <div v-else class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <div class="flex items-center text-gray-500">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span>No supporting document provided</span>
+            </div>
           </div>
         </div>
 
@@ -452,6 +509,36 @@ export default {
       this.showModal = false;
       this.selectedClaim = null;
       document.body.style.overflow = 'auto';
+    },
+    
+    // Download document from Supabase URL
+    downloadDocument(documentUrl, claimId) {
+      if (!documentUrl) {
+        alert('No document available for this claim');
+        return;
+      }
+
+      try {
+        // Extract filename from URL or create a default one
+        const urlParts = documentUrl.split('/');
+        const filename = urlParts[urlParts.length - 1] || `claim-${claimId}-document`;
+        
+        // Create a temporary link element and trigger download
+        const link = document.createElement('a');
+        link.href = documentUrl;
+        link.download = filename;
+        link.target = '_blank'; // Fallback to open in new tab if download fails
+        
+        // Append to body, click, and remove
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+      } catch (error) {
+        console.error('Error downloading document:', error);
+        // Fallback: open in new tab
+        window.open(documentUrl, '_blank');
+      }
     }
   }
 };

@@ -125,6 +125,35 @@
             </div>
           </div>
 
+          <!-- Document Upload - NOW MANDATORY -->
+          <div>
+            <label for="document" class="block text-sm font-medium mb-1">Supporting Document *</label>
+            <div class="relative">
+              <input
+                id="document"
+                type="file"
+                ref="documentInput"
+                @change="handleFileChange"
+                accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
+                required
+                class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-brand-backgroundTheme file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-sm file:bg-brand-backgroundTheme file:text-white hover:file:bg-brand-hover"
+              />
+            </div>
+            <div v-if="selectedFile" class="mt-2 p-2 bg-green-50 border border-green-200 rounded text-sm text-green-700">
+              <div class="flex items-center justify-between">
+                <span>{{ selectedFile.name }} ({{ formatFileSize(selectedFile.size) }})</span>
+                <button type="button" @click="removeFile" class="text-red-500 hover:text-red-700">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <p class="mt-1 text-xs text-gray-500">
+              <strong>Required:</strong> Upload proof of your claim (Images: JPG, PNG | Documents: PDF, DOC, DOCX | Max size: 5MB)
+            </p>
+          </div>
+
           <!-- Success & Error Messages -->
           <div v-if="$store.state.claims?.successMessage" class="p-3 bg-green-100 border text-green-700 rounded">
             {{ $store.state.claims.successMessage }}
@@ -179,7 +208,8 @@ export default {
         claimDate: new Date().toISOString().slice(0, 10), // Today's date
         claimAmount: '',
         reason: ''
-      }
+      },
+      selectedFile: null
     };
   },
   
@@ -277,16 +307,24 @@ export default {
           return;
         }
 
-        // Prepare claim data
-        const claimData = {
-          userPolicyId: parseInt(this.form.userPolicyId),
-          claimDate: this.form.claimDate,
-          claimAmount: parseFloat(this.form.claimAmount),
-          reason: this.form.reason
-        };
+        // MANDATORY DOCUMENT VALIDATION
+        // Since document upload is now required, check if file is selected
+        if (!this.selectedFile) {
+          this.setStoreError('Supporting document is required. Please upload a proof document for your claim.');
+          return;
+        }
 
-        // Submit claim to store
-        await this.submitClaimToStore(claimData);
+        // Submit claim with mandatory document using FormData
+        // All claims now require a document, so we always use the multipart endpoint
+        const formData = new FormData();
+        formData.append('userPolicyId', this.form.userPolicyId);
+        formData.append('claimAmount', this.form.claimAmount);
+        formData.append('reason', this.form.reason);
+        formData.append('claimDate', this.form.claimDate);
+        formData.append('document', this.selectedFile); // Always include document
+
+        // Use the main submitClaim action (which now handles documents)
+        await this.submitClaimWithDocument(formData);
         
         // Reset form after successful submission
         this.resetForm();
@@ -311,6 +349,15 @@ export default {
         await this.$store.dispatch('submitClaim', claimData)
       }
     },
+
+    // This function submits claim with document using FormData
+    async submitClaimWithDocument(formData) {
+      if (this.$store._actions['claims/submitClaimWithDocument']) {
+        await this.$store.dispatch('claims/submitClaimWithDocument', formData)
+      } else if (this.$store._actions['submitClaimWithDocument']) {
+        await this.$store.dispatch('submitClaimWithDocument', formData)
+      }
+    },
     
     // This function takes errorMessage string as input and sets it in store for display
     setStoreError(errorMessage) {
@@ -329,6 +376,53 @@ export default {
         claimAmount: '',
         reason: ''
       };
+      this.selectedFile = null;
+      if (this.$refs.documentInput) {
+        this.$refs.documentInput.value = '';
+      }
+    },
+
+    // Handle file selection and validation
+    handleFileChange(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      // Validate file size (5MB limit)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        this.setStoreError('File size cannot exceed 5MB');
+        event.target.value = '';
+        return;
+      }
+
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf', 
+                           'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      
+      if (!allowedTypes.includes(file.type)) {
+        this.setStoreError('Invalid file type. Please upload JPG, PNG, PDF, DOC, or DOCX files only.');
+        event.target.value = '';
+        return;
+      }
+
+      this.selectedFile = file;
+    },
+
+    // Remove selected file
+    removeFile() {
+      this.selectedFile = null;
+      if (this.$refs.documentInput) {
+        this.$refs.documentInput.value = '';
+      }
+    },
+
+    // Format file size for display
+    formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
   }
 };
