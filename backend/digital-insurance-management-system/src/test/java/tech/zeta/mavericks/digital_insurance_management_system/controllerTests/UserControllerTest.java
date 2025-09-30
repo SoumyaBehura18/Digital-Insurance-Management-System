@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.LoginRequest;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.request.RoleUpdateRequest;
 import tech.zeta.mavericks.digital_insurance_management_system.controller.UserController;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.LoginResponse;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.User;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.UserPrincipal;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.RoleType;
@@ -89,10 +90,10 @@ class UserControllerTest {
 
         // Treat response body as a Map
         @SuppressWarnings("unchecked")
-        Map<String, Object> body = (Map<String, Object>) response.getBody();
+        LoginResponse body = (LoginResponse) response.getBody();
         assertNotNull(body);
-        assertEquals("mockJwtToken", body.get("token"));
-        assertEquals(1L, ((Number) body.get("id")).longValue());
+        assertEquals("mockJwtToken", body.getToken());
+        assertEquals(1L, body.getUserId());
     }
 
     // Test: Login failure
