@@ -14,8 +14,7 @@ public class CORSConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-//        config.setAllowedOrigins(List.of("http://localhost:8080")); // frontend origin
-        config.setAllowedOrigins(List.of("http://localhost:8081")); // frontend origin
+        config.setAllowedOrigins(List.of("http://localhost:8080")); // frontend origin
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

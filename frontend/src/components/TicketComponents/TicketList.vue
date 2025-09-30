@@ -1,14 +1,15 @@
 <template>
   <div class="bg-gray-50 rounded-lg shadow">
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h3 class="text-lg text-gray-900">Your Support Tickets</h3>
+    <div class="px-4 py-3 sm:px-6 border-b border-gray-200">
+      <h3 class="text-lg text-gray-900 font-semibold">Your Support Tickets</h3>
     </div>
 
-    <div class="p-6">
+    <div class="p-4 sm:p-6">
+      <!-- No tickets -->
       <div v-if="tickets.length === 0" class="text-center py-12">
         <div class="mb-4">
           <svg
-            class="mx-auto h-16 w-16 text-gray-400"
+            class="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-gray-400"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -21,7 +22,7 @@
             />
           </svg>
         </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">
+        <h3 class="text-md sm:text-lg font-medium text-gray-900 mb-2">
           No support tickets yet
         </h3>
         <BaseButton variant="theme" @click="$emit('create-first-ticket')">
@@ -29,55 +30,56 @@
         </BaseButton>
       </div>
 
-      <div v-else class="space-y-4">
+      <!-- Tickets list -->
+      <div v-else class="space-y-3 sm:space-y-4">
         <div
           v-for="ticket in tickets"
           :key="ticket.id"
-          class="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow bg-white"
+          class="border border-gray-200 rounded-lg p-3 sm:p-4 hover:shadow-sm transition-shadow bg-white flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4"
         >
-          <div class="flex justify-between items-start">
-            <div>
-              <h3 class="font-medium text-gray-900">{{ ticket.subject }}</h3>
-              <p class="text-sm text-gray-500 mt-1 w-64 truncate">
-                {{ ticket.description }}
-              </p>
-              <div class="flex items-center gap-4 mt-2">
-                <span
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                  :class="getStatusClasses(ticket.status ?? 'OPEN')"
-                >
-                  <component
-                    :is="getStatusClassIcon(ticket.status ?? 'OPEN')"
-                    class="w-3 h-3 mr-1"
-                  />
-                  {{ ticket.status ?? "OPEN" }}
-                </span>
-                <span class="text-xs text-gray-500">{{
-                  formatDate(ticket.createdAt)
-                }}</span>
-              </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-medium text-gray-900 text-sm sm:text-base truncate">
+              {{ ticket.subject }}
+            </h3>
+            <p class="text-xs sm:text-sm text-gray-500 mt-1 truncate">
+              {{ ticket.description }}
+            </p>
+            <div class="flex flex-wrap items-center gap-2 mt-2 text-xs sm:text-sm">
+              <span
+                class="inline-flex items-center px-2 py-0.5 rounded-full font-medium"
+                :class="getStatusClasses(ticket.status ?? 'OPEN')"
+              >
+                <component
+                  :is="getStatusClassIcon(ticket.status ?? 'OPEN')"
+                  class="w-3 h-3 mr-1"
+                />
+                {{ ticket.status ?? "OPEN" }}
+              </span>
+              <span class="text-gray-500">
+                {{ formatDate(ticket.createdAt) }}
+              </span>
             </div>
+          </div>
 
-            <div class="flex gap-2 mt-5">
-              <BaseButton
-                variant="theme"
-                size="sm"
-                @click="handleViewTicket(ticket)"
-                class="flex items-center"
-              >
-                <Eye class="h-5" />
-                View
-              </BaseButton>
-              <BaseButton
-                variant="outline"
-                size="sm"
-                @click="$emit('update-ticket', ticket)"
-                class="flex items-center"
-              >
-                <Pencil class="h-4" />
-                Edit
-              </BaseButton>
-            </div>
+          <div class="flex gap-2 mt-2 sm:mt-0 flex-wrap sm:flex-nowrap">
+            <BaseButton
+              variant="theme"
+              size="sm"
+              @click="handleViewTicket(ticket)"
+              class="flex items-center whitespace-nowrap"
+            >
+              <Eye class="h-4 sm:h-5" />
+              <span class="ml-1">View</span>
+            </BaseButton>
+            <BaseButton
+              variant="outline"
+              size="sm"
+              @click="$emit('update-ticket', ticket)"
+              class="flex items-center whitespace-nowrap"
+            >
+              <Pencil class="h-3.5 sm:h-4" />
+              <span class="ml-1">Edit</span>
+            </BaseButton>
           </div>
         </div>
       </div>
@@ -105,32 +107,25 @@ import {
   formatDate,
 } from "@/utils/helperFunctions";
 
-// Props
 const props = defineProps({
   tickets: {
     type: Array,
     required: true,
     default: () => [],
   },
-  ticketSelected: {
-    type: Object,
-    default: null,
-  },
 });
 
-// Emits
 const emit = defineEmits([
   "create-first-ticket",
   "view-ticket",
   "update-ticket",
   "resolve-ticket",
+  "close-ticket",
 ]);
 
-// Modal state
 const isModalOpen = ref(false);
 const selectedTicket = ref(null);
 
-// Methods
 const handleViewTicket = (ticket) => {
   selectedTicket.value = ticket;
   isModalOpen.value = true;
