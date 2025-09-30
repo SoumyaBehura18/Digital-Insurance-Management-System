@@ -79,7 +79,7 @@
 import { ref, computed } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
-import { useToast } from "vue-toast-notification"; // ✅ Make sure toast library is installed
+import { useToast } from "vue-toast-notification";
 import { makeRequestWithToken } from "@/utils/requests";
 
 const props = defineProps({
@@ -111,7 +111,7 @@ const premiumToPay = computed(() => {
   if (!props.policy) return null;
 
   if (props.policy.isRenewal && props.policy.renewalRate) {
-    // ✅ Apply 10% discount if eligible for No Claim Bonus
+    // Apply 10% discount if eligible for No Claim Bonus
     if (props.policy.noClaimBonus === false) {
       return (props.policy.renewalRate * 0.9).toFixed(2);
     }

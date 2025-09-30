@@ -35,23 +35,6 @@
           />
         </div>
 
-        <!-- Filter Pills
-        <div class="flex flex-wrap gap-2 mb-4">
-          <button
-            v-for="filter in filters"
-            :key="filter"
-            @click="activeFilter = filter"
-            :class="[
-              'px-3 py-1 rounded-lg text-sm font-medium transition',
-              activeFilter === filter
-                ? 'bg-indigo-100 text-indigo-700'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            ]"
-          >
-            {{ filter }}
-          </button>
-        </div> -->
-
         <!-- Table -->
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
@@ -344,7 +327,6 @@ const toast = useToast();
 // Modal & form state
 const showCreatePolicy = ref(false);
 const search = ref("");
-const filters = ["All", "LIFE", "HEALTH", "VEHICLE"];
 const activeFilter = ref("All");
 
 const newPolicy = reactive({

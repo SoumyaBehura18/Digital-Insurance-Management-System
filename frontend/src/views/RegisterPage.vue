@@ -156,7 +156,7 @@ const vehicleAge = ref("");
 const errorMessage = ref("");
 const successMessage = ref("");
 
-// ✅ Password validation regex
+//  Password validation regex
 const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
 
 // ----------------------------

@@ -1,4 +1,3 @@
-// tests/ViewClaims.spec.js
 // Simple tests for the ViewClaims/ClaimsPage component
 
 import { mount } from "@vue/test-utils";

@@ -50,7 +50,7 @@ const setIsCollapsed = (val) => (isCollapsed.value = val);
 const currentRoute = computed(() => route.path);
 const isAdmin = computed(() => userRole.value === "admin");
 
-// ✅ Hide sidebar for these routes
+//  Hide sidebar for these routes
 const hideSidebar = computed(() => {
   const hiddenRoutes = ["/", "/login", "/register"];
   return hiddenRoutes.includes(route.path);
