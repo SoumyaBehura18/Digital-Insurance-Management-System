@@ -72,6 +72,7 @@
                   {{ policy.policyName }}
                 </option>
               </select>
+
               <div
                 class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none"
               >
@@ -101,12 +102,40 @@
               Related Claim (Optional)
             </label>
             <div class="relative">
+              <!-- <select
+                id="claim"
+                v-model="form.relatedClaim"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none"
+              >
+                <option value="" disabled selected>
+                  {{
+                    !selectedPolicy.value
+                      ? "Please select a policy first"
+                      : "Select a claim if relevant"
+                  }}
+                </option>
+
+                <option
+                  v-for="claim in claimsById"
+                  :key="claim.id"
+                  :value="claim.id"
+                  :disabled="!selectedPolicy.value"
+                >
+                  {{ claim.id }}
+                </option>
+              </select> -->
               <select
                 id="claim"
                 v-model="form.relatedClaim"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none"
               >
-                <option value="" disabled>Select a claim if relevant</option>
+                <option value="" disabled selected>
+                  {{
+                    !form.relatedPolicy
+                      ? "Please select a relevant policy if applicable"
+                      : "Select a claim if relevant"
+                  }}
+                </option>
                 <option
                   v-for="claim in claimsById"
                   :key="claim.id"
@@ -115,6 +144,7 @@
                   {{ claim.id }}
                 </option>
               </select>
+
               <div
                 class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none"
               >
@@ -172,7 +202,6 @@ import { reactive, ref, watch, computed } from "vue";
 import BaseButton from "@/components/BaseButton.vue";
 import { useStore } from "vuex";
 import { useToast } from "vue-toast-notification";
-
 const toast = useToast();
 
 const props = defineProps({
@@ -251,6 +280,12 @@ watch(
   },
   { immediate: true }
 );
+
+const claimsById = computed(() => {
+  if (!props.claims || !props.claims.length || !selectedPolicy.value) return [];
+  const policyId = Number(selectedPolicy.value); // convert to number
+  return props.claims.filter((claim) => claim.userPolicyId === policyId);
+});
 
 const handleSubmit = async () => {
   if (!isFormDirty.value) {
