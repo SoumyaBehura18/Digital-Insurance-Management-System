@@ -71,14 +71,30 @@
         <table class="hidden md:table w-full text-sm">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-4 py-2 text-left text-xs font-medium uppercase">Claim ID</th>
-              <th class="px-4 py-2 text-left text-xs font-medium uppercase">Policy Name</th>
-              <th class="px-4 py-2 text-left text-xs font-medium uppercase">Claim Amount</th>
-              <th class="px-4 py-2 text-left text-xs font-medium uppercase">Date</th>
-              <th class="px-4 py-2 text-left text-xs font-medium uppercase">Status</th>
-              <th class="px-4 py-2 text-left text-xs font-medium uppercase">Document</th>
-              <th class="px-4 py-2 text-left text-xs font-medium uppercase">Reason</th>
-              <th class="px-4 py-2 text-left text-xs font-medium uppercase">Admin Review</th>
+              <th class="px-4 py-2 text-left text-xs font-medium uppercase">
+                Claim ID
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium uppercase">
+                Policy Name
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium uppercase">
+                Claim Amount
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium uppercase">
+                Date
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium uppercase">
+                Status
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium uppercase">
+                Document
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium uppercase">
+                Reason
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium uppercase">
+                Admin Review
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -173,7 +189,9 @@
                 >
                   View Comment
                 </button>
-                <span v-else class="text-xs text-gray-400 italic">No comments yet</span>
+                <span v-else class="text-xs text-gray-400 italic"
+                  >No comments yet</span
+                >
               </td>
             </tr>
           </tbody>
@@ -199,10 +217,19 @@
                 {{ claim.status }}
               </span>
             </div>
-            <p class="text-sm text-gray-600"><b>Policy:</b> {{ claim.policyName || getPolicyLabel(claim.userPolicyId) }}</p>
-            <p class="text-sm text-gray-600"><b>Amount:</b> ₹{{ formatAmount(claim.claimAmount) }}</p>
-            <p class="text-sm text-gray-600"><b>Date:</b> {{ formatDate(claim.claimDate) }}</p>
-            <p class="text-sm text-gray-600"><b>Reason:</b> {{ claim.reason || "-" }}</p>
+            <p class="text-sm text-gray-600">
+              <b>Policy:</b>
+              {{ claim.policyName || getPolicyLabel(claim.userPolicyId) }}
+            </p>
+            <p class="text-sm text-gray-600">
+              <b>Amount:</b> ₹{{ formatAmount(claim.claimAmount) }}
+            </p>
+            <p class="text-sm text-gray-600">
+              <b>Date:</b> {{ formatDate(claim.claimDate) }}
+            </p>
+            <p class="text-sm text-gray-600">
+              <b>Reason:</b> {{ claim.reason || "-" }}
+            </p>
             <div class="mt-2 flex items-center gap-2">
               <button
                 v-if="claim.documentLink"
@@ -232,13 +259,18 @@
       class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
       @click="closeModal"
     >
-      <div class="bg-white rounded p-6 w-full max-w-lg mx-4 sm:mx-auto" @click.stop>
+      <div
+        class="bg-white rounded p-6 w-full max-w-lg mx-4 sm:mx-auto"
+        @click.stop
+      >
         <div class="flex justify-between items-start mb-4">
           <div>
             <h3 class="text-lg font-semibold">Admin Review</h3>
             <p class="text-sm text-gray-600">Claim #{{ selectedClaim?.id }}</p>
           </div>
-          <button @click="closeModal" class="text-gray-400 hover:text-gray-600">✕</button>
+          <button @click="closeModal" class="text-gray-400 hover:text-gray-600">
+            ✕
+          </button>
         </div>
 
         <div class="mb-4 bg-gray-50 rounded p-4">
@@ -251,15 +283,21 @@
               }"
             ></div>
             <span class="text-sm font-medium">
-              {{ selectedClaim?.status === "APPROVED" ? "Approved" : "Rejected" }}
+              {{
+                selectedClaim?.status === "APPROVED" ? "Approved" : "Rejected"
+              }}
             </span>
           </div>
           <p class="text-sm">{{ selectedClaim?.reviewerComment }}</p>
         </div>
 
         <div class="flex justify-between text-xs text-gray-500">
-          <span v-if="selectedClaim?.resolvedDate">Reviewed on {{ formatDate(selectedClaim.resolvedDate) }}</span>
-          <span>Claim Amount: ₹{{ formatAmount(selectedClaim?.claimAmount) }}</span>
+          <span v-if="selectedClaim?.resolvedDate"
+            >Reviewed on {{ formatDate(selectedClaim.resolvedDate) }}</span
+          >
+          <span
+            >Claim Amount: ₹{{ formatAmount(selectedClaim?.claimAmount) }}</span
+          >
         </div>
 
         <div class="mt-6 flex justify-end">
@@ -274,7 +312,6 @@
     </div>
   </div>
 </template>
-
 
 <script>
 import { useToast } from "vue-toast-notification";
@@ -383,7 +420,7 @@ export default {
     downloadDocument(documentUrl, claimId) {
       // Validate that document URL exists
       if (!documentUrl) {
-        toast.error("No document available for this claim.");
+        this.toast.error("No document available for this claim.");
         return;
       }
 
