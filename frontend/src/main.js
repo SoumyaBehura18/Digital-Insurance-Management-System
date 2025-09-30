@@ -14,5 +14,5 @@ app.use(VueToast, {
   dismissible: true,
 });
 app.use(router);
-app.use(store); // <-- use the Vuex store here
+app.use(store);
 app.mount("#InsureCore");
