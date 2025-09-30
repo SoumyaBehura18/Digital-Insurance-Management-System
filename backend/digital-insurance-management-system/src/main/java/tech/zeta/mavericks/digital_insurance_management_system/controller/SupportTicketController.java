@@ -31,12 +31,10 @@ public class SupportTicketController {
     @Autowired
     private SupportTicketService ticketService;
 
-    /**
-     * Create a new support ticket.
-     *
-     * @param request Request containing ticket subject and message details
-     * @return Created support ticket with assigned ID and details
-     */
+    public SupportTicketController(SupportTicketService ticketService) {
+        this.ticketService = ticketService;
+    }
+
     @PostMapping
     public ResponseEntity<SupportTicketResponse> createTicket(@RequestBody SupportTicketRequest request) {
         return ResponseEntity.ok(ticketService.createSupportTicket(request));
