@@ -8,13 +8,26 @@ import tech.zeta.mavericks.digital_insurance_management_system.enums.VehicleType
 
 import java.util.Set;
 
+/**
+ * Data Transfer Object for requesting insurance policies based on user details.
+ *
+ * This DTO is used to capture user attributes that affect policy eligibility
+ * and premium calculations for health, vehicle, and life insurance policies.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class PolicyRequest {
-    private Boolean smokingDrinking;                // true if user smokes or drinks
-    private VehicleType vehicleType;               // type of vehicle
-    private Integer vehicleAge;                    // age of the vehicle
-    private Set<HealthCondition> preexistingConditions;  // preexisting diseases
-}
 
+    /** Indicates if the user smokes or drinks, which may affect premiums */
+    private Boolean smokingDrinking;
+
+    /** Type of the user's vehicle (e.g., car, bike) */
+    private VehicleType vehicleType;
+
+    /** Age of the user's vehicle in years */
+    private Integer vehicleAge;
+
+    /** Set of preexisting health conditions of the user */
+    private Set<HealthCondition> preexistingConditions;
+}

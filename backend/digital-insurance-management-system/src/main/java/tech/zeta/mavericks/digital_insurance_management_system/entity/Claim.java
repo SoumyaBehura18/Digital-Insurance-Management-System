@@ -13,8 +13,6 @@ import java.time.LocalDate;
  *
  * This entity tracks insurance claims submitted by users for their policies,
  * including claim details, status, and supporting documentation.
- *
- * @author Team Mavericks
  */
 @Data
 @Entity

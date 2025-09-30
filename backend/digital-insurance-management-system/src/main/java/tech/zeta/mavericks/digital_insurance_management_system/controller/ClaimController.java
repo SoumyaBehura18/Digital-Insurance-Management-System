@@ -27,8 +27,6 @@ import java.util.List;
  *  - GET /claim/policy/{policyId}: Get user policies by policy ID
  *  - GET /claim/policy/remaining-amount/{policyId}: Get remaining claimable amount
  *  - GET /claim/policies: Get all user policies
- *
- * @author Team Mavericks
  */
 @RestController
 @RequestMapping("/claim")

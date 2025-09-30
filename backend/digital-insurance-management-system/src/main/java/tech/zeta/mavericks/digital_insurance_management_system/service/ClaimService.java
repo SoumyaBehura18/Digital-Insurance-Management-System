@@ -28,8 +28,6 @@ import java.util.stream.Collectors;
  *
  * This service coordinates between repositories and external services
  * to provide complete claim management functionality.
- *
- * @author Team Mavericks
  */
 @Slf4j
 @Service
