@@ -113,9 +113,7 @@ const actions = {
     const diffDays = (now - endDate) / (1000 * 60 * 60 * 24); // how many days since expiry
 
     // Case 1️⃣: Policy is still active → do nothing
-    if (policy.status === "ACTIVE") {
-      continue;
-    }
+    
 
     // Case 2️⃣: Expired but within 15 days → set RENEW_PENDING
     if (diffDays >= 0 && diffDays <= 15 && policy.status !== "RENEW_PENDING") {

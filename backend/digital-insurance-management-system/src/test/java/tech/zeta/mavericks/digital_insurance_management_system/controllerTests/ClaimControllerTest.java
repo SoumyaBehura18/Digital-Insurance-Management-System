@@ -14,7 +14,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 import java.util.Map;
+
+import org.springframework.web.multipart.MultipartFile;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.request.ClaimRequest;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.request.ClaimReview;
 import tech.zeta.mavericks.digital_insurance_management_system.dto.response.ClaimListResponse;
@@ -32,8 +35,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -121,95 +122,104 @@ class ClaimControllerTest {
 
     @Test
     void submitClaim_ShouldReturnCreatedDto() throws Exception {
-        when(claimService.submitClaim(any())).thenReturn(claimResponseDto);
-        mockMvc.perform(post("/claim")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(claimRequest)))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.id").value(1L))
-            .andExpect(jsonPath("$.status").value("PENDING"))
-            .andExpect(jsonPath("$.claimAmount").value(5000.00));
+        MockMultipartFile file = new MockMultipartFile("document", "claim.pdf", "application/pdf", "dummy".getBytes());
+        when(claimService.submitClaimWithDocument(
+                eq(1L), eq("5000.00"), eq("Medical emergency treatment required"),
+                eq(claimRequest.getClaimDate().toString()), any(MultipartFile.class)
+        )).thenReturn(claimResponseDto);
+
+        mockMvc.perform(multipart("/claim")
+                        .file(file)
+                        .param("userPolicyId", "1")
+                        .param("claimAmount", "5000.00")
+                        .param("reason", "Medical emergency treatment required")
+                        .param("claimDate", claimRequest.getClaimDate().toString()))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.status").value("PENDING"))
+                .andExpect(jsonPath("$.claimAmount").value(5000.00));
     }
 
     @Test
     void submitClaim_ShouldFailValidation() throws Exception {
-        ClaimRequest invalid = new ClaimRequest();
-        mockMvc.perform(post("/claim")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(invalid)))
-            .andExpect(status().isBadRequest());
+        mockMvc.perform(multipart("/claim")
+                        .param("userPolicyId", "1")
+                        .param("claimAmount", "5000.00")
+                        .param("reason", "Medical emergency treatment required")
+                        .param("claimDate", claimRequest.getClaimDate().toString()))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     void getAllClaims_ShouldReturnList() throws Exception {
         when(claimService.getAllClaimsDto()).thenReturn(Collections.singletonList(claimListDto));
         mockMvc.perform(get("/claim/claims"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].id").value(1L))
-            .andExpect(jsonPath("$[0].userName").value("John Doe"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[0].userName").value("John Doe"));
     }
 
     @Test
     void getAllClaims_ShouldReturnEmpty() throws Exception {
         when(claimService.getAllClaimsDto()).thenReturn(Collections.emptyList());
         mockMvc.perform(get("/claim/claims"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$").isEmpty());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
     }
 
     @Test
     void getClaimsByUserId_ShouldReturnList() throws Exception {
         when(claimService.getClaimsByUserIdDto(10L)).thenReturn(Collections.singletonList(claimListDto));
         mockMvc.perform(get("/claim/user/10"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].userId").value(10L));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].userId").value(10L));
     }
 
     @Test
     void reviewClaim_ShouldReturnOk() throws Exception {
         mockMvc.perform(put("/claim/1/review")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(claimReview)))
-            .andExpect(status().isOk());
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(claimReview)))
+                .andExpect(status().isOk());
     }
 
     @Test
     void reviewClaim_ShouldReturnError_WhenServiceThrows() throws Exception {
         doThrow(new RuntimeException("not found"))
-            .when(claimService)
-            .updateCalimStatusAndReviewerComment(eq(99L), eq(ClaimStatus.APPROVED), anyString());
+                .when(claimService)
+                .updateCalimStatusAndReviewerComment(eq(99L), eq(ClaimStatus.APPROVED), anyString());
 
         mockMvc.perform(put("/claim/99/review")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(claimReview)))
-            .andExpect(status().isInternalServerError())
-            .andExpect(jsonPath("$.error").value("not found"));
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(claimReview)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.error").value("not found"));
     }
 
     @Test
     void getPoliciesByUserId_ShouldReturnPolicies() throws Exception {
         when(claimService.getUserPoliciesByUserId(10L)).thenReturn(Collections.singletonList(userPolicy));
         mockMvc.perform(get("/claim/policy/10"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].id").value(1L))
-            .andExpect(jsonPath("$[0].status").value("ACTIVE"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[0].status").value("ACTIVE"));
     }
 
     @Test
     void getRemainingCoverage_ShouldReturnValue() throws Exception {
         when(claimService.getRemainingCoverageAmount(1L)).thenReturn(remainingCoverageResponse);
         mockMvc.perform(get("/claim/policy/remaining-amount/1"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.policyId").value(1L))
-            .andExpect(jsonPath("$.remainingClaimAmount").value(45000.0));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.policyId").value(1L))
+                .andExpect(jsonPath("$.remainingClaimAmount").value(45000.0));
     }
 
     @Test
     void getAllPolicies_ShouldReturnAll() throws Exception {
         when(claimService.getAllUserPolicies()).thenReturn(Collections.singletonList(userPolicy));
         mockMvc.perform(get("/claim/policies"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].id").value(1L));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1L));
     }
 
     @RestControllerAdvice

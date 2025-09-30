@@ -7,7 +7,7 @@
       class="w-full"
     />
 
-    <main class="max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <main class="w-full px-4 sm:px-6 lg:px-8 py-8">
       <div class="flex justify-between items-center mb-8">
         <div class="flex items-center gap-3">
           <ArrowLeft
@@ -27,7 +27,7 @@
 
           <BaseButton
             :variant="activeView === 'create' ? 'theme' : 'secondary'"
-            @click="setActiveView('create')"
+            @click="handleRaiseTicket()"
           >
             Raise Ticket
           </BaseButton>
@@ -78,7 +78,6 @@ const store = useStore();
 onMounted(async () => {
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
   userId.value = currentUser ? currentUser.userId : null;
-  console.log("The userId is: ", userId.value);
   if (userId.value) {
     await fetchUserTickets();
     await fetchPoliciesAndClaims();
@@ -109,8 +108,6 @@ const fetchPoliciesAndClaims = async () => {
         "userPolicies/fetchUserPolicies",
         userId.value
       );
-      // policies.value = store.state.policies?.policies || [];
-      console.log("The policies are: ", store.state);
     } else if (store._actions["fetchPolicies"]) {
       await store.dispatch("fetchPolicies");
       policies.value = store.state.policies || [];
@@ -179,5 +176,10 @@ const handleTicketCreated = (newTicket) => {
 
   // Switch back to tickets view
   setActiveView("tickets");
+};
+
+const handleRaiseTicket = () => {
+  selectedTicket.value = null;
+  setActiveView("create");
 };
 </script>

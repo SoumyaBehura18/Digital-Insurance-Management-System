@@ -59,7 +59,7 @@
         You have not submitted any claims yet.
       </div>
 
-      <!-- Claims Table -->
+      <!-- Claims Desktop Table -->
       <div
         v-if="
           !$store.state.claims?.loading &&
@@ -68,7 +68,7 @@
         "
         class="overflow-x-auto"
       >
-        <table class="w-full text-sm">
+        <table class="hidden md:table w-full text-sm">
           <thead class="bg-gray-50">
             <tr>
               <th class="px-4 py-2 text-left text-xs font-medium uppercase">
@@ -87,6 +87,9 @@
                 Status
               </th>
               <th class="px-4 py-2 text-left text-xs font-medium uppercase">
+                Document
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium uppercase">
                 Reason
               </th>
               <th class="px-4 py-2 text-left text-xs font-medium uppercase">
@@ -101,9 +104,6 @@
               class="hover:bg-gray-50 border-b border-gray-100"
             >
               <td class="px-4 py-4 font-medium">{{ claim.id }}</td>
-              <td class="px-4 py-4 font-medium">
-                {{ claim.policyName || getPolicyLabel(claim.userPolicyId) }}
-              </td>
               <td class="px-4 py-4 font-medium">
                 {{ claim.policyName || getPolicyLabel(claim.userPolicyId) }}
               </td>
@@ -133,6 +133,53 @@
                   {{ claim.status }}
                 </span>
               </td>
+              <td class="px-4 py-4">
+                <button
+                  v-if="claim.documentLink"
+                  @click="downloadDocument(claim.documentLink, claim.id)"
+                  class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 transition-colors"
+                >
+                  <svg
+                    class="w-3 h-3 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
+                  View
+                </button>
+                <span
+                  v-else
+                  class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-400 bg-gray-50 rounded"
+                >
+                  <svg
+                    class="w-3 h-3 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  No doc
+                </span>
+              </td>
               <td class="px-4 py-4 truncate max-w-xs">{{ claim.reason }}</td>
               <td class="px-4 py-4">
                 <button
@@ -149,6 +196,60 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Mobile Card Layout -->
+        <div class="space-y-4 md:hidden">
+          <div
+            v-for="claim in $store.state.claims?.claims || []"
+            :key="claim.id"
+            class="border rounded p-4 bg-white shadow-sm"
+          >
+            <div class="flex justify-between items-center mb-2">
+              <span class="font-semibold">#{{ claim.id }}</span>
+              <span
+                class="inline-flex items-center px-2 py-0.5 rounded text-xs"
+                :class="{
+                  'bg-yellow-100 text-yellow-800': claim.status === 'PENDING',
+                  'bg-green-100 text-green-800': claim.status === 'APPROVED',
+                  'bg-red-100 text-red-800': claim.status === 'REJECTED',
+                }"
+              >
+                {{ claim.status }}
+              </span>
+            </div>
+            <p class="text-sm text-gray-600">
+              <b>Policy:</b>
+              {{ claim.policyName || getPolicyLabel(claim.userPolicyId) }}
+            </p>
+            <p class="text-sm text-gray-600">
+              <b>Amount:</b> ₹{{ formatAmount(claim.claimAmount) }}
+            </p>
+            <p class="text-sm text-gray-600">
+              <b>Date:</b> {{ formatDate(claim.claimDate) }}
+            </p>
+            <p class="text-sm text-gray-600">
+              <b>Reason:</b> {{ claim.reason || "-" }}
+            </p>
+            <div class="mt-2 flex items-center gap-2">
+              <button
+                v-if="claim.documentLink"
+                @click="downloadDocument(claim.documentLink, claim.id)"
+                class="px-2 py-1 text-xs text-blue-600 bg-blue-50 rounded hover:bg-blue-100"
+              >
+                View Doc
+              </button>
+              <span v-else class="text-xs text-gray-400">No doc</span>
+
+              <button
+                v-if="claim.reviewerComment"
+                @click="showCommentModal(claim)"
+                class="px-2 py-1 text-xs text-purple-600 bg-purple-50 rounded hover:bg-purple-100"
+              >
+                Comment
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -158,7 +259,10 @@
       class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
       @click="closeModal"
     >
-      <div class="bg-white rounded p-6 max-w-lg w-full mx-4" @click.stop>
+      <div
+        class="bg-white rounded p-6 w-full max-w-lg mx-4 sm:mx-auto"
+        @click.stop
+      >
         <div class="flex justify-between items-start mb-4">
           <div>
             <h3 class="text-lg font-semibold">Admin Review</h3>
@@ -210,8 +314,16 @@
 </template>
 
 <script>
+import { useToast } from "vue-toast-notification";
+
 export default {
   name: "ClaimList",
+  setup() {
+    const toast = useToast();
+    return {
+      toast,
+    };
+  },
   data() {
     return {
       showModal: false,
@@ -296,6 +408,47 @@ export default {
       this.selectedClaim = null;
       // Restore body scroll
       document.body.style.overflow = "auto";
+    },
+
+    /**
+     * DOCUMENT VIEW FUNCTIONALITY
+     * Opens the supporting document for a claim from Supabase storage in a new tab
+     *
+     * @param {string} documentUrl - The public URL of the document in Supabase
+     * @param {number} claimId - The ID of the claim (used for filename)
+     */
+    downloadDocument(documentUrl, claimId) {
+      // Validate that document URL exists
+      if (!documentUrl) {
+        this.toast.error("No document available for this claim.");
+        return;
+      }
+
+      try {
+        // Extract filename from URL or create a default one
+        // Supabase URLs typically end with the actual filename
+        const urlParts = documentUrl.split("/");
+        const filename =
+          urlParts[urlParts.length - 1] || `claim-${claimId}-document`;
+
+        // Create a temporary anchor element to view document in new tab
+        const link = document.createElement("a");
+        link.href = documentUrl;
+        link.target = "_blank"; // Open in new tab to view the document
+
+        // Temporarily add to DOM, click, and remove
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        console.log(
+          `Document opened for viewing for claim ${claimId}: ${filename}`
+        );
+      } catch (error) {
+        console.error("Error opening document:", error);
+        // Fallback: open in new tab directly
+        window.open(documentUrl, "_blank");
+      }
     },
   },
 };

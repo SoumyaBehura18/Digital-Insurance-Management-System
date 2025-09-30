@@ -21,31 +21,50 @@ import tech.zeta.mavericks.digital_insurance_management_system.entity.User;
 import java.util.List;
 import java.util.Map;
 
-
-
-
+/**
+ * REST controller for managing user operations including registration, login,
+ * user role updates, and retrieval of user details.
+ *
+ * Endpoints:
+ *  - POST /register: Register a new user
+ *  - POST /login: Authenticate a user and generate JWT token
+ *  - GET /getAllUsers: Retrieve all users
+ *  - GET /getUsersByIds: Retrieve users by a list of IDs
+ *  - PATCH /updateUserRole/{id}: Update a user's role
+ *  - PUT /updateUserDetails/{id}: Update user personal details
+ *  - GET /getUserDetailsById/{id}: Retrieve a user by ID
+ */
 @RestController
+public class UserController {
 
-
-public class UserController{
     @Autowired
     private UserService service;
 
     @Autowired
     private AuthenticationManager authenticationManager;
 
-
     @Autowired
     private JWTService jwtService;
 
+    /**
+     * Register a new user in the system.
+     *
+     * @param user User entity containing registration details
+     * @return Registered user with assigned ID
+     */
     @PostMapping("/register")
-    public User register(@RequestBody User user){
+    public User register(@RequestBody User user) {
         return service.register(user);
     }
 
-
+    /**
+     * Authenticate a user and generate a JWT token for session management.
+     *
+     * @param loginRequest Request containing email and password
+     * @return Login response with user details and JWT token
+     */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(
@@ -76,11 +95,22 @@ public class UserController{
         return ResponseEntity.ok(responseDTO);
     }
 
+    /**
+     * Retrieve all users registered in the system.
+     *
+     * @return List of users
+     */
     @GetMapping("/getAllUsers")
-    public ResponseEntity<List<User>> getAllUsers(){
-        return new ResponseEntity<>(service.getAllUsers(),HttpStatus.OK);
+    public ResponseEntity<List<User>> getAllUsers() {
+        return new ResponseEntity<>(service.getAllUsers(), HttpStatus.OK);
     }
 
+    /**
+     * Retrieve users based on a list of IDs.
+     *
+     * @param ids List of user IDs
+     * @return List of users corresponding to the provided IDs
+     */
     @GetMapping("/getUsersByIds")
     public ResponseEntity<List<User>> getUsersByIds(@RequestParam List<Long> ids) {
         try {
@@ -94,16 +124,39 @@ public class UserController{
         }
     }
 
+    /**
+     * Update the role of a specific user.
+     *
+     * @param id User ID
+     * @param request Request containing new role type
+     * @return Updated user entity
+     */
     @PatchMapping("/updateUserRole/{id}")
     public ResponseEntity<User> updateUserRole(@PathVariable Long id, @RequestBody RoleUpdateRequest request) {
         RoleType role = RoleType.valueOf(request.getRoleType().toUpperCase());
         return new ResponseEntity<>(service.updateUserRole(id, role), HttpStatus.OK);
     }
 
+    /**
+     * Update the personal details of a user.
+     *
+     * @param id User ID
+     * @param user Request containing updated user details
+     * @return Updated user entity
+     */
     @PutMapping("/updateUserDetails/{id}")
-    public ResponseEntity<User> updateUserDetails(@PathVariable Long id,@RequestBody UserUpdateRequest user){
-        return new ResponseEntity<>(service.updateUserDetails(id,user),HttpStatus.OK);
-
+    public ResponseEntity<User> updateUserDetails(@PathVariable Long id, @RequestBody UserUpdateRequest user) {
+        return new ResponseEntity<>(service.updateUserDetails(id, user), HttpStatus.OK);
     }
 
+    /**
+     * Retrieve detailed information of a user by ID.
+     *
+     * @param id User ID
+     * @return User entity with all details
+     */
+    @GetMapping("/getUserDetailsById/{id}")
+    public ResponseEntity<User> getUserDetailsById(@PathVariable Long id) {
+        return new ResponseEntity<>(service.getUserDetailsById(id), HttpStatus.OK);
+    }
 }

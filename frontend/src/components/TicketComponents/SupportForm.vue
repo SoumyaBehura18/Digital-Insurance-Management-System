@@ -108,7 +108,7 @@
               >
                 <option value="" disabled>Select a claim if relevant</option>
                 <option
-                  v-for="claim in props.claims"
+                  v-for="claim in claimsById"
                   :key="claim.id"
                   :value="claim.id"
                 >
@@ -151,7 +151,8 @@
           type="submit"
           variant="primary"
           customClass="bg-indigo-600 hover:bg-indigo-700 flex-1"
-          :disabled="isSubmitting"
+          :disabled="isSubmitting || !isFormDirty"
+          @click="handleButtonClick"
         >
           {{
             props.ticket
@@ -167,9 +168,12 @@
 </template>
 
 <script setup>
-import { reactive, ref, watch } from "vue";
+import { reactive, ref, watch, computed } from "vue";
 import BaseButton from "@/components/BaseButton.vue";
 import { useStore } from "vuex";
+import { useToast } from "vue-toast-notification";
+
+const toast = useToast();
 
 const props = defineProps({
   userId: {
@@ -178,7 +182,7 @@ const props = defineProps({
   },
   ticket: {
     type: Object,
-    default: () => null, // ✅ ensures ticket is never undefined
+    default: () => null,
   },
   policies: {
     type: Array,
@@ -190,10 +194,13 @@ const props = defineProps({
   },
 });
 
+// Emits
 const emit = defineEmits(["ticket-created", "ticket-updated", "cancel"]);
 const store = useStore();
 
-// ✅ Form state safely initialized with optional chaining
+const isSubmitting = ref(false);
+
+// Form state
 const form = reactive({
   subject: props.ticket?.subject || "",
   description: props.ticket?.description || "",
@@ -201,19 +208,38 @@ const form = reactive({
   relatedClaim: props.ticket?.relatedClaim || "",
 });
 
-const isSubmitting = ref(false);
+const selectedPolicy = ref(form.relatedPolicy);
 
-// ✅ Watch ticket safely (only if it exists)
+const isFormDirty = computed(() => {
+  if (!props.ticket) return true; // New ticket is always dirty
+  return (
+    form.subject !== props.ticket.subject ||
+    form.description !== props.ticket.description ||
+    form.relatedPolicy !== props.ticket.relatedPolicy ||
+    form.relatedClaim !== props.ticket.relatedClaim
+  );
+});
+
+watch(
+  () => form.relatedPolicy,
+  (newVal) => {
+    selectedPolicy.value = newVal;
+    form.relatedClaim = ""; // reset claim when policy changes
+  }
+);
+
 watch(
   () => props.ticket,
   async (newTicket) => {
-    if (!newTicket || !newTicket.id) return; // ✅ prevent null access
+    if (!newTicket || !newTicket.id) return;
 
     try {
-      const response = await store.dispatch("tickets/fetchTicketById", newTicket.id);
+      const response = await store.dispatch(
+        "tickets/fetchTicketById",
+        newTicket.id
+      );
 
       if (response) {
-        console.log("Fetched ticket details:", response);
         form.subject = response.subject || "";
         form.description = response.description || "";
         form.relatedPolicy = response.policyId || "";
@@ -226,47 +252,53 @@ watch(
   { immediate: true }
 );
 
-// ✅ Safe form submission handler
 const handleSubmit = async () => {
-  if (!props.userId) {
-    alert("User not found. Please log in again.");
+  if (!isFormDirty.value) {
+    toast.info("No changes detected. Nothing to update.");
     return;
   }
 
-  isSubmitting.value = true;
+  if (props.userId) {
+    if (form.subject === "" || form.description === "") return;
+    isSubmitting.value = true;
 
-  try {
-    const newTicket = {
-      subject: form.subject.trim(),
-      description: form.description.trim(),
-      policyId: form.relatedPolicy || null,
-      claimId: form.relatedClaim || null,
-      userId: props.userId,
-    };
+    try {
+      const newTicket = {
+        subject: form.subject.trim(),
+        description: form.description.trim(),
+        policyId: form.relatedPolicy || null,
+        claimId: form.relatedClaim || null,
+        userId: props.userId,
+      };
 
-    if (props.ticket && props.ticket.id) {
-      // ✅ Update existing ticket
-      await store.dispatch("tickets/updateTicket", {
-        ticketData: { ...newTicket, status: "OPEN" },
-        ticketId: props.ticket.id,
+      if (props.ticket && props.ticket.id) {
+        await store.dispatch("tickets/updateTicket", {
+          ticketData: { ...newTicket, status: "OPEN" },
+          ticketId: props.ticket.id,
+        });
+        emit("ticket-updated");
+        toast.success("Ticket updated successfully.", {
+          position: "top-right",
+        });
+      } else {
+        const result = await store.dispatch("tickets/createTicket", newTicket);
+        emit("ticket-created", newTicket);
+        toast.success("Ticket created successfully.", {
+          position: "top-right",
+        });
+      }
+
+      Object.keys(form).forEach((key) => {
+        form[key] = "";
       });
-      emit("ticket-updated");
-    } else {
-      // ✅ Create new ticket
-      const result = await store.dispatch("tickets/createTicket", newTicket);
-      console.log("Ticket created:", result);
-      emit("ticket-created", newTicket);
+    } catch (error) {
+      console.error("Error submitting ticket:", error);
+      toast.error("Error submitting ticket. Please try again.", {
+        position: "top-right",
+      });
+    } finally {
+      isSubmitting.value = false;
     }
-
-    // ✅ Reset form after successful submission
-    Object.keys(form).forEach((key) => {
-      form[key] = "";
-    });
-  } catch (error) {
-    console.error("Error submitting ticket:", error);
-    alert("Error submitting ticket. Please try again.");
-  } finally {
-    isSubmitting.value = false;
   }
 };
 </script>

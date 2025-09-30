@@ -3,7 +3,7 @@
     <div class="bg-white shadow-md rounded-xl w-full max-w-md p-8">
       <!-- Logo & Title -->
       <div class="flex items-center justify-center mb-6">
-        <Shield class="w-8 h-8 text-blue-600 rounded-full mr-2" />
+        <img src="Icon.png" alt="Shield Icon" class="w-8 h-8" />
         <h1 class="text-xl font-semibold">InsureCore</h1>
       </div>
 
@@ -15,9 +15,11 @@
       <form @submit.prevent="handleLogin" class="space-y-4">
         <!-- Email -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input 
-            type="email" 
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >Email</label
+          >
+          <input
+            type="email"
             v-model="email"
             placeholder="Enter your email"
             class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
@@ -27,9 +29,11 @@
 
         <!-- Password -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-          <input 
-            type="password" 
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >Password</label
+          >
+          <input
+            type="password"
             v-model="password"
             placeholder="Enter your password"
             class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
@@ -38,72 +42,83 @@
         </div>
 
         <!-- Login Button -->
-        <button 
+        <button
           type="submit"
           :disabled="isLoading"
           class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-50"
         >
-          {{ isLoading ? 'Logging in...' : 'Login' }}
+          {{ isLoading ? "Logging in..." : "Login" }}
         </button>
       </form>
 
       <!-- Register Link -->
       <p class="mt-4 text-center text-gray-600">
-        New user? 
-        <a href="/register" class="text-blue-600 font-medium hover:underline">Register</a>
+        New user?
+        <a href="/register" class="text-blue-600 font-medium hover:underline"
+          >Register</a
+        >
       </p>
     </div>
   </div>
 </template>
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { Shield } from 'lucide-vue-next'
-import { useStore } from 'vuex'
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { Shield } from "lucide-vue-next";
+import { useStore } from "vuex";
+import { useToast } from "vue-toast-notification";
 
-const store = useStore()
+const store = useStore();
+const toast = useToast();
 
-const email = ref('')
-const password = ref('')
-const isLoading = ref(false)
-const router = useRouter()
+const email = ref("");
+const password = ref("");
+const isLoading = ref(false);
+const router = useRouter();
 
 const handleLogin = async () => {
-  if (isLoading.value) return
+  if (isLoading.value) return;
   if (!email.value || !password.value) {
-    alert('Please enter email and password')
-    return
+    toast.warn("Please enter both email and password.", {
+      position: "top-right",
+    });
+    return;
   }
 
-  isLoading.value = true
+  isLoading.value = true;
 
   try {
     // Call Vuex action instead of axios directly
-    await store.dispatch('user/loginUser', { email: email.value, password: password.value })
+    await store.dispatch("user/loginUser", {
+      email: email.value,
+      password: password.value,
+    });
 
-
-    const user = store.getters['user/getCurrentUser']
+    const user = store.getters["user/getCurrentUser"];
 
     if (!user) {
-      alert('Login failed. Please try again.')
-      return
+      toast.error("Login failed. Please try again.", {
+        position: "top-right",
+      });
+      return;
     }
 
-    alert('Login successful!')
-    console.log('User Role:', user.role)
+    toast.success("Login successful!", {
+      position: "top-right",
+    });
     // Role-based redirection
-    if (user.role === 'admin') {
-      router.push('/admin/dashboard')
+    if (user.role === "admin") {
+      router.push("/admin/dashboard");
     } else {
-      router.push('/dashboard')
+      router.push("/dashboard");
     }
-
   } catch (error) {
-    console.error('Login failed:', error)
-    alert('Login failed. Please try again.')
+    console.error("Login failed:", error);
+    toast.error("Login failed. Please check your credentials.", {
+      position: "top-right",
+    });
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-
-}
+};
 </script>
