@@ -21,6 +21,16 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for managing insurance claims business logic.
+ * Handles claim submission, validation, document upload, review processing,
+ * and coverage calculations.
+ *
+ * This service coordinates between repositories and external services
+ * to provide complete claim management functionality.
+ *
+ * @author Team Mavericks
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -102,6 +112,16 @@ public class ClaimService {
         return response;
     }
 
+    /**
+     * Submits a new insurance claim after validating policy eligibility.
+     * Validates that the user policy exists and is in active status before
+     * creating the claim record.
+     *
+     * @param claimRequest Request object containing claim details
+     * @return ClaimResponseDto with submitted claim information
+     * @throws UserPolicyNotFoundException if user policy not found
+     * @throws RuntimeException if policy is not in active status
+     */
     public ClaimListResponse.ClaimResponseDto submitClaim(ClaimRequest claimRequest) {
         UserPolicy userPolicy = userPolicyRepository.findById(claimRequest.getUserPolicyId())
                 .orElseThrow(() -> new UserPolicyNotFoundException("User policy with ID " + claimRequest.getUserPolicyId() + " not found"));
@@ -128,6 +148,13 @@ public class ClaimService {
         return convertToResponseDto(savedClaim);
     }
 
+    /**
+     * Converts a Claim entity to ClaimResponseDto for API responses.
+     * Maps all claim fields to the DTO structure.
+     *
+     * @param claim Claim entity to convert
+     * @return ClaimResponseDto with claim data
+     */
     private ClaimListResponse.ClaimResponseDto convertToResponseDto(Claim claim) {
         ClaimListResponse.ClaimResponseDto responseDto = new ClaimListResponse.ClaimResponseDto();
         responseDto.setId(claim.getId());
@@ -142,6 +169,12 @@ public class ClaimService {
         return responseDto;
     }
 
+    /**
+     * Retrieves all claims in the system with complete user and policy details.
+     * Typically used by administrators for claim management.
+     *
+     * @return List of ClaimListResponse DTOs with full claim information
+     */
     public List<ClaimListResponse> getAllClaimsDto() {
         List<Claim> claims = claimRepository.findAll();
         return claims.stream()
@@ -149,6 +182,13 @@ public class ClaimService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves all claims submitted by a specific user.
+     * Returns claims with full details including user and policy information.
+     *
+     * @param userId ID of the user whose claims to retrieve
+     * @return List of ClaimListResponse DTOs for the specified user
+     */
     public List<ClaimListResponse> getClaimsByUserIdDto(Long userId) {
         List<Claim> claims = claimRepository.findByUserPolicy_User_Id(userId);
         return claims.stream()
@@ -156,6 +196,13 @@ public class ClaimService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Converts a Claim entity to ClaimListResponse DTO with complete information.
+     * Includes user details, policy information, and claim data for list views.
+     *
+     * @param claim Claim entity to convert
+     * @return ClaimListResponse DTO with full claim details
+     */
     private ClaimListResponse convertToClaimListResponseDto(Claim claim) {
         ClaimListResponse dto = new ClaimListResponse();
         dto.setId(claim.getId());
@@ -174,6 +221,15 @@ public class ClaimService {
         return dto;
     }
 
+    /**
+     * Updates the status and reviewer comments for a claim.
+     * Sets the resolved date when claim is approved or rejected.
+     *
+     * @param claimId ID of the claim to update
+     * @param status New claim status (PENDING, APPROVED, REJECTED)
+     * @param reviewerComment Comments from the reviewer
+     * @throws ClaimNotFoundException if claim with given ID is not found
+     */
     public void updateCalimStatusAndReviewerComment(Long claimId, ClaimStatus status, String reviewerComment) {
         Claim claim = claimRepository.findById(claimId)
                 .orElseThrow(() -> new ClaimNotFoundException("Claim with ID " + claimId + " not found"));
@@ -186,10 +242,24 @@ public class ClaimService {
         claimRepository.save(claim);
     }
 
+    /**
+     * Retrieves all user policies for a specific user.
+     *
+     * @param userId ID of the user
+     * @return List of UserPolicy entities belonging to the user
+     */
     public List<UserPolicy> getUserPoliciesByUserId(Long userId) {
         return userPolicyRepository.findByUser_Id(userId);
     }
 
+    /**
+     * Calculates the remaining claimable amount for a user policy.
+     * Subtracts total approved claims from the policy coverage amount.
+     *
+     * @param userPolicyId ID of the user policy
+     * @return RemainingCoverageResponse with policy ID and remaining amount
+     * @throws UserPolicyNotFoundException if user policy not found
+     */
     public RemainingCoverageResponse getRemainingCoverageAmount(Long userPolicyId) {
         UserPolicy userPolicy = userPolicyRepository.findById(userPolicyId)
                 .orElseThrow(() -> new UserPolicyNotFoundException("User policy with ID " + userPolicyId + " not found"));
@@ -204,10 +274,23 @@ public class ClaimService {
         return new RemainingCoverageResponse(userPolicyId, remaining);
     }
 
+    /**
+     * Retrieves all user policies in the system.
+     *
+     * @return List of all UserPolicy entities
+     */
     public List<UserPolicy> getAllUserPolicies() {
         return userPolicyRepository.findAll();
     }
 
+    /**
+     * Updates the document link for an existing claim.
+     * Used after successful document upload to Supabase storage.
+     *
+     * @param claimId ID of the claim to update
+     * @param documentUrl URL of the uploaded document
+     * @throws ClaimNotFoundException if claim with given ID is not found
+     */
     public void updateClaimDocument(Long claimId, String documentUrl) {
         Claim claim = claimRepository.findById(claimId)
                 .orElseThrow(() -> new ClaimNotFoundException("Claim with ID " + claimId + " not found"));

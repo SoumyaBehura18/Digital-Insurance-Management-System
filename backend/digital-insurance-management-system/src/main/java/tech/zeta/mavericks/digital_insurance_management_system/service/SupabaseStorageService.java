@@ -12,30 +12,59 @@ import java.net.http.HttpResponse;
 import java.util.UUID;
 
 /**
- * Service for handling file uploads to Supabase Storage
- * This service provides clean and simple file upload functionality
+ * Service for handling file uploads to Supabase Storage.
+ *
+ * This service provides secure file upload functionality for claim supporting documents.
+ * It handles file validation, unique filename generation, and direct upload to Supabase
+ * storage buckets. The service supports multiple file formats including images, PDFs,
+ * and Word documents with size limitations for security and performance.
+ *
+ * Features:
+ * - File type validation (JPG, PNG, PDF, DOC, DOCX)
+ * - File size validation (5MB limit)
+ * - Unique filename generation to prevent conflicts
+ * - Direct HTTP API integration with Supabase Storage
+ * - Public URL generation for uploaded files
+ * - Organized file structure by claim ID
+ *
+ * @author Team Mavericks
  */
 @Service
 public class SupabaseStorageService {
 
-    // Supabase configuration
+    /** Base URL for Supabase instance - configured via application properties */
     @Value("${supabase.url:https://exhhnhdfkmwxluwhvyvq.supabase.co}")
     private String supabaseUrl;
     
+    /** Anonymous key for Supabase authentication - configured via application properties */
     @Value("${supabase.anon.key:your-anon-key}")
     private String supabaseAnonKey;
     
+    /** Name of the Supabase storage bucket for claim documents */
     @Value("${supabase.bucket.name:claim-proofs}")
     private String bucketName;
 
+    /** HTTP client for making requests to Supabase Storage API */
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
     /**
-     * Upload a file to Supabase Storage and return the public URL
-     * 
-     * @param file The multipart file to upload
-     * @param claimId The claim ID for organizing files
-     * @return The public URL of the uploaded file
+     * Uploads a file to Supabase Storage and returns the public URL.
+     *
+     * This method performs complete file upload workflow:
+     * 1. Validates file type and size
+     * 2. Generates unique filename with claim ID prefix
+     * 3. Creates organized folder structure in bucket
+     * 4. Uploads file via HTTP POST to Supabase Storage API
+     * 5. Returns public URL for accessing the uploaded file
+     *
+     * The uploaded file is stored with path: claims/{claimId}/{uniqueFilename}
+     *
+     * @param file The multipart file to upload (must be valid type and size)
+     * @param claimId The claim ID for organizing files in folders
+     * @return The public URL of the uploaded file for accessing via web
+     * @throws IOException If file upload fails or network issues occur
+     * @throws InterruptedException If the upload request is interrupted
+     * @throws IllegalArgumentException If file type or size validation fails
      */
     public String uploadFile(MultipartFile file, Long claimId) throws IOException, InterruptedException {
         System.out.println("SupabaseStorageService: Starting file upload");
@@ -94,20 +123,27 @@ public class SupabaseStorageService {
     }
     
     /**
-     * Generate public URL for accessing the uploaded file
-     * 
-     * @param filePath The file path in the bucket
-     * @return The public URL
+     * Generates a public URL for accessing an uploaded file.
+     *
+     * Constructs the public URL using Supabase's public object endpoint.
+     * The generated URL allows direct access to the file without authentication.
+     *
+     * @param filePath The file path within the storage bucket
+     * @return The complete public URL for accessing the file
      */
     private String getPublicUrl(String filePath) {
         return supabaseUrl + "/storage/v1/object/public/" + bucketName + "/" + filePath;
     }
     
     /**
-     * Validate if the file type is allowed
-     * 
-     * @param file The file to validate
-     * @return true if file type is allowed
+     * Validates if the uploaded file type is allowed for claim documents.
+     *
+     * Checks the MIME type against a whitelist of supported formats:
+     * - Images: JPEG, JPG, PNG
+     * - Documents: PDF, DOC, DOCX
+     *
+     * @param file The multipart file to validate
+     * @return true if file type is allowed, false otherwise
      */
     public boolean isValidFileType(MultipartFile file) {
         String contentType = file.getContentType();
@@ -122,10 +158,13 @@ public class SupabaseStorageService {
     }
     
     /**
-     * Check if file size is within limits (5MB)
-     * 
-     * @param file The file to check
-     * @return true if file size is acceptable
+     * Validates if the file size is within acceptable limits.
+     *
+     * Enforces a maximum file size of 5MB to ensure reasonable upload times
+     * and prevent abuse of storage resources.
+     *
+     * @param file The multipart file to check
+     * @return true if file size is within the 5MB limit, false otherwise
      */
     public boolean isValidFileSize(MultipartFile file) {
         long maxSize = 5 * 1024 * 1024; // 5MB
