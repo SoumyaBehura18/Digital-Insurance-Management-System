@@ -78,7 +78,6 @@ const store = useStore();
 onMounted(async () => {
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
   userId.value = currentUser ? currentUser.userId : null;
-  console.log("The userId is: ", userId.value);
   if (userId.value) {
     await fetchUserTickets();
     await fetchPoliciesAndClaims();
@@ -109,8 +108,6 @@ const fetchPoliciesAndClaims = async () => {
         "userPolicies/fetchUserPolicies",
         userId.value
       );
-      // policies.value = store.state.policies?.policies || [];
-      console.log("The policies are: ", store.state);
     } else if (store._actions["fetchPolicies"]) {
       await store.dispatch("fetchPolicies");
       policies.value = store.state.policies || [];

@@ -108,7 +108,7 @@
               >
                 <option value="" disabled>Select a claim if relevant</option>
                 <option
-                  v-for="claim in props.claims"
+                  v-for="claim in claimsById"
                   :key="claim.id"
                   :value="claim.id"
                 >
@@ -167,7 +167,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, watch } from "vue";
+import { reactive, ref, watch, computed } from "vue";
 import BaseButton from "@/components/BaseButton.vue";
 import { useStore } from "vuex";
 
@@ -204,6 +204,8 @@ const form = reactive({
   relatedClaim: props.ticket?.relatedClaim || "",
 });
 
+const selectedPolicy = ref(form.relatedPolicy);
+
 const isFormDirty = computed(() => {
   if (!props.ticket) return true; // New ticket is always dirty
   return (
@@ -215,15 +217,25 @@ const isFormDirty = computed(() => {
 });
 
 watch(
+  () => form.relatedPolicy,
+  (newVal) => {
+    selectedPolicy.value = newVal;
+    form.relatedClaim = ""; // reset claim when policy changes
+  }
+);
+
+watch(
   () => props.ticket,
   async (newTicket) => {
     if (!newTicket || !newTicket.id) return;
 
     try {
-      const response = await store.dispatch("tickets/fetchTicketById", newTicket.id);
+      const response = await store.dispatch(
+        "tickets/fetchTicketById",
+        newTicket.id
+      );
 
       if (response) {
-        console.log("Fetched ticket details:", response);
         form.subject = response.subject || "";
         form.description = response.description || "";
         form.relatedPolicy = response.policyId || "";
@@ -236,6 +248,12 @@ watch(
   { immediate: true }
 );
 
+const claimsById = computed(() => {
+  if (!props.claims || !props.claims.length || !selectedPolicy.value) return [];
+  const policyId = Number(selectedPolicy.value); // convert to number
+  return props.claims.filter((claim) => claim.userPolicyId === policyId);
+});
+
 const handleSubmit = async () => {
   if (!isFormDirty.value) {
     alert("No changes detected. Nothing to update.");
@@ -246,35 +264,35 @@ const handleSubmit = async () => {
     if (form.subject === "" || form.description === "") return;
     isSubmitting.value = true;
 
-  try {
-    const newTicket = {
-      subject: form.subject.trim(),
-      description: form.description.trim(),
-      policyId: form.relatedPolicy || null,
-      claimId: form.relatedClaim || null,
-      userId: props.userId,
-    };
+    try {
+      const newTicket = {
+        subject: form.subject.trim(),
+        description: form.description.trim(),
+        policyId: form.relatedPolicy || null,
+        claimId: form.relatedClaim || null,
+        userId: props.userId,
+      };
 
-    if (props.ticket && props.ticket.id) {
-      await store.dispatch("tickets/updateTicket", {
-        ticketData: { ...newTicket, status: "OPEN" },
-        ticketId: props.ticket.id,
+      if (props.ticket && props.ticket.id) {
+        await store.dispatch("tickets/updateTicket", {
+          ticketData: { ...newTicket, status: "OPEN" },
+          ticketId: props.ticket.id,
+        });
+        emit("ticket-updated");
+      } else {
+        const result = await store.dispatch("tickets/createTicket", newTicket);
+        emit("ticket-created", newTicket);
+      }
+
+      Object.keys(form).forEach((key) => {
+        form[key] = "";
       });
-      emit("ticket-updated");
-    } else {
-      const result = await store.dispatch("tickets/createTicket", newTicket);
-      console.log("Ticket created:", result);
-      emit("ticket-created", newTicket);
+    } catch (error) {
+      console.error("Error submitting ticket:", error);
+      alert("Error submitting ticket. Please try again.");
+    } finally {
+      isSubmitting.value = false;
     }
-
-    Object.keys(form).forEach((key) => {
-      form[key] = "";
-    });
-  } catch (error) {
-    console.error("Error submitting ticket:", error);
-    alert("Error submitting ticket. Please try again.");
-  } finally {
-    isSubmitting.value = false;
   }
 };
 </script>

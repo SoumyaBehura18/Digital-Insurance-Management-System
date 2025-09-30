@@ -221,7 +221,7 @@
                         : 'text-gray-400'
                     "
                   >
-                    {{ formatDate(message.timestamp) }}
+                    {{ formatDateTime(message.timestamp) }}
                   </span>
                 </div>
                 <!-- Message Content -->
@@ -562,6 +562,12 @@ const handleAddMessage = async () => {
     await store.dispatch("tickets/addMessageToTicket", {
       ticketId: props.ticket.id,
       message: messageData,
+    });
+
+    sortedMessages.value.push({
+      ...messageData,
+      id: Date.now(), // Temporary ID; in real app, backend would provide this
+      timestamp: new Date().toISOString(),
     });
 
     // Clear the message input
