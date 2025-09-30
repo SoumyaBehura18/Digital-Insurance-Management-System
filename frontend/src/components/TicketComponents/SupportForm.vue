@@ -152,6 +152,7 @@
           variant="primary"
           customClass="bg-indigo-600 hover:bg-indigo-700 flex-1"
           :disabled="isSubmitting || !isFormDirty"
+          @click="handleButtonClick"
         >
           {{
             props.ticket
@@ -170,6 +171,9 @@
 import { reactive, ref, watch, computed } from "vue";
 import BaseButton from "@/components/BaseButton.vue";
 import { useStore } from "vuex";
+import { useToast } from "vue-toast-notification";
+
+const toast = useToast();
 
 const props = defineProps({
   userId: {
@@ -248,15 +252,9 @@ watch(
   { immediate: true }
 );
 
-const claimsById = computed(() => {
-  if (!props.claims || !props.claims.length || !selectedPolicy.value) return [];
-  const policyId = Number(selectedPolicy.value); // convert to number
-  return props.claims.filter((claim) => claim.userPolicyId === policyId);
-});
-
 const handleSubmit = async () => {
   if (!isFormDirty.value) {
-    alert("No changes detected. Nothing to update.");
+    toast.info("No changes detected. Nothing to update.");
     return;
   }
 
@@ -279,9 +277,15 @@ const handleSubmit = async () => {
           ticketId: props.ticket.id,
         });
         emit("ticket-updated");
+        toast.success("Ticket updated successfully.", {
+          position: "top-right",
+        });
       } else {
         const result = await store.dispatch("tickets/createTicket", newTicket);
         emit("ticket-created", newTicket);
+        toast.success("Ticket created successfully.", {
+          position: "top-right",
+        });
       }
 
       Object.keys(form).forEach((key) => {
@@ -289,7 +293,9 @@ const handleSubmit = async () => {
       });
     } catch (error) {
       console.error("Error submitting ticket:", error);
-      alert("Error submitting ticket. Please try again.");
+      toast.error("Error submitting ticket. Please try again.", {
+        position: "top-right",
+      });
     } finally {
       isSubmitting.value = false;
     }
