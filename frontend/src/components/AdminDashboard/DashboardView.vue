@@ -699,7 +699,7 @@ export default {
 .activity-number {
   width: 24px;
   height: 24px;
-  border-radius: 50%;
+  border-radius: 51%;
   background-color: #3b82f6;
   color: white;
   display: flex;

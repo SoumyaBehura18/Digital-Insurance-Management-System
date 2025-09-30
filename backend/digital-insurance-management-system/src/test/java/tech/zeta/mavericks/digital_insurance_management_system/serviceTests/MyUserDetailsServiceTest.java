@@ -59,7 +59,7 @@ class MyUserDetailsServiceTest {
         UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class,
                 () -> myUserDetailsService.loadUserByUsername(email));
 
-        assertEquals("user not found", exception.getMessage());
+        assertEquals("User not found with email: "+email, exception.getMessage());
         verify(userRepository, times(1)).findByEmail(email);
     }
 }
