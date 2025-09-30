@@ -6,7 +6,8 @@
                 <div class="flex items-center justify-between h-16">
                     <!-- Logo -->
                     <div class="flex items-center gap-2">
-                        <Shield class="w-8 h-8 text-brand-backgroundTheme" />
+                        <img src="Icon.png" alt="Shield Icon" class="w-8 h-8" />
+
                         <span class="text-xl font-bold">InsureCore</span>
                     </div>
 

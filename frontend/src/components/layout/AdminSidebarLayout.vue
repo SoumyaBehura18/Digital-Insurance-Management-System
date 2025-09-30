@@ -1,60 +1,110 @@
 <template>
-  <div :class="[
-    'flex flex-col h-full border-r transition-all duration-300 bg-gray-100',
-    isCollapsed ? 'w-16' : 'w-64'
-  ]">
-    <!-- Header -->
-    <div class="p-4 border-b flex items-center justify-between">
-      <div v-if="!isCollapsed" class="flex items-center gap-2">
-        <Shield class="w-6 h-6 text-brand-backgroundTheme" />
-        <span class="font-semibold text-gray-900">InsureCore Admin</span>
-      </div>
-      <button class="p-2 rounded hover:bg-gray-200 text-gray-900" @click="setIsCollapsed(!isCollapsed)">
-        <ChevronRight v-if="isCollapsed" class="w-4 h-4" />
-        <ChevronLeft v-else class="w-4 h-4" />
-      </button>
-    </div>
+  <div>
+    <!-- Mobile Hamburger Button -->
+    <button
+      class="sm:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded shadow-md"
+      @click="mobileOpen = !mobileOpen"
+    >
+      <svg
+        v-if="!mobileOpen"
+        class="w-6 h-6 text-gray-800"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+      <svg
+        v-else
+        class="w-6 h-6 text-gray-800"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
 
-    <!-- Navigation -->
-    <nav class="flex-1 p-4 bg-gray-100">
-      <div class="space-y-2">
-        <button v-for="item in adminSidebarItems" :key="item.id" @click="handleClick(item.id)" :class="[
-          'w-full flex items-center justify-start rounded transition py-2',
-          isCollapsed ? 'px-2' : 'px-4',
-          currentPage === `/admin/${item.id}`
-            ? 'bg-brand-backgroundTheme text-white'
-            : 'text-gray-900 hover:bg-gray-200'
+    <!-- Sidebar Overlay (Mobile) -->
+    <div
+      v-show="mobileOpen"
+      class="fixed inset-0 bg-black bg-opacity-30 z-40 sm:hidden"
+      @click="mobileOpen = false"
+    ></div>
 
-        ]">
-          <component :is="item.icon" :class="[
-            'w-4 h-4 shrink-0',
-            currentPage === `/admin/${item.id}` ? 'text-white' : 'text-gray-900'
-          ]" />
-          <span v-if="!isCollapsed" class="ml-2 truncate">{{ item.label }}</span>
+    <!-- Sidebar -->
+    <div
+      :class="[
+        'flex flex-col h-full border-r transition-all duration-300 bg-gray-100 fixed z-50 top-0 left-0 sm:relative sm:translate-x-0',
+        isCollapsed ? 'w-16' : 'w-64',
+        mobileOpen ? 'translate-x-0' : '-translate-x-full',
+        'sm:translate-x-0'
+      ]"
+      class="h-screen overflow-y-auto"
+    >
+      <!-- Header -->
+      <div class="p-4 border-b flex items-center justify-between">
+        <div v-if="!isCollapsed" class="flex items-center gap-2">
+          <img src="/Icon.png" alt="Shield Icon" class="w-8 h-8" />
+          <span class="font-semibold text-gray-900">InsureCore Admin</span>
+        </div>
+        <button class="p-2 rounded hover:bg-gray-200 text-gray-900" @click="setIsCollapsed(!isCollapsed)">
+          <ChevronRight v-if="isCollapsed" class="w-4 h-4" />
+          <ChevronLeft v-else class="w-4 h-4" />
         </button>
       </div>
-    </nav>
 
-    <!-- Footer -->
-    <div class="p-4 border-t space-y-2">
-      <!-- Logout -->
-      <button
-        @click="handleLogout()"
-        :class="[
-          'w-full flex items-center justify-start rounded transition-colors py-2',
-          isCollapsed ? 'px-2' : 'px-4',
-          'text-gray-900 hover:bg-gray-200'
-        ]"
-      >
-        <LogOut class="w-4 h-4 shrink-0" />
-        <span v-if="!isCollapsed" class="ml-2">Logout</span>
-      </button>
+      <!-- Navigation -->
+      <nav class="flex-1 p-4 bg-gray-100">
+        <div class="space-y-2">
+          <button
+            v-for="item in adminSidebarItems"
+            :key="item.id"
+            @click="handleClick(item.id)"
+            :class="[
+              'w-full flex items-center justify-start rounded transition py-2',
+              isCollapsed ? 'px-2' : 'px-4',
+              currentPage === `/admin/${item.id}`
+                ? 'bg-brand-backgroundTheme text-white'
+                : 'text-gray-900 hover:bg-gray-200'
+            ]"
+          >
+            <component
+              :is="item.icon"
+              :class="[
+                'w-4 h-4 shrink-0',
+                currentPage === `/admin/${item.id}` ? 'text-white' : 'text-gray-900'
+              ]"
+            />
+            <span v-if="!isCollapsed" class="ml-2 truncate">{{ item.label }}</span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Footer -->
+      <div class="p-4 border-t space-y-2">
+        <button
+          @click="handleLogout()"
+          :class="[
+            'w-full flex items-center justify-start rounded transition-colors py-2',
+            isCollapsed ? 'px-2' : 'px-4',
+            'text-gray-900 hover:bg-gray-200'
+          ]"
+        >
+          <LogOut class="w-4 h-4 shrink-0" />
+          <span v-if="!isCollapsed" class="ml-2">Logout</span>
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref } from "vue";
 import router from "@/router";
 import {
   LayoutDashboard,
@@ -85,23 +135,21 @@ const adminSidebarItems = [
   { id: "users", label: "Users", icon: Users },
 ];
 
+// Mobile sidebar state
+const mobileOpen = ref(false);
 
 const handleLogout = () => {
-  // props.onLogout();
-  // Clear all auth-related localStorage
   localStorage.removeItem('currentUser');
   localStorage.removeItem('userId');
-  // Redirect to login page
   router.push('/login');
 };
 
 const handleClick = (id) => {
   props.setCurrentPage(id);
-  // push to route when clicking sidebar item
   const target = `/admin/${id}`;
   if (router.currentRoute.value.path !== target) {
     router.push(target);
   }
+  mobileOpen.value = false; // close mobile sidebar after click
 };
 </script>
-

@@ -18,7 +18,7 @@
     <!-- Filters -->
     <div v-else class="mb-4 flex flex-wrap gap-4 items-center justify-between">
       <!-- Status Filter -->
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 flex-wrap">
         <span class="font-semibold text-gray-700">Filter by Status:</span>
         <button
           v-for="status in statusOptions"
@@ -43,7 +43,7 @@
       </div>
 
       <!-- NCB Filter -->
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 flex-wrap">
         <span class="font-semibold text-gray-700">Filter by NCB Eligibility:</span>
         <button
           v-for="ncb in ncbOptions"
@@ -61,8 +61,8 @@
       </div>
     </div>
 
-    <!-- Policies Table -->
-    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+    <!-- Desktop Table (md and up) -->
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden hidden md:block">
       <table class="w-full table-auto border-collapse">
         <thead>
           <tr class="bg-gray-50 text-[#6c63ff]">
@@ -140,6 +140,57 @@
       </table>
     </div>
 
+    <!-- Mobile Cards (sm and down) -->
+    <div class="flex flex-col gap-4 md:hidden">
+      <div
+        v-for="policy in filteredPolicies"
+        :key="policy.id"
+        class="bg-white shadow rounded-lg p-4 space-y-2 border"
+      >
+        <div class="flex justify-between items-center">
+          <h3 class="font-semibold text-gray-800">{{ policy.policyName }}</h3>
+          <span
+            :class="{
+              'bg-green-100 text-green-800': policy.status === 'ACTIVE',
+              'bg-gray-200 text-gray-700': policy.status === 'RENEWED',
+              'bg-yellow-100 text-yellow-800': policy.status === 'RENEW_PENDING',
+              'bg-red-100 text-red-800': policy.status === 'EXPIRED',
+              'bg-gray-300 text-gray-600': policy.status === 'CANCELLED'
+            }"
+            class="px-2 py-1 rounded-full text-xs font-semibold"
+          >
+            {{ policy.status }}
+          </span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-sm text-gray-700">
+          <div><span class="font-medium">Type:</span> {{ policy.policyType }}</div>
+          <div><span class="font-medium">Premium:</span> Rs.{{ formatCurrency(policy.premiumPaid) }}</div>
+          <div><span class="font-medium">Start Date:</span> {{ formatDate(policy.startDate) }}</div>
+          <div><span class="font-medium">End Date:</span> {{ formatDate(policy.endDate) }}</div>
+          <div><span class="font-medium">NCB:</span>
+            <span v-if="!policy.noClaimBonus" class="text-green-700 font-semibold">Eligible</span>
+            <span v-else class="text-red-700 font-semibold">Not Eligible</span>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button
+            v-if="canRenew(policy)"
+            class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-medium transition"
+            @click="openModal(policy)"
+          >
+            {{ policy.status === 'RENEW_PENDING' ? 'Renew (Grace Period)' : 'Renew' }}
+          </button>
+          <button
+            v-show="policy.status !== 'CANCELLED'"
+            @click="cancelPolicy(policy)"
+            class="text-red-500 hover:text-red-700 transition"
+          >
+            <Trash class="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Purchase / Renewal Modal -->
     <PurchaseModal
       v-if="selectedPolicy"
@@ -148,7 +199,6 @@
       @purchased="openModal"
     />
   </div>
-
 </template>
 
 <script setup>
