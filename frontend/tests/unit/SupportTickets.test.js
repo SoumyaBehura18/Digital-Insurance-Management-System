@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mount } from "@vue/test-utils";
 import { createStore } from "vuex";
 import SupportTickets from "@/views/User/TicketsPage.vue";
-import { MessageCircle } from "lucide-vue-next";
 
 // Mock components
 const MockHeaderLayout = {

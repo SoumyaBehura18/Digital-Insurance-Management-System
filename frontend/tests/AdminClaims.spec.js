@@ -1,4 +1,3 @@
-// tests/AdminClaims.spec.js
 // Simple tests for the AdminClaims component
 
 import { mount } from "@vue/test-utils";

@@ -20,7 +20,7 @@
 
       <QuickActions @navigate="goToPage" />
 
-      <!-- ✅ Pass multiple props -->
+      <!--  Pass multiple props -->
       <RecentActivity
         :recent-policies="recentPolicies"
         :recent-claims="recentClaims"
@@ -66,7 +66,7 @@ const totalCoverage = computed(() =>
   }, 0)
 );
 
-// ✅ Recent data (last 2 each)
+//  Recent data (last 2 each)
 const recentPolicies = computed(() => policies.value.slice(-2).reverse());
 const recentClaims = computed(() => claims.value.slice(-2).reverse());
 const recentTickets = computed(() => tickets.value.slice(-2).reverse());

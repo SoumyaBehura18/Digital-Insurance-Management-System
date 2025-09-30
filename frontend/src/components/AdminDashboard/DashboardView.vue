@@ -7,14 +7,16 @@
     </div>
 
     <!-- KPI cards -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <!-- Total Policies -->
       <div class="kpi-card kpi-card-policies">
         <div class="flex items-center justify-between">
           <h3 class="text-sm font-medium text-gray-600">Total Policies</h3>
           <span class="kpi-icon-policies">📄</span>
         </div>
-        <div class="kpi-number text-gray-900">{{ policies.totalPoliciesText }}</div>
+        <div class="kpi-number text-gray-900">
+          {{ policies.totalPoliciesText }}
+        </div>
       </div>
 
       <!-- Total Claims -->
@@ -26,8 +28,6 @@
         <div class="kpi-number text-gray-900">{{ stats.totalClaimsText }}</div>
         <div class="text-sm text-gray-600">{{ stats.pendingClaimsText }}</div>
       </div>
-
-      
 
       <!-- Support Tickets -->
       <div class="kpi-card kpi-card-tickets">
@@ -52,17 +52,16 @@
           <!-- Pie Chart -->
           <div class="flex justify-center">
             <div class="pie-chart-container">
-              <div 
-                class="pie-chart"
-                :style="pieChartStyle"
-              ></div>
+              <div class="pie-chart" :style="pieChartStyle"></div>
               <div class="pie-chart-center">
-                <div class="text-2xl font-bold text-gray-800">{{ totalPoliciesFromBreakdown }}</div>
+                <div class="text-2xl font-bold text-gray-800">
+                  {{ totalPoliciesFromBreakdown }}
+                </div>
                 <div class="text-xs text-gray-500">Total</div>
               </div>
             </div>
           </div>
-          
+
           <!-- Extended Legend -->
           <div class="grid grid-cols-1 gap-4">
             <div
@@ -72,24 +71,32 @@
               :class="{
                 'border-green-500': item.name.includes('Life'),
                 'border-blue-500': item.name.includes('Health'),
-                'border-purple-500': !item.name.includes('Life') && !item.name.includes('Health')
+                'border-purple-500':
+                  !item.name.includes('Life') && !item.name.includes('Health'),
               }"
             >
               <div class="flex items-center gap-3">
-                <span 
+                <span
                   :class="[
                     'w-5 h-5 rounded-full',
-                    item.name.includes('Life') ? 'bg-green-500' : 
-                    item.name.includes('Health') ? 'bg-blue-500' : 'bg-purple-500'
+                    item.name.includes('Life')
+                      ? 'bg-green-500'
+                      : item.name.includes('Health')
+                      ? 'bg-blue-500'
+                      : 'bg-purple-500',
                   ]"
                 ></span>
                 <div>
                   <div class="font-semibold text-gray-800">{{ item.name }}</div>
-                  <div class="text-sm text-gray-600">{{ item.percent.toFixed(1) }}% of total claims</div>
+                  <div class="text-sm text-gray-600">
+                    {{ item.percent.toFixed(1) }}% of total claims
+                  </div>
                 </div>
               </div>
               <div class="text-right">
-                <div class="text-2xl font-bold text-gray-900">{{ item.count }}</div>
+                <div class="text-2xl font-bold text-gray-900">
+                  {{ item.count }}
+                </div>
                 <div class="text-sm text-gray-500">Claims</div>
               </div>
             </div>
@@ -105,9 +112,9 @@
           Recent Activities
         </h3>
         <div v-if="recentActivities.length" class="space-y-3">
-          <div 
-            v-for="(act, i) in recentActivities" 
-            :key="i" 
+          <div
+            v-for="(act, i) in recentActivities"
+            :key="i"
             class="activity-item-simple"
           >
             <div class="activity-number">{{ i + 1 }}</div>
@@ -127,19 +134,36 @@
         Quick Actions
       </h3>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <router-link to="/admin/policies" class="quick-action-card quick-action-card-policies">
+        <router-link
+          to="/admin/policies"
+          class="quick-action-card quick-action-card-policies"
+        >
           <div class="quick-action-icon quick-action-icon-policies">+</div>
-          <div class="quick-action-title quick-action-title-policies">Create New Policy</div>
-          <div class="quick-action-desc">Add a new insurance policy to the catalog</div>
+          <div class="quick-action-title quick-action-title-policies">
+            Create New Policy
+          </div>
+          <div class="quick-action-desc">
+            Add a new insurance policy to the catalog
+          </div>
         </router-link>
-        <router-link to="/admin/claims" class="quick-action-card quick-action-card-claims">
+        <router-link
+          to="/admin/claims"
+          class="quick-action-card quick-action-card-claims"
+        >
           <div class="quick-action-icon quick-action-icon-claims">👁️</div>
-          <div class="quick-action-title quick-action-title-claims">Review Claims</div>
+          <div class="quick-action-title quick-action-title-claims">
+            Review Claims
+          </div>
           <div class="quick-action-desc">Process pending insurance claims</div>
         </router-link>
-        <router-link to="/admin/users" class="quick-action-card quick-action-card-users">
+        <router-link
+          to="/admin/users"
+          class="quick-action-card quick-action-card-users"
+        >
           <div class="quick-action-icon quick-action-icon-users">👥</div>
-          <div class="quick-action-title quick-action-title-users">Manage Users</div>
+          <div class="quick-action-title quick-action-title-users">
+            Manage Users
+          </div>
           <div class="quick-action-desc">View and manage customer accounts</div>
         </router-link>
       </div>
@@ -149,212 +173,256 @@
 
 <script>
 export default {
-  name: 'DashboardView',
+  name: "DashboardView",
   computed: {
     policies() {
-    
-    const policiesStoreState = this.$store?.state?.adminPolicyStore || {}
-      const policyStoreList= Array.isArray(policiesStoreState.policies) ? policiesStoreState.policies : []
+      const policiesStoreState = this.$store?.state?.adminPolicyStore || {};
+      const policyStoreList = Array.isArray(policiesStoreState.policies)
+        ? policiesStoreState.policies
+        : [];
 
-      const totalPoliciesCount = policyStoreList.length || 0
+      const totalPoliciesCount = policyStoreList.length || 0;
 
-      const activePoliciesDisplayText = totalPoliciesCount ? `${totalPoliciesCount} policy types` : 'No data available for now'
-      console.log('Total Policies Count:', totalPoliciesCount);
-      console.log('Active Policies Display Text:', activePoliciesDisplayText);
-      console.log('Policy Store List:', policyStoreList);
+      const activePoliciesDisplayText = totalPoliciesCount
+        ? `${totalPoliciesCount} policy types`
+        : "No data available for now";
+      console.log("Total Policies Count:", totalPoliciesCount);
+      console.log("Active Policies Display Text:", activePoliciesDisplayText);
+      console.log("Policy Store List:", policyStoreList);
       return {
         totalPoliciesText: String(totalPoliciesCount || 0),
         totalPoliciesCount,
-        activePoliciesDisplayText
-      }
+        activePoliciesDisplayText,
+      };
     },
     // This function takes no input and returns calculated dashboard statistics from claims and tickets data
     stats() {
-      const claimsStoreState = this.$store?.state?.claims || {}
-      const adminClaimsList = Array.isArray(claimsStoreState.adminClaims) ? claimsStoreState.adminClaims : []
-      
-      // Count unique policy types from claims data
-      // const uniquePolicyNames = new Set()
-      // adminClaimsList.forEach(claim => {
-      //   if (claim?.policyName) {
-      //     uniquePolicyNames.add(claim.policyName)
-      //   }
-      // }
-      
+      const claimsStoreState = this.$store?.state?.claims || {};
+      const adminClaimsList = Array.isArray(claimsStoreState.adminClaims)
+        ? claimsStoreState.adminClaims
+        : [];
+
       // Count pending claims
-      const pendingClaimsCount = adminClaimsList.filter(claim => 
-        (claim?.status || '').toUpperCase() === 'PENDING'
-      ).length
+      const pendingClaimsCount = adminClaimsList.filter(
+        (claim) => (claim?.status || "").toUpperCase() === "PENDING"
+      ).length;
 
       // Get tickets data from admin tickets store
-      const ticketsStoreState = this.$store?.state?.adminTickets || {}
-      const adminTicketsList = Array.isArray(ticketsStoreState.tickets) ? ticketsStoreState.tickets : []
-      
-      // Count open tickets
-      const openTicketsCount = adminTicketsList.filter(ticket => 
-        (ticket?.status || '').toUpperCase() === 'OPEN' || 
-        (ticket?.status || '').toUpperCase() === 'PENDING'
-      ).length
+      const ticketsStoreState = this.$store?.state?.adminTickets || {};
+      const adminTicketsList = Array.isArray(ticketsStoreState.tickets)
+        ? ticketsStoreState.tickets
+        : [];
 
-      const openTicketsDisplayText = openTicketsCount 
-        ? `${openTicketsCount} open` 
-        : adminTicketsList.length 
-          ? 'All resolved' 
-          : 'No data available for now'
+      // Count open tickets
+      const openTicketsCount = adminTicketsList.filter(
+        (ticket) =>
+          (ticket?.status || "").toUpperCase() === "OPEN" ||
+          (ticket?.status || "").toUpperCase() === "PENDING"
+      ).length;
+
+      const openTicketsDisplayText = openTicketsCount
+        ? `${openTicketsCount} open`
+        : adminTicketsList.length
+        ? "All resolved"
+        : "No data available for now";
 
       return {
         totalClaimsText: String(adminClaimsList.length || 0),
         pendingClaimsText: `${pendingClaimsCount} pending review`,
         totalTicketsText: String(adminTicketsList.length || 0),
-        openTicketsText: openTicketsDisplayText
-      }
+        openTicketsText: openTicketsDisplayText,
+      };
     },
     // This function takes no input and returns policy breakdown data categorized by insurance types
     policyBreakdown() {
-      const claimsStoreState = this.$store?.state?.claims || {}
-      const adminClaimsList = Array.isArray(claimsStoreState.adminClaims) ? claimsStoreState.adminClaims : []
-      
+      const claimsStoreState = this.$store?.state?.claims || {};
+      const adminClaimsList = Array.isArray(claimsStoreState.adminClaims)
+        ? claimsStoreState.adminClaims
+        : [];
+
       if (adminClaimsList.length === 0) {
-        return []
+        return [];
       }
 
       // Count each policy type from claims
-      const policyTypeCounter = {}
-      
-      adminClaimsList.forEach(claim => {
-        const policyName = claim?.policyName || 'Unknown Policy'
-        
+      const policyTypeCounter = {};
+
+      adminClaimsList.forEach((claim) => {
+        const policyName = claim?.policyName || "Unknown Policy";
+
         // Determine policy category based on name
-        let policyCategory = 'Auto Insurance' // default category
-        const lowerCaseName = policyName.toLowerCase()
-        
-        if (lowerCaseName.includes('health') || lowerCaseName.includes('medical')) {
-          policyCategory = 'Health Insurance'
-        } else if (lowerCaseName.includes('life') || lowerCaseName.includes('term')) {
-          policyCategory = 'Life Insurance'
-        } else if (lowerCaseName.includes('auto') || lowerCaseName.includes('vehicle') || lowerCaseName.includes('car')) {
-          policyCategory = 'Auto Insurance'
+        let policyCategory = "Auto Insurance"; // default category
+        const lowerCaseName = policyName.toLowerCase();
+
+        if (
+          lowerCaseName.includes("health") ||
+          lowerCaseName.includes("medical")
+        ) {
+          policyCategory = "Health Insurance";
+        } else if (
+          lowerCaseName.includes("life") ||
+          lowerCaseName.includes("term")
+        ) {
+          policyCategory = "Life Insurance";
+        } else if (
+          lowerCaseName.includes("auto") ||
+          lowerCaseName.includes("vehicle") ||
+          lowerCaseName.includes("car")
+        ) {
+          policyCategory = "Auto Insurance";
         }
-        
-        policyTypeCounter[policyCategory] = (policyTypeCounter[policyCategory] || 0) + 1
-      })
+
+        policyTypeCounter[policyCategory] =
+          (policyTypeCounter[policyCategory] || 0) + 1;
+      });
 
       // Calculate percentages and format data
-      const totalCount = Object.values(policyTypeCounter).reduce((sum, count) => sum + count, 0) || 1
-      
+      const totalCount =
+        Object.values(policyTypeCounter).reduce(
+          (sum, count) => sum + count,
+          0
+        ) || 1;
+
       return Object.entries(policyTypeCounter)
         .map(([categoryName, categoryCount]) => ({
           name: categoryName,
           count: categoryCount,
-          percent: (categoryCount / totalCount) * 100
+          percent: (categoryCount / totalCount) * 100,
         }))
-        .filter(item => item.count > 0)
+        .filter((item) => item.count > 0);
     },
     // This function takes no input and returns total count of all policies from breakdown data
     totalPoliciesFromBreakdown() {
-      return this.policyBreakdown.reduce((totalSum, policyItem) => totalSum + policyItem.count, 0)
+      return this.policyBreakdown.reduce(
+        (totalSum, policyItem) => totalSum + policyItem.count,
+        0
+      );
     },
-    
+
     // This function takes no input and returns CSS conic-gradient style for pie chart visualization
     pieChartStyle() {
-      if (this.policyBreakdown.length === 0) return {}
-      
+      if (this.policyBreakdown.length === 0) return {};
+
       const policyColors = {
-        'Health Insurance': '#3b82f6',
-        'Life Insurance': '#10b981', 
-        'Auto Insurance': '#8b5cf6'
-      }
-      
-      let currentPercent = 0
-      const colorGradientStops = []
-      
-      this.policyBreakdown.forEach(policyItem => {
-        const itemColor = policyColors[policyItem.name] || '#6b7280'
-        const startPercent = currentPercent
-        const endPercent = currentPercent + policyItem.percent
-        
-        colorGradientStops.push(`${itemColor} ${startPercent}% ${endPercent}%`)
-        currentPercent = endPercent
-      })
-      
+        "Health Insurance": "#3b82f6",
+        "Life Insurance": "#10b981",
+        "Auto Insurance": "#8b5cf6",
+      };
+
+      let currentPercent = 0;
+      const colorGradientStops = [];
+
+      this.policyBreakdown.forEach((policyItem) => {
+        const itemColor = policyColors[policyItem.name] || "#6b7280";
+        const startPercent = currentPercent;
+        const endPercent = currentPercent + policyItem.percent;
+
+        colorGradientStops.push(`${itemColor} ${startPercent}% ${endPercent}%`);
+        currentPercent = endPercent;
+      });
+
       return {
-        background: `conic-gradient(${colorGradientStops.join(', ')})`
-      }
+        background: `conic-gradient(${colorGradientStops.join(", ")})`,
+      };
     },
     // This function takes no input and returns combined list of recent claims and tickets activities
     recentActivities() {
-      const claimsStoreState = this.$store?.state?.claims || {}
-      const adminClaimsList = Array.isArray(claimsStoreState.adminClaims) ? claimsStoreState.adminClaims : []
-      
-      const ticketsStoreState = this.$store?.state?.adminTickets || {}
-      const adminTicketsList = Array.isArray(ticketsStoreState.tickets) ? ticketsStoreState.tickets : []
+      const claimsStoreState = this.$store?.state?.claims || {};
+      const adminClaimsList = Array.isArray(claimsStoreState.adminClaims)
+        ? claimsStoreState.adminClaims
+        : [];
+
+      const ticketsStoreState = this.$store?.state?.adminTickets || {};
+      const adminTicketsList = Array.isArray(ticketsStoreState.tickets)
+        ? ticketsStoreState.tickets
+        : [];
 
       // Parse date string safely
       const parseActivityDate = (dateString) => {
-        if (!dateString) return 0
-        const parsedTimestamp = Date.parse(dateString)
-        return isNaN(parsedTimestamp) ? 0 : parsedTimestamp
-      }
+        if (!dateString) return 0;
+        const parsedTimestamp = Date.parse(dateString);
+        return isNaN(parsedTimestamp) ? 0 : parsedTimestamp;
+      };
 
       // Get latest 4 claims activities
       const recentClaimsActivities = [...adminClaimsList]
-        .sort((firstClaim, secondClaim) => 
-          parseActivityDate(secondClaim?.createdAt || secondClaim?.claimDate || secondClaim?.resolvedDate) - 
-          parseActivityDate(firstClaim?.createdAt || firstClaim?.claimDate || firstClaim?.resolvedDate)
+        .sort(
+          (firstClaim, secondClaim) =>
+            parseActivityDate(
+              secondClaim?.createdAt ||
+                secondClaim?.claimDate ||
+                secondClaim?.resolvedDate
+            ) -
+            parseActivityDate(
+              firstClaim?.createdAt ||
+                firstClaim?.claimDate ||
+                firstClaim?.resolvedDate
+            )
         )
         .slice(0, 4)
-        .map(claim => ({
-          title: `New claim submitted for ${claim?.policyName || claim?.policyType || 'Unknown Policy'}`,
-          type: 'claim'
-        }))
+        .map((claim) => ({
+          title: `New claim submitted for ${
+            claim?.policyName || claim?.policyType || "Unknown Policy"
+          }`,
+          type: "claim",
+        }));
 
       // Get latest 2 tickets activities
       const recentTicketsActivities = [...adminTicketsList]
-        .sort((firstTicket, secondTicket) => 
-          parseActivityDate(secondTicket?.createdAt || secondTicket?.createdDate || secondTicket?.dateCreated) - 
-          parseActivityDate(firstTicket?.createdAt || firstTicket?.createdDate || firstTicket?.dateCreated)
+        .sort(
+          (firstTicket, secondTicket) =>
+            parseActivityDate(
+              secondTicket?.createdAt ||
+                secondTicket?.createdDate ||
+                secondTicket?.dateCreated
+            ) -
+            parseActivityDate(
+              firstTicket?.createdAt ||
+                firstTicket?.createdDate ||
+                firstTicket?.dateCreated
+            )
         )
         .slice(0, 2)
-        .map(ticket => ({
-          title: `Support ticket: ${ticket?.subject || ticket?.title || 'Customer inquiry'}`,
-          type: 'ticket'
-        }))
+        .map((ticket) => ({
+          title: `Support ticket: ${
+            ticket?.subject || ticket?.title || "Customer inquiry"
+          }`,
+          type: "ticket",
+        }));
 
       // Combine activities and return latest 6
-      return [...recentClaimsActivities, ...recentTicketsActivities].slice(0, 6)
-    }
+      return [...recentClaimsActivities, ...recentTicketsActivities].slice(
+        0,
+        6
+      );
+    },
   },
   // Component methods
   methods: {
     // This function takes dateString as input and returns human-readable time difference from now
     calculateTimeAgo(dateString) {
       try {
-        const pastTime = new Date(dateString).getTime()
-        const currentTime = Date.now()
-        const timeDifference = Math.max(0, currentTime - pastTime)
-        const minutesAgo = Math.floor(timeDifference / 60000)
-        
-        if (minutesAgo < 1) return 'just now'
-        if (minutesAgo < 60) return `${minutesAgo} minute${minutesAgo === 1 ? '' : 's'} ago`
-        
-        const hoursAgo = Math.floor(minutesAgo / 60)
-        if (hoursAgo < 24) return `${hoursAgo} hour${hoursAgo === 1 ? '' : 's'} ago`
-        
-        const daysAgo = Math.floor(hoursAgo / 24)
-        return `${daysAgo} day${daysAgo === 1 ? '' : 's'} ago`
+        const pastTime = new Date(dateString).getTime();
+        const currentTime = Date.now();
+        const timeDifference = Math.max(0, currentTime - pastTime);
+        const minutesAgo = Math.floor(timeDifference / 60000);
+
+        if (minutesAgo < 1) return "just now";
+        if (minutesAgo < 60)
+          return `${minutesAgo} minute${minutesAgo === 1 ? "" : "s"} ago`;
+
+        const hoursAgo = Math.floor(minutesAgo / 60);
+        if (hoursAgo < 24)
+          return `${hoursAgo} hour${hoursAgo === 1 ? "" : "s"} ago`;
+
+        const daysAgo = Math.floor(hoursAgo / 24);
+        return `${daysAgo} day${daysAgo === 1 ? "" : "s"} ago`;
       } catch {
-        return 'just now'
+        return "just now";
       }
-    }
+    },
   },
-//   onMounted() {
-//     // Fetch initial data for claims and tickets
-//     const store = this.$store
-//     if (store._actions["adminPolicyStore/fetchPolicies"]) {
-//       store.dispatch("adminPolicyStore/fetchPolicies")
-//     }
-// }
-}
+};
 </script>
 
 <style scoped>

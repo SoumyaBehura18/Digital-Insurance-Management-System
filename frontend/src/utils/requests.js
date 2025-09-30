@@ -1,4 +1,3 @@
-
 import axios from "axios";
 
 const base_url = "http://localhost:9090";
@@ -35,7 +34,7 @@ export async function makeRequestWithToken(type, endpoint, body = null) {
   const url = base_url + endpoint;
 
   // Get the token from multiple fallbacks in localStorage
-  const user=JSON.parse(localStorage.getItem("currentUser"));
+  const user = JSON.parse(localStorage.getItem("currentUser"));
   const token = user?.token;
 
   if (!token) {
@@ -43,10 +42,6 @@ export async function makeRequestWithToken(type, endpoint, body = null) {
   }
 
   const config = {
-    // headers: {
-    //     'Content-Type': 'application/json',
-    //     'Accept': 'application/json',
-    //     'Authorization': `Bearer ${token}`
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
@@ -85,26 +80,25 @@ export async function requestWithAuth(type, endpoint, body) {
     return await makeRequestWithToken(type, endpoint, body);
   } catch (err) {
     const status = err?.response?.status;
-    console.error('Request error:', err);
+    console.error("Request error:", err);
     if (status === 401 || status === 403) {
       // Clear stale credentials and redirect to login
       try {
-        // localStorage.removeItem("currentUser");
-        // localStorage.removeItem("userId");
+        localStorage.removeItem("currentUser");
       } catch (_) {
         // intentionally ignore storage errors (ESLint no-empty fix)
         // noop
       }
       // Best-effort redirect without importing router here
-      // if (typeof window !== "undefined") {
-      //   const current = window.location.pathname + window.location.search;
-      //   const loginUrl =
-      //     "/login" +
-      //     (current && current !== "/login"
-      //       ? `?redirect=${encodeURIComponent(current)}`
-      //       : "");
-      //   window.location.assign(loginUrl);
-      // }
+      if (typeof window !== "undefined") {
+        const current = window.location.pathname + window.location.search;
+        const loginUrl =
+          "/login" +
+          (current && current !== "/login"
+            ? `?redirect=${encodeURIComponent(current)}`
+            : "");
+        window.location.assign(loginUrl);
+      }
     }
     throw err;
   }

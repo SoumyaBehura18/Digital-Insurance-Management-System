@@ -35,7 +35,6 @@ const actions = {
     commit("SET_LOADING", true);
     try {
       const response = await requestWithAuth("GET", `/tickets/all`);
-      console.log("API Response:", response.data);
       commit("SET_TICKETS", response.data);
       commit("SET_ERROR", null);
       return response.data;

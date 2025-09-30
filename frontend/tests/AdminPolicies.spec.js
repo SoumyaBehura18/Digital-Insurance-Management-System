@@ -1,4 +1,3 @@
-// tests/AdminPolicies.spec.js
 import { mount, flushPromises } from "@vue/test-utils";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import PoliciesComponent from "../src/components/AdminPoliciesView/AdminPolicies.vue";

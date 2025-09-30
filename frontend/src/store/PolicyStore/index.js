@@ -42,7 +42,6 @@ const mutations = {
 const actions = {
   // 🔹 Fetch all policies available for a user
   async fetchAllPolicies({ commit }, policyRequest) {
-    console.log("Inside fetchAllPolcies")
     commit('SET_LOADING', true)
     try {
       const response = await makeRequestWithToken(
@@ -62,7 +61,6 @@ const actions = {
 
   // 🔹 Fetch only vehicle policies
   async fetchVehiclePolicies({ commit }, policyRequest) {
-    console.log("Inside fetchVehiclePolcies")
     commit('SET_LOADING', true)
     try {
       const response = await makeRequestWithToken(
@@ -82,7 +80,6 @@ const actions = {
 
   // 🔹 Fetch only life policies
   async fetchLifePolicies({ commit }, policyRequest) {
-    console.log("Inside fetchLifePolicies")
     commit('SET_LOADING', true)
     try {
       const response = await makeRequestWithToken(
@@ -90,7 +87,6 @@ const actions = {
         `/policies/lifePolicies`,
         policyRequest
       )
-      console.log("Life Policies Response:", response.data);
       commit('SET_LIFE_POLICIES', response.data)
       commit('SET_ERROR', null)
     } catch (error) {
@@ -103,7 +99,6 @@ const actions = {
 
   // 🔹 Fetch only health policies
   async fetchHealthPolicies({ commit }, policyRequest) {
-    console.log("Inside fetchHealthPolicies")
     commit('SET_LOADING', true)
     try {
       const response = await makeRequestWithToken(

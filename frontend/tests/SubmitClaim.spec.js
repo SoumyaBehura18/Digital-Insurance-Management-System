@@ -1,4 +1,3 @@
-// tests/SubmitClaim.spec.js  
 // Simple tests for the SubmitClaim component
 
 import { mount } from "@vue/test-utils";

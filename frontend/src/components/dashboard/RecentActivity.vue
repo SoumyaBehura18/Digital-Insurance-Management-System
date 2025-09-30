@@ -56,7 +56,7 @@ function formatDate(date) {
   return date ? new Date(date).toLocaleDateString() : "N/A";
 }
 
-// ✅ Combine all into a single unified list
+// Combine all into a single unified list
 const combinedActivities = computed(() => {
   const policyActivities = (props.recentPolicies || []).map((p) => ({
     id: p.id,
@@ -82,7 +82,7 @@ const combinedActivities = computed(() => {
     type: "TICKET",
   }));
 
-  // ✅ Merge and sort newest first
+  // Merge and sort newest first
   return [...policyActivities, ...claimActivities, ...ticketActivities].slice(-6).reverse();
 });
 
