@@ -14,8 +14,7 @@
           <h3 class="text-sm font-medium text-gray-600">Total Policies</h3>
           <span class="kpi-icon-policies">📄</span>
         </div>
-        <div class="kpi-number text-gray-900">{{ stats.totalPoliciesText }}</div>
-        <div class="text-sm text-gray-600">{{ stats.activePoliciesText }}</div>
+        <div class="kpi-number text-gray-900">{{ policies.totalPoliciesText }}</div>
       </div>
 
       <!-- Total Claims -->
@@ -138,7 +137,7 @@
           <div class="quick-action-title quick-action-title-claims">Review Claims</div>
           <div class="quick-action-desc">Process pending insurance claims</div>
         </router-link>
-        <router-link to="/admin/tickets" class="quick-action-card quick-action-card-users">
+        <router-link to="/admin/users" class="quick-action-card quick-action-card-users">
           <div class="quick-action-icon quick-action-icon-users">👥</div>
           <div class="quick-action-title quick-action-title-users">Manage Users</div>
           <div class="quick-action-desc">View and manage customer accounts</div>
@@ -152,21 +151,36 @@
 export default {
   name: 'DashboardView',
   computed: {
+    policies() {
+    
+    const policiesStoreState = this.$store?.state?.adminPolicyStore || {}
+      const policyStoreList= Array.isArray(policiesStoreState.policies) ? policiesStoreState.policies : []
+
+      const totalPoliciesCount = policyStoreList.length || 0
+
+      const activePoliciesDisplayText = totalPoliciesCount ? `${totalPoliciesCount} policy types` : 'No data available for now'
+      console.log('Total Policies Count:', totalPoliciesCount);
+      console.log('Active Policies Display Text:', activePoliciesDisplayText);
+      console.log('Policy Store List:', policyStoreList);
+      return {
+        totalPoliciesText: String(totalPoliciesCount || 0),
+        totalPoliciesCount,
+        activePoliciesDisplayText
+      }
+    },
     // This function takes no input and returns calculated dashboard statistics from claims and tickets data
     stats() {
       const claimsStoreState = this.$store?.state?.claims || {}
       const adminClaimsList = Array.isArray(claimsStoreState.adminClaims) ? claimsStoreState.adminClaims : []
       
       // Count unique policy types from claims data
-      const uniquePolicyNames = new Set()
-      adminClaimsList.forEach(claim => {
-        if (claim?.policyName) {
-          uniquePolicyNames.add(claim.policyName)
-        }
-      })
-      const totalPoliciesCount = uniquePolicyNames.size
-      const activePoliciesDisplayText = totalPoliciesCount ? `${totalPoliciesCount} policy types` : 'No data available for now'
-
+      // const uniquePolicyNames = new Set()
+      // adminClaimsList.forEach(claim => {
+      //   if (claim?.policyName) {
+      //     uniquePolicyNames.add(claim.policyName)
+      //   }
+      // }
+      
       // Count pending claims
       const pendingClaimsCount = adminClaimsList.filter(claim => 
         (claim?.status || '').toUpperCase() === 'PENDING'
@@ -189,8 +203,6 @@ export default {
           : 'No data available for now'
 
       return {
-        totalPoliciesText: String(totalPoliciesCount || 0),
-        activePoliciesText: activePoliciesDisplayText,
         totalClaimsText: String(adminClaimsList.length || 0),
         pendingClaimsText: `${pendingClaimsCount} pending review`,
         totalTicketsText: String(adminTicketsList.length || 0),
@@ -334,7 +346,14 @@ export default {
         return 'just now'
       }
     }
-  }
+  },
+//   onMounted() {
+//     // Fetch initial data for claims and tickets
+//     const store = this.$store
+//     if (store._actions["adminPolicyStore/fetchPolicies"]) {
+//       store.dispatch("adminPolicyStore/fetchPolicies")
+//     }
+// }
 }
 </script>
 

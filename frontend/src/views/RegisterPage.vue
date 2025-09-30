@@ -8,8 +8,12 @@
       </div>
 
       <!-- Heading -->
-      <h2 class="text-center text-lg font-medium mb-1">Create Account</h2>
-      <p class="text-center text-gray-500 mb-6">Fill in your details to get started</p>
+      <h2 class="text-center text-lg font-medium mb-1">
+        {{ isEdit ? "Edit User Details" : "Create Account" }}
+      </h2>
+      <p v-if="!isEdit" class="text-center text-gray-500 mb-6">
+        Fill in your details to get started
+      </p>
 
       <!-- Form -->
       <form @submit.prevent="handleRegister" class="space-y-4">
@@ -24,7 +28,8 @@
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
           <input v-model="email" type="email" placeholder="Enter your email"
-            class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" required />
+            class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+            :disabled="isEdit" required />
         </div>
 
         <!-- Age -->
@@ -51,16 +56,21 @@
             class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" required />
         </div>
 
-        <!-- Password -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-          <input v-model="password" type="password" placeholder="Enter your password"
-            class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" required />
-          <!-- Inline error -->
-          <p v-if="password && !passwordRegex.test(password)" class="text-red-600 text-xs mt-1">
-            Password must be at least 8 characters, include one uppercase letter and one special character.
-          </p>
-        </div>
+       <!-- Password (only show on Register, hide in Edit mode) -->
+<div v-if="!isEdit">
+  <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+  <input 
+    v-model="password" 
+    type="password" 
+    placeholder="Enter your password"
+    class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+    required
+  />
+  <p v-if="password && !passwordRegex.test(password)" class="text-red-600 text-xs mt-1">
+    Password must be at least 8 characters, include one uppercase letter and one special character.
+  </p>
+</div>
+
 
         <!-- Smoking -->
         <div>
@@ -86,9 +96,9 @@
         <!-- Vehicle Type -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Vehicle Type</label>
-          <select v-model="vehicleType" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+          <select v-model="vehicleType" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" required>
             <option value="">Select type</option>
-            <option value="NONE">No Vehicle</option>
+            <option value="NULL">No Vehicle</option>
             <option value="CAR">Car</option>
             <option value="BIKE">Bike</option>
             <option value="HEAVY_VEHICLE">Heavy Vehicle</option>
@@ -96,15 +106,15 @@
         </div>
 
         <!-- Vehicle Age (only if not NONE) -->
-        <div v-if="vehicleType && vehicleType !== 'NONE'">
+        <div v-if="vehicleType && vehicleType !== 'NULL'">
           <label class="block text-sm font-medium text-gray-700 mb-1">Vehicle Age</label>
           <input v-model="vehicleAge" type="number" placeholder="Enter your vehicle's age"
             class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" />
         </div>
 
-        <!-- Register Button -->
+        <!-- Submit Button -->
         <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
-          Register
+          {{ isEdit ? "Save Changes" : "Register" }}
         </button>
       </form>
 
@@ -113,7 +123,7 @@
       <p v-if="successMessage" class="mt-2 text-green-600 text-sm">{{ successMessage }}</p>
 
       <!-- Login Link -->
-      <p class="mt-4 text-center text-gray-600">
+      <p v-if="!isEdit" class="mt-4 text-center text-gray-600">
         Already have an account?
         <a href="/login" class="text-blue-600 font-medium hover:underline">Login</a>
       </p>
@@ -123,9 +133,12 @@
 
 <script setup>
 import { Shield } from 'lucide-vue-next'
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { useStore } from "vuex";
+
+const route = useRoute();
+const isEdit = ref(route.query.mode === "edit");
 
 const router = useRouter();
 const store = useStore();
@@ -146,22 +159,42 @@ const successMessage = ref("");
 // ✅ Password validation regex
 const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
 
+// ----------------------------
+// Prefill User Data for Edit
+// ----------------------------
+onMounted(async () => {
+  if (isEdit.value) {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("currentUser"));
+      if (storedUser?.id) {
+        const user = await store.dispatch("user/fetchUserById", storedUser.id);
+
+        // Prefill the form
+        if (user) {
+          name.value = user.name || "";
+          email.value = user.email || "";
+          age.value = user.age || "";
+          phone.value = user.phone || "";
+          address.value = user.address || "";
+          smoking.value = user.smokingDrinking ? "yes" : "no";
+          preexisting.value = user.preexistingConditions || [];
+          vehicleType.value = user.vehicleType || "NULL";
+          vehicleAge.value = user.vehicleAge || 0;
+        }
+      }
+    } catch (e) {
+      console.error("Failed to fetch user details", e);
+      errorMessage.value = "Could not load user details for editing.";
+    }
+  }
+});
+
+// ----------------------------
+// Handle Register / Update
+// ----------------------------
 const handleRegister = async () => {
-  // Validate password
-  if (!passwordRegex.test(password.value)) {
-    errorMessage.value = "Password must be at least 8 characters, include one uppercase letter and one special character.";
-    return;
-  }
-
-  // Validate phone number
-  if (!/^\d{10}$/.test(phone.value)) {
-    errorMessage.value = "Phone number must be exactly 10 digits.";
-    return;
-  }
-
-  // Vehicle logic
-  let vehicleTypeValue = vehicleType.value === "NONE" ? null : vehicleType.value;
-  let vehicleAgeValue = vehicleType.value === "NONE" ? 0 : Number(vehicleAge.value) || 0;
+  errorMessage.value = "";
+  successMessage.value = "";
 
   try {
     const userData = {
@@ -170,23 +203,30 @@ const handleRegister = async () => {
       age: Number(age.value),
       phone: phone.value,
       address: address.value,
-      password: password.value,
       smokingDrinking: smoking.value === "yes",
       preexistingConditions: preexisting.value,
-      vehicleType: vehicleTypeValue,
-      vehicleAge: vehicleType.value === "NONE" ? Number.MAX_SAFE_INTEGER : Number(vehicleAge.value) || 0,
-      roleType: "USER"
+      vehicleType: vehicleType.value,
+      vehicleAge: Number(vehicleAge.value) || 0,
+      roleType: "USER",
+      ...(password.value ? { password: password.value } : {}) // include only if provided
     };
 
-    await store.dispatch("user/createUser", userData);
-
-    successMessage.value = "Registration successful! Redirecting to login...";
-    errorMessage.value = "";
-    setTimeout(() => {
-      router.push("/login");
-    }, 1500);
+    if (isEdit.value) {
+      // 🔹 Update user
+      await store.dispatch("user/updateUser", userData);
+      successMessage.value = "Profile updated successfully!";
+      setTimeout(() => router.push("/dashboard"), 1200);
+    } else {
+      // 🔹 Register new user
+      await store.dispatch("user/createUser", userData);
+      successMessage.value = "Registration successful! Redirecting to login...";
+      setTimeout(() => router.push("/login"), 1500);
+    }
   } catch (err) {
-    errorMessage.value = err.response?.data?.message || "Something went wrong during registration.";
+    errorMessage.value =
+      err.response?.data?.message ||
+      (isEdit.value ? "Update failed" : "Registration failed");
   }
 };
 </script>
+ 

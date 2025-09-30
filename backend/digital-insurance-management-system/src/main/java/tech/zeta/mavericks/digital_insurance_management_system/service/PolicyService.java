@@ -1,9 +1,8 @@
 package tech.zeta.mavericks.digital_insurance_management_system.service;
 
 import org.springframework.stereotype.Service;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.PolicyRequest;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.PolicyWithPremiumDTO;
-import tech.zeta.mavericks.digital_insurance_management_system.entity.User;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.PolicyRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.PolicyWithPremium;
 import tech.zeta.mavericks.digital_insurance_management_system.repository.PolicyRepository;
 
 import java.util.List;
@@ -17,25 +16,25 @@ public class PolicyService {
         this.policyRepo = policyRepo;
     }
 
-    public List<PolicyWithPremiumDTO> getPoliciesForUser(PolicyRequest policyRequest) {
+    public List<PolicyWithPremium> getPoliciesForUser(PolicyRequest policyRequest) {
         return policyRepo.findPoliciesForUser(
                 policyRequest
         );
     }
 
-    public List<PolicyWithPremiumDTO> getVehiclePoliciesForUser(PolicyRequest policyRequest){
+    public List<PolicyWithPremium> getVehiclePoliciesForUser(PolicyRequest policyRequest){
         return policyRepo.findVehiclePoliciesForUser(
               policyRequest
         );
     }
 
-    public List<PolicyWithPremiumDTO> getLifePoliciesForUser(PolicyRequest policyRequest){
+    public List<PolicyWithPremium> getLifePoliciesForUser(PolicyRequest policyRequest){
         return policyRepo.findLifePoliciesForUser(
                policyRequest
         );
     }
 
-    public List<PolicyWithPremiumDTO> getHealthPoliciesForUser(PolicyRequest policyRequest){
+    public List<PolicyWithPremium> getHealthPoliciesForUser(PolicyRequest policyRequest){
         return policyRepo.findHealthPoliciesForUser(
                 policyRequest
         );

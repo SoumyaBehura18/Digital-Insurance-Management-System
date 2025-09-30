@@ -14,7 +14,8 @@
             {{ email }}
           </p>
         </div>
-        <AvatarComponent :user-name="name" />
+        <!-- <AvatarComponent :user-name="name" /> -->
+        <ProfileDropdown />
       </div>
     </div>
   </header>
@@ -24,11 +25,18 @@
 import { computed, ref } from "vue";
 import { useStore } from "vuex";
 import AvatarComponent from "../AvatarComponent.vue";
+import ProfileDropdown from "./ProfileDropdown.vue"; // if you added it
 
 const store = useStore();
-const user = ref(JSON.parse(localStorage.getItem("currentUser")));
-const currentUser = computed(() => store.getters["user/getCurrentUser"]);
-console.log("Current User from Store:", currentUser.value);   
-const email = user.value?.email;
-const name = user.value?.name;
+
+// safely read and parse currentUser from localStorage
+let stored = null;
+if (typeof window !== "undefined") {
+  stored = localStorage.getItem("currentUser");
+}
+const user = ref(stored ? JSON.parse(stored) : null);
+
+// make name/email computed so they update reactively and avoid "unused import" errors
+const email = computed(() => user.value?.email || "");
+const name = computed(() => user.value?.name || "");
 </script>

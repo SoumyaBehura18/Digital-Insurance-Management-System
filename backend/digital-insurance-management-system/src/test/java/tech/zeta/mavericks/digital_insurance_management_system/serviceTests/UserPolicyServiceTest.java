@@ -3,10 +3,12 @@ package tech.zeta.mavericks.digital_insurance_management_system.serviceTests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.UserPolicyRequest;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.UserPolicyResponse;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.UserPolicyRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.UserPolicyResponse;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.Policy;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.User;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.UserPolicy;
@@ -20,16 +22,16 @@ import tech.zeta.mavericks.digital_insurance_management_system.repository.UserRe
 import tech.zeta.mavericks.digital_insurance_management_system.service.UserPolicyService;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Optional;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserPolicyServiceTest {
-
-    @InjectMocks
-    private UserPolicyService userPolicyService;
 
     @Mock
     private UserPolicyRepository userPolicyRepository;
@@ -40,129 +42,227 @@ class UserPolicyServiceTest {
     @Mock
     private PolicyRepository policyRepository;
 
+    @InjectMocks
+    private UserPolicyService userPolicyService;
+
     private User user;
     private Policy policy;
+    private UserPolicyRequest request;
     private UserPolicy userPolicy;
 
     @BeforeEach
-    void setup() {
+    void setUp() {
         user = new User();
         user.setId(1L);
-        user.setName("John Doe");
 
         policy = new Policy();
         policy.setId(1L);
         policy.setName("Health Policy");
-        policy.setType(PolicyType.valueOf("HEALTH"));
-        policy.setCoverageAmt(10000.0);
+        policy.setType(PolicyType.HEALTH);
+        policy.setCoverageAmt(100000.0);
+
+        request = new UserPolicyRequest();
+        request.setUserId(1L);
+        request.setPolicyId(1L);
+        request.setStartDate(LocalDate.now());
+        request.setEndDate(LocalDate.now().plusYears(1));
+        request.setStatus("ACTIVE");
+        request.setPremiumPaid(12000.0);
 
         userPolicy = new UserPolicy();
         userPolicy.setId(1L);
         userPolicy.setUser(user);
         userPolicy.setPolicy(policy);
-        userPolicy.setStartDate(LocalDate.now());
-        userPolicy.setEndDate(LocalDate.now().plusYears(1));
+        userPolicy.setStartDate(request.getStartDate());
+        userPolicy.setEndDate(request.getEndDate());
         userPolicy.setStatus(PolicyStatus.ACTIVE);
-        userPolicy.setPremiumPaid(5000.0);
+        userPolicy.setPremiumPaid(12000.0);
         userPolicy.setNoClaimBonus(false);
     }
 
     @Test
-    void saveUserPolicy_ShouldSaveSuccessfully() {
-        UserPolicyRequest request = new UserPolicyRequest();
-        request.setUserId(user.getId());
-        request.setPolicyId(policy.getId());
-        request.setStartDate(LocalDate.now());
-        request.setEndDate(LocalDate.now().plusYears(1));
-        request.setStatus("ACTIVE");
-        request.setPremiumPaid(5000.0);
-
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-        when(policyRepository.findById(policy.getId())).thenReturn(Optional.of(policy));
+    void testSaveUserPolicy_Success() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(policyRepository.findById(1L)).thenReturn(Optional.of(policy));
         when(userPolicyRepository.save(any(UserPolicy.class))).thenReturn(userPolicy);
 
         UserPolicyResponse response = userPolicyService.saveUserPolicy(request);
 
         assertNotNull(response);
-        assertEquals(user.getId(), response.getUserId());
-        assertEquals(policy.getId(), response.getPolicyId());
+        assertEquals(1L, response.getUserId());
+        assertEquals(1L, response.getPolicyId());
+        assertEquals("Health Policy", response.getPolicyName());
+        assertEquals(PolicyType.HEALTH, response.getPolicyType());
+        assertEquals(100000.0, response.getCoverageAmount());
+        assertEquals(12000.0, response.getPremiumPaid());
         assertEquals("ACTIVE", response.getStatus());
+        assertFalse(response.getNoClaimBonus());
         verify(userPolicyRepository, times(1)).save(any(UserPolicy.class));
     }
 
     @Test
-    void saveUserPolicy_ShouldThrowUserNotFoundException() {
-        UserPolicyRequest request = new UserPolicyRequest();
-        request.setUserId(2L);
+    void testSaveUserPolicy_UserNotFound() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
-        when(userRepository.findById(2L)).thenReturn(Optional.empty());
+        UserNotFoundException exception = assertThrows(UserNotFoundException.class,
+                () -> userPolicyService.saveUserPolicy(request));
+        assertEquals("User not found", exception.getMessage());
 
-        assertThrows(UserNotFoundException.class, () -> userPolicyService.saveUserPolicy(request));
+        verify(policyRepository, never()).findById(any());
+        verify(userPolicyRepository, never()).save(any());
     }
 
     @Test
-    void saveUserPolicy_ShouldThrowPolicyNotFoundException() {
-        UserPolicyRequest request = new UserPolicyRequest();
-        request.setUserId(user.getId());
-        request.setPolicyId(2L);
+    void testSaveUserPolicy_PolicyNotFound() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(policyRepository.findById(1L)).thenReturn(Optional.empty());
 
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-        when(policyRepository.findById(2L)).thenReturn(Optional.empty());
+        PolicyNotFoundException exception = assertThrows(PolicyNotFoundException.class,
+                () -> userPolicyService.saveUserPolicy(request));
+        assertEquals("Policy not found", exception.getMessage());
 
-        assertThrows(PolicyNotFoundException.class, () -> userPolicyService.saveUserPolicy(request));
+        verify(userPolicyRepository, never()).save(any());
     }
 
     @Test
-    void getUserPoliciesByUserId_ShouldReturnPolicies() {
-        when(userPolicyRepository.findByUserId(user.getId())).thenReturn(List.of(userPolicy));
+    void testGetUserPoliciesByUserId_Success() {
+        List<UserPolicy> list = new ArrayList<>();
+        list.add(userPolicy);
 
-        List<UserPolicyResponse> responses = userPolicyService.getUserPoliciesByUserId(user.getId());
+        when(userPolicyRepository.findByUserId(1L)).thenReturn(list);
+
+        List<UserPolicyResponse> responses = userPolicyService.getUserPoliciesByUserId(1L);
 
         assertEquals(1, responses.size());
-        assertEquals(user.getId(), responses.get(0).getUserId());
+        assertEquals(1L, responses.get(0).getUserId());
+        assertEquals("Health Policy", responses.get(0).getPolicyName());
+        verify(userPolicyRepository, times(1)).findByUserId(1L);
     }
 
     @Test
-    void getUserPoliciesByUserId_ShouldThrowPolicyNotFoundException() {
-        when(userPolicyRepository.findByUserId(user.getId())).thenReturn(Collections.emptyList());
+    void testGetUserPoliciesByUserId_NotFound() {
+        when(userPolicyRepository.findByUserId(1L)).thenReturn(new ArrayList<>());
 
-        assertThrows(PolicyNotFoundException.class, () -> userPolicyService.getUserPoliciesByUserId(user.getId()));
+        PolicyNotFoundException exception = assertThrows(PolicyNotFoundException.class,
+                () -> userPolicyService.getUserPoliciesByUserId(1L));
+        assertEquals("No policies found for user with ID 1", exception.getMessage());
     }
 
     @Test
-    void getUserPolicyById_ShouldReturnPolicy() {
-        when(userPolicyRepository.findById(userPolicy.getId())).thenReturn(Optional.of(userPolicy));
+    void testGetUserPolicyById_Success() {
+        when(userPolicyRepository.findById(1L)).thenReturn(Optional.of(userPolicy));
 
-        UserPolicyResponse response = userPolicyService.getUserPolicyById(userPolicy.getId());
+        UserPolicyResponse response = userPolicyService.getUserPolicyById(1L);
 
         assertNotNull(response);
-        assertEquals(userPolicy.getId(), response.getId());
+        assertEquals(1L, response.getId());
+        assertEquals(1L, response.getUserId());
+        assertEquals(1L, response.getPolicyId());
+        assertEquals("Health Policy", response.getPolicyName());
+        verify(userPolicyRepository, times(1)).findById(1L);
     }
 
     @Test
-    void updateUserPolicyById_ShouldSetNoClaimBonusTrue() {
-        when(userPolicyRepository.findById(userPolicy.getId())).thenReturn(Optional.of(userPolicy));
-        when(userPolicyRepository.save(any(UserPolicy.class))).thenReturn(userPolicy);
+    void testGetUserPolicyById_NotFound() {
+        when(userPolicyRepository.findById(1L)).thenReturn(Optional.empty());
 
-        UserPolicyResponse response = userPolicyService.updateUserPolicyById(userPolicy.getId());
+        assertThrows(NoSuchElementException.class,
+                () -> userPolicyService.getUserPolicyById(1L));
+        verify(userPolicyRepository, times(1)).findById(1L);
+    }
 
+    @Test
+    void testUpdateUserPolicyById_Success() {
+        when(userPolicyRepository.findById(1L)).thenReturn(Optional.of(userPolicy));
+
+        // Create a copy of userPolicy with noClaimBonus set to true for the save return
+        UserPolicy updatedUserPolicy = new UserPolicy();
+        updatedUserPolicy.setId(1L);
+        updatedUserPolicy.setUser(user);
+        updatedUserPolicy.setPolicy(policy);
+        updatedUserPolicy.setStartDate(userPolicy.getStartDate());
+        updatedUserPolicy.setEndDate(userPolicy.getEndDate());
+        updatedUserPolicy.setStatus(userPolicy.getStatus());
+        updatedUserPolicy.setPremiumPaid(userPolicy.getPremiumPaid());
+        updatedUserPolicy.setNoClaimBonus(true);
+
+        when(userPolicyRepository.save(any(UserPolicy.class))).thenReturn(updatedUserPolicy);
+
+        UserPolicyResponse response = userPolicyService.updateUserPolicyById(1L);
+
+        assertNotNull(response);
         assertTrue(response.getNoClaimBonus());
+        verify(userPolicyRepository, times(1)).findById(1L);
         verify(userPolicyRepository, times(1)).save(any(UserPolicy.class));
     }
 
     @Test
-    void updateUserPolicyStatusById_ShouldUpdateStatusAndPremium() {
-        when(userPolicyRepository.findById(userPolicy.getId())).thenReturn(Optional.of(userPolicy));
-        when(userPolicyRepository.save(any(UserPolicy.class))).thenReturn(userPolicy);
+    void testUpdateUserPolicyById_NotFound() {
+        when(userPolicyRepository.findById(1L)).thenReturn(Optional.empty());
 
-        UserPolicyResponse response = userPolicyService.updateUserPolicyStatusById(
-                userPolicy.getId(),
-                PolicyStatus.EXPIRED,
-                0.0
-        );
+        PolicyNotFoundException exception = assertThrows(PolicyNotFoundException.class,
+                () -> userPolicyService.updateUserPolicyById(1L));
+        assertEquals("UserPolicy not found with id: 1", exception.getMessage());
 
-        assertEquals("EXPIRED", response.getStatus());
-        assertEquals(0.0, response.getPremiumPaid());
+        verify(userPolicyRepository, never()).save(any());
+    }
+
+    @Test
+    void testUpdateUserPolicyStatusById_Success() {
+        when(userPolicyRepository.findById(1L)).thenReturn(Optional.of(userPolicy));
+
+        // Create updated policy with new status and premium
+        UserPolicy updatedUserPolicy = new UserPolicy();
+        updatedUserPolicy.setId(1L);
+        updatedUserPolicy.setUser(user);
+        updatedUserPolicy.setPolicy(policy);
+        updatedUserPolicy.setStartDate(userPolicy.getStartDate());
+        updatedUserPolicy.setEndDate(userPolicy.getEndDate());
+        updatedUserPolicy.setStatus(PolicyStatus.EXPIRED);
+        updatedUserPolicy.setPremiumPaid(15000.0);
+        updatedUserPolicy.setNoClaimBonus(false);
+
+        when(userPolicyRepository.save(any(UserPolicy.class))).thenReturn(updatedUserPolicy);
+
+        UserPolicyResponse response = userPolicyService.updateUserPolicyStatusById(1L, PolicyStatus.EXPIRED, 15000.0);
+
+        assertNotNull(response);
+        assertEquals(PolicyStatus.EXPIRED.name(), response.getStatus());
+        assertEquals(15000.0, response.getPremiumPaid());
+        verify(userPolicyRepository, times(1)).findById(1L);
         verify(userPolicyRepository, times(1)).save(any(UserPolicy.class));
+    }
+
+    @Test
+    void testUpdateUserPolicyStatusById_NotFound() {
+        when(userPolicyRepository.findById(1L)).thenReturn(Optional.empty());
+
+        PolicyNotFoundException exception = assertThrows(PolicyNotFoundException.class,
+                () -> userPolicyService.updateUserPolicyStatusById(1L, PolicyStatus.EXPIRED, 15000.0));
+        assertEquals("UserPolicy not found with id: 1", exception.getMessage());
+
+        verify(userPolicyRepository, never()).save(any());
+    }
+
+    @Test
+    void testMapToResponse_AllFields() {
+        // This test ensures the private mapToResponse method is fully covered
+        // by testing through a public method that uses it
+        when(userPolicyRepository.findById(1L)).thenReturn(Optional.of(userPolicy));
+
+        UserPolicyResponse response = userPolicyService.getUserPolicyById(1L);
+
+        // Verify all fields are properly mapped
+        assertEquals(userPolicy.getId(), response.getId());
+        assertEquals(userPolicy.getUser().getId(), response.getUserId());
+        assertEquals(userPolicy.getPolicy().getId(), response.getPolicyId());
+        assertEquals(userPolicy.getStartDate(), response.getStartDate());
+        assertEquals(userPolicy.getEndDate(), response.getEndDate());
+        assertEquals(userPolicy.getStatus().name(), response.getStatus());
+        assertEquals(userPolicy.getPremiumPaid(), response.getPremiumPaid());
+        assertEquals(userPolicy.getPolicy().getName(), response.getPolicyName());
+        assertEquals(userPolicy.getPolicy().getType(), response.getPolicyType());
+        assertEquals(userPolicy.getNoClaimBonus(), response.getNoClaimBonus());
+        assertEquals(userPolicy.getPolicy().getCoverageAmt(), response.getCoverageAmount());
     }
 }

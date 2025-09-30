@@ -6,9 +6,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.ClaimRequestDto;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.ClaimListResponseDto;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.RemainingCoverageResponseDto;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.ClaimRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.ClaimListResponse;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.RemainingCoverageResponse;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.Claim;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.Policy;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.User;
@@ -44,7 +44,7 @@ class ClaimServiceTest {
     private Policy policy;
     private UserPolicy userPolicy;
     private Claim claim;
-    private ClaimRequestDto claimRequestDto;
+    private ClaimRequest claimRequest;
 
     @BeforeEach
     void setup() { setupEntities(); setupDto(); }
@@ -83,18 +83,18 @@ class ClaimServiceTest {
     }
 
     private void setupDto() {
-        claimRequestDto = new ClaimRequestDto();
-        claimRequestDto.setUserPolicyId(1L);
-        claimRequestDto.setClaimDate(LocalDate.now());
-        claimRequestDto.setClaimAmount(new BigDecimal("5000.00"));
-        claimRequestDto.setReason("Medical emergency treatment required");
+        claimRequest = new ClaimRequest();
+        claimRequest.setUserPolicyId(1L);
+        claimRequest.setClaimDate(LocalDate.now());
+        claimRequest.setClaimAmount(new BigDecimal("5000.00"));
+        claimRequest.setReason("Medical emergency treatment required");
     }
 
     @Test
     void submitClaim_ShouldCreate_WhenActivePolicy() {
         when(userPolicyRepository.findById(1L)).thenReturn(Optional.of(userPolicy));
         when(claimRepository.save(any(Claim.class))).thenAnswer(inv -> { Claim c = inv.getArgument(0); c.setId(1L); return c; });
-        ClaimListResponseDto.ClaimResponseDto dto = claimService.submitClaim(claimRequestDto);
+        ClaimListResponse.ClaimResponseDto dto = claimService.submitClaim(claimRequest);
         assertNotNull(dto);
         assertEquals(1L, dto.getId());
         assertEquals(ClaimStatus.PENDING, dto.getStatus());
@@ -104,7 +104,7 @@ class ClaimServiceTest {
     @Test
     void submitClaim_ShouldThrow_WhenUserPolicyMissing() {
         when(userPolicyRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(UserPolicyNotFoundException.class, () -> claimService.submitClaim(claimRequestDto));
+        assertThrows(UserPolicyNotFoundException.class, () -> claimService.submitClaim(claimRequest));
         verify(claimRepository, never()).save(any());
     }
 
@@ -112,14 +112,14 @@ class ClaimServiceTest {
     void submitClaim_ShouldThrow_WhenPolicyNotActive() {
         userPolicy.setStatus(PolicyStatus.EXPIRED);
         when(userPolicyRepository.findById(1L)).thenReturn(Optional.of(userPolicy));
-        assertThrows(RuntimeException.class, () -> claimService.submitClaim(claimRequestDto));
+        assertThrows(RuntimeException.class, () -> claimService.submitClaim(claimRequest));
         verify(claimRepository, never()).save(any());
     }
 
     @Test
     void getAllClaimsDto_ShouldMap() {
         when(claimRepository.findAll()).thenReturn(Collections.singletonList(claim));
-        List<ClaimListResponseDto> list = claimService.getAllClaimsDto();
+        List<ClaimListResponse> list = claimService.getAllClaimsDto();
         assertEquals(1, list.size());
         assertEquals("John Doe", list.get(0).getUserName());
     }
@@ -133,7 +133,7 @@ class ClaimServiceTest {
     @Test
     void getClaimsByUserIdDto_ShouldReturn() {
         when(claimRepository.findByUserPolicy_User_Id(1L)).thenReturn(Collections.singletonList(claim));
-        List<ClaimListResponseDto> list = claimService.getClaimsByUserIdDto(1L);
+        List<ClaimListResponse> list = claimService.getClaimsByUserIdDto(1L);
         assertEquals(1, list.size());
         assertEquals(1L, list.get(0).getUserPolicyId());
     }
@@ -176,7 +176,7 @@ class ClaimServiceTest {
         approved.setStatus(ClaimStatus.APPROVED);
         approved.setClaimAmount(new BigDecimal("5000"));
         when(claimRepository.findByUserPolicy_Id(1L)).thenReturn(Collections.singletonList(approved));
-        RemainingCoverageResponseDto dto = claimService.getRemainingCoverageAmount(1L);
+        RemainingCoverageResponse dto = claimService.getRemainingCoverageAmount(1L);
         assertEquals(45000.0, dto.getRemainingClaimAmount());
     }
 

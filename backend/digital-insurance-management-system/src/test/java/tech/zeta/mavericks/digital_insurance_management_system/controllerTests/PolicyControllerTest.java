@@ -10,8 +10,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.PolicyRequest;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.PolicyWithPremiumDTO;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.PolicyRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.PolicyWithPremium;
 import tech.zeta.mavericks.digital_insurance_management_system.controller.PolicyController;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.PolicyType;
 import tech.zeta.mavericks.digital_insurance_management_system.service.PolicyService;
@@ -33,16 +33,16 @@ class PolicyControllerTest {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    private PolicyWithPremiumDTO vehiclePolicyDTO;
-    private PolicyWithPremiumDTO lifePolicyDTO;
-    private PolicyWithPremiumDTO healthPolicyDTO;
+    private PolicyWithPremium vehiclePolicyDTO;
+    private PolicyWithPremium lifePolicyDTO;
+    private PolicyWithPremium healthPolicyDTO;
 
     @BeforeEach
     void setup() {
         policyController = new PolicyController(policyService);
         mockMvc = MockMvcBuilders.standaloneSetup(policyController).build();
 
-        vehiclePolicyDTO = new PolicyWithPremiumDTO(
+        vehiclePolicyDTO = new PolicyWithPremium(
                 1L,
                 "Car Insurance",
                 PolicyType.VEHICLE,
@@ -52,7 +52,7 @@ class PolicyControllerTest {
                 50000.0
         );
 
-        lifePolicyDTO = new PolicyWithPremiumDTO(
+        lifePolicyDTO = new PolicyWithPremium(
                 2L,
                 "Life Insurance",
                 PolicyType.LIFE,
@@ -62,7 +62,7 @@ class PolicyControllerTest {
                 100000.0
         );
 
-        healthPolicyDTO = new PolicyWithPremiumDTO(
+        healthPolicyDTO = new PolicyWithPremium(
                 3L,
                 "Health Insurance",
                 PolicyType.HEALTH,

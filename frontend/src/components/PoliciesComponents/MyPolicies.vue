@@ -148,6 +148,7 @@
       @purchased="openModal"
     />
   </div>
+
 </template>
 
 <script setup>

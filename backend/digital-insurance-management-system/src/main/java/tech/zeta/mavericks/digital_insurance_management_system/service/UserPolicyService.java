@@ -2,8 +2,8 @@ package tech.zeta.mavericks.digital_insurance_management_system.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.request.UserPolicyRequest;
-import tech.zeta.mavericks.digital_insurance_management_system.DTO.response.UserPolicyResponse;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.request.UserPolicyRequest;
+import tech.zeta.mavericks.digital_insurance_management_system.dto.response.UserPolicyResponse;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.Policy;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.User;
 import tech.zeta.mavericks.digital_insurance_management_system.entity.UserPolicy;
