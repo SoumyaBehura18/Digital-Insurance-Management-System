@@ -1,8 +1,5 @@
 package tech.zeta.mavericks.digital_insurance_management_system.dto.request;
-
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.HealthCondition;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.VehicleType;
 
@@ -15,8 +12,6 @@ import java.util.Set;
  * and premium calculations for health, vehicle, and life insurance policies.
  */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class PolicyRequest {
 
     /** Indicates if the user smokes or drinks, which may affect premiums */

@@ -298,7 +298,7 @@
                 {{ claim.policyName || "-" }}
               </td>
               <td class="px-6 py-4 font-semibold text-gray-900">
-                ${{ formatAmount(claim.claimAmount) }}
+                ₹{{ formatAmount(claim.claimAmount) }}
               </td>
               <td class="px-6 py-4 text-gray-500">
                 {{ formatDate(claim.claimDate) }}
@@ -535,7 +535,7 @@
               >Claim Amount</label
             >
             <p class="text-xl font-bold text-gray-900">
-              ${{ formatAmount(selectedClaim?.claimAmount) }}
+              ₹{{ formatAmount(selectedClaim?.claimAmount) }}
             </p>
           </div>
           <div>
