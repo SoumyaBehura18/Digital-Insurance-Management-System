@@ -7,7 +7,7 @@
       class="w-full"
     />
 
-    <main class="max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <main class="w-full px-4 sm:px-6 lg:px-8 py-8">
       <div class="flex justify-between items-center mb-8">
         <div class="flex items-center gap-3">
           <ArrowLeft
@@ -27,7 +27,7 @@
 
           <BaseButton
             :variant="activeView === 'create' ? 'theme' : 'secondary'"
-            @click="setActiveView('create')"
+            @click="handleRaiseTicket()"
           >
             Raise Ticket
           </BaseButton>
@@ -179,5 +179,10 @@ const handleTicketCreated = (newTicket) => {
 
   // Switch back to tickets view
   setActiveView("tickets");
+};
+
+const handleRaiseTicket = () => {
+  selectedTicket.value = null;
+  setActiveView("create");
 };
 </script>

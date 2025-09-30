@@ -151,7 +151,7 @@
           type="submit"
           variant="primary"
           customClass="bg-indigo-600 hover:bg-indigo-700 flex-1"
-          :disabled="isSubmitting"
+          :disabled="isSubmitting || !isFormDirty"
         >
           {{
             props.ticket
@@ -178,7 +178,7 @@ const props = defineProps({
   },
   ticket: {
     type: Object,
-    default: () => null, // ✅ ensures ticket is never undefined
+    default: () => null,
   },
   policies: {
     type: Array,
@@ -190,10 +190,13 @@ const props = defineProps({
   },
 });
 
+// Emits
 const emit = defineEmits(["ticket-created", "ticket-updated", "cancel"]);
 const store = useStore();
 
-// ✅ Form state safely initialized with optional chaining
+const isSubmitting = ref(false);
+
+// Form state
 const form = reactive({
   subject: props.ticket?.subject || "",
   description: props.ticket?.description || "",
@@ -201,13 +204,20 @@ const form = reactive({
   relatedClaim: props.ticket?.relatedClaim || "",
 });
 
-const isSubmitting = ref(false);
+const isFormDirty = computed(() => {
+  if (!props.ticket) return true; // New ticket is always dirty
+  return (
+    form.subject !== props.ticket.subject ||
+    form.description !== props.ticket.description ||
+    form.relatedPolicy !== props.ticket.relatedPolicy ||
+    form.relatedClaim !== props.ticket.relatedClaim
+  );
+});
 
-// ✅ Watch ticket safely (only if it exists)
 watch(
   () => props.ticket,
   async (newTicket) => {
-    if (!newTicket || !newTicket.id) return; // ✅ prevent null access
+    if (!newTicket || !newTicket.id) return;
 
     try {
       const response = await store.dispatch("tickets/fetchTicketById", newTicket.id);
@@ -226,14 +236,15 @@ watch(
   { immediate: true }
 );
 
-// ✅ Safe form submission handler
 const handleSubmit = async () => {
-  if (!props.userId) {
-    alert("User not found. Please log in again.");
+  if (!isFormDirty.value) {
+    alert("No changes detected. Nothing to update.");
     return;
   }
 
-  isSubmitting.value = true;
+  if (props.userId) {
+    if (form.subject === "" || form.description === "") return;
+    isSubmitting.value = true;
 
   try {
     const newTicket = {
@@ -245,20 +256,17 @@ const handleSubmit = async () => {
     };
 
     if (props.ticket && props.ticket.id) {
-      // ✅ Update existing ticket
       await store.dispatch("tickets/updateTicket", {
         ticketData: { ...newTicket, status: "OPEN" },
         ticketId: props.ticket.id,
       });
       emit("ticket-updated");
     } else {
-      // ✅ Create new ticket
       const result = await store.dispatch("tickets/createTicket", newTicket);
       console.log("Ticket created:", result);
       emit("ticket-created", newTicket);
     }
 
-    // ✅ Reset form after successful submission
     Object.keys(form).forEach((key) => {
       form[key] = "";
     });
