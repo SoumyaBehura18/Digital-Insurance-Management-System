@@ -10,12 +10,10 @@ import java.time.LocalDate;
 /**
  * Data Transfer Object for updating the status and premium of a user policy.
  *
- * This DTO is used when modifying a policy's status (e.g., ACTIVE, LAPSED)
+ * This DTO is used when modifying a policy's status (e.g., ACTIVE, RENEW_PENDING)
  * and updating its premium rate in the system.
  */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class PolicyStatusRequest {
 
     /** Updated premium rate for the policy */

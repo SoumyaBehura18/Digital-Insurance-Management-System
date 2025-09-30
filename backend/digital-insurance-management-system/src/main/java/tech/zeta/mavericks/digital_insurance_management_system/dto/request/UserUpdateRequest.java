@@ -1,9 +1,7 @@
 package tech.zeta.mavericks.digital_insurance_management_system.dto.request;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.HealthCondition;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.RoleType;
 import tech.zeta.mavericks.digital_insurance_management_system.enums.VehicleType;
@@ -17,8 +15,6 @@ import java.util.Set;
  * including personal details, role, health conditions, and vehicle information.
  */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class UserUpdateRequest {
 
     /** Name of the user */
