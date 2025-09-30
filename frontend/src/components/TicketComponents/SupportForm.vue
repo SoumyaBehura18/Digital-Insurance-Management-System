@@ -102,28 +102,6 @@
               Related Claim (Optional)
             </label>
             <div class="relative">
-              <!-- <select
-                id="claim"
-                v-model="form.relatedClaim"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none"
-              >
-                <option value="" disabled selected>
-                  {{
-                    !selectedPolicy.value
-                      ? "Please select a policy first"
-                      : "Select a claim if relevant"
-                  }}
-                </option>
-
-                <option
-                  v-for="claim in claimsById"
-                  :key="claim.id"
-                  :value="claim.id"
-                  :disabled="!selectedPolicy.value"
-                >
-                  {{ claim.id }}
-                </option>
-              </select> -->
               <select
                 id="claim"
                 v-model="form.relatedClaim"

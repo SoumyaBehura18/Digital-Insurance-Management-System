@@ -1,4 +1,3 @@
-// test-setup.js - Common test utilities and global setup
 import { vi } from "vitest";
 import { createStore as vuexCreateStore } from "vuex";
 
@@ -119,27 +118,6 @@ export const createMockStore = (modules = {}) => {
       },
     },
   };
-
-  // return {
-  //   modules: { ...defaultModules, ...modules },
-  //   state: {},
-  //   _modulesNamespaceMap: {
-  //     "tickets/": true,
-  //     "userPolicies/": true,
-  //     "claims/": true,
-  //     "policies/": true,
-  //   },
-  //   _actions: {
-  //     "tickets/fetchUserTickets": true,
-  //     "tickets/createTicket": true,
-  //     "tickets/updateTicket": true,
-  //     "tickets/fetchTicketById": true,
-  //     "userPolicies/fetchUserPolicies": true,
-  //     "claims/fetchClaims": true,
-  //     fetchPolicies: true,
-  //     fetchClaims: true,
-  //   },
-  // };
 
   return vuexCreateStore({
     modules: {

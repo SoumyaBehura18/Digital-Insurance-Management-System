@@ -509,15 +509,6 @@ const getCustomerInitials = (customer) => {
   return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
 };
 
-const getCustomerTypeClass = (type) => {
-  const typeMap = {
-    premium: "bg-yellow-100 text-yellow-800",
-    vip: "bg-purple-100 text-purple-800",
-    regular: "bg-gray-100 text-gray-800",
-  };
-  return typeMap[type?.toLowerCase()] || typeMap.regular;
-};
-
 // Event handlers
 const handleUpdateTicket = () => {
   emit("update-ticket", props.ticket);

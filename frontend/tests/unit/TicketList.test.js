@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mount } from "@vue/test-utils";
 import TicketsList from "@/components/TicketComponents/TicketList.vue";
 import { formatDate } from "@/utils/helperFunctions";
-import { Eye, Pencil } from "lucide-vue-next";
 
 // Mock components
 const MockBaseButton = {
@@ -118,8 +117,6 @@ describe("TicketsList.vue", () => {
           BaseButton: MockBaseButton,
           TicketDetailsModal: MockTicketDetailsModal,
           Pencil: MockPencil,
-          // Eye: MockEye,
-          // eye: MockEye,
         },
       },
     });
@@ -288,8 +285,6 @@ describe("TicketsList.vue", () => {
             BaseButton: MockBaseButton,
             TicketDetailsModal: MockTicketDetailsModal,
             Pencil: MockPencil,
-            // Eye: MockEye,
-            // eye: MockEye,
           },
         },
       });
@@ -354,8 +349,6 @@ describe("TicketsList.vue", () => {
             BaseButton: MockBaseButton,
             TicketDetailsModal: MockTicketDetailsModal,
             Pencil: MockPencil,
-            // Eye: MockEye,
-            // eye: MockEye,
           },
         },
       });

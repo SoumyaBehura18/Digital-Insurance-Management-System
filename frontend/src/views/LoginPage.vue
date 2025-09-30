@@ -64,7 +64,6 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { Shield } from "lucide-vue-next";
 import { useStore } from "vuex";
 import { useToast } from "vue-toast-notification";
 

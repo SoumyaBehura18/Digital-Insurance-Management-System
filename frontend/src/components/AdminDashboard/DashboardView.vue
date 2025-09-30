@@ -173,14 +173,6 @@ export default {
       const claimsStoreState = this.$store?.state?.claims || {}
       const adminClaimsList = Array.isArray(claimsStoreState.adminClaims) ? claimsStoreState.adminClaims : []
       
-      // Count unique policy types from claims data
-      // const uniquePolicyNames = new Set()
-      // adminClaimsList.forEach(claim => {
-      //   if (claim?.policyName) {
-      //     uniquePolicyNames.add(claim.policyName)
-      //   }
-      // }
-      
       // Count pending claims
       const pendingClaimsCount = adminClaimsList.filter(claim => 
         (claim?.status || '').toUpperCase() === 'PENDING'
@@ -347,14 +339,6 @@ export default {
       }
     }
   },
-//   onMounted() {
-//     // Fetch initial data for claims and tickets
-//     const store = this.$store
-//     if (store._actions["adminPolicyStore/fetchPolicies"]) {
-//       store.dispatch("adminPolicyStore/fetchPolicies")
-//     }
-// }
-}
 </script>
 
 <style scoped>

@@ -50,7 +50,6 @@ const actions = {
   },
   // Fetch all policies for the current user
   async fetchUserPolicies({ commit }, userId) {
-    console.log("Action fired with userId:", userId);
     commit("SET_LOADING", true);
     try {
       const response = await requestWithAuth("GET", `/user/policies/${userId}`);
