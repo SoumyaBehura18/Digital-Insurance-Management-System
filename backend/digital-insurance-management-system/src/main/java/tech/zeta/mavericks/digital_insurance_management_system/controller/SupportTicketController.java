@@ -35,12 +35,6 @@ public class SupportTicketController {
         this.ticketService = ticketService;
     }
 
-    /**
-     * Create a new support ticket.
-     *
-     * @param request Request containing ticket subject and message details
-     * @return Created support ticket with assigned ID and details
-     */
     @PostMapping
     public ResponseEntity<SupportTicketResponse> createTicket(@RequestBody SupportTicketRequest request) {
         return ResponseEntity.ok(ticketService.createSupportTicket(request));
