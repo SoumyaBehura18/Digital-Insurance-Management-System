@@ -3,7 +3,7 @@
     <div class="bg-white shadow-md rounded-xl w-full max-w-md p-8">
       <!-- Logo & Title -->
       <div class="flex items-center justify-center mb-6">
-        <Shield class="w-8 h-8 text-blue-600 rounded-full mr-2" />
+        <img src="Icon.png" alt="Shield Icon" class="w-8 h-8" />
         <h1 class="text-xl font-semibold">InsureCore</h1>
       </div>
 

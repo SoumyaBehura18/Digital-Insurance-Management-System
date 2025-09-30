@@ -1,21 +1,28 @@
 <template>
   <header class="bg-background border-b border-border p-4">
     <div class="flex items-center justify-between">
-      <!-- Logo / Brand -->
-      <div class="flex items-center gap-2">
+      <!-- Logo / Brand (hidden on mobile) -->
+      <div class="hidden sm:flex items-center gap-2">
         <span class="font-semibold text-lg">InsureCore</span>
       </div>
 
       <!-- User Info -->
-      <div class="flex items-center gap-4">
-        <div class="text-right">
-          <p class="font-medium">{{ name }}</p>
-          <p class="text-sm text-brand-textTheme text-muted-foreground">
-            {{ email }}
-          </p>
+      <div class="flex items-center gap-4 ml-auto">
+        <!-- Desktop: show name/email + dropdown -->
+        <div class="hidden sm:flex items-center gap-4">
+          <div class="text-right">
+            <p class="font-medium truncate max-w-[150px]">{{ name }}</p>
+            <p class="text-sm text-brand-textTheme text-muted-foreground truncate max-w-[150px]">
+              {{ email }}
+            </p>
+          </div>
+          <ProfileDropdown />
         </div>
-        <!-- <AvatarComponent :user-name="name" /> -->
-        <ProfileDropdown />
+
+        <!-- Mobile: show dropdown only -->
+        <div class="sm:hidden">
+          <ProfileDropdown />
+        </div>
       </div>
     </div>
   </header>
@@ -23,20 +30,14 @@
 
 <script setup>
 import { computed, ref } from "vue";
-import { useStore } from "vuex";
-import AvatarComponent from "../AvatarComponent.vue";
-import ProfileDropdown from "./ProfileDropdown.vue"; // if you added it
+import ProfileDropdown from "./ProfileDropdown.vue";
 
-const store = useStore();
-
-// safely read and parse currentUser from localStorage
 let stored = null;
 if (typeof window !== "undefined") {
   stored = localStorage.getItem("currentUser");
 }
 const user = ref(stored ? JSON.parse(stored) : null);
 
-// make name/email computed so they update reactively and avoid "unused import" errors
-const email = computed(() => user.value?.email || "");
 const name = computed(() => user.value?.name || "");
+const email = computed(() => user.value?.email || "");
 </script>
