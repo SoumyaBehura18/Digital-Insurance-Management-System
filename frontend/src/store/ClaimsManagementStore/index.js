@@ -272,7 +272,7 @@ export default {
       try {
         await requestWithAuth("PATCH", `/user/policy/ncb/${userPolicyId}`);
       } catch (error) {
-        
+        console.error("Failed to update no claim bonus", error);
       }
     },
   },
