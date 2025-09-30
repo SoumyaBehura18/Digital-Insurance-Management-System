@@ -9,8 +9,7 @@ import java.time.LocalDate;
 /**
  * DTO representing detailed information about an insurance claim.
  * Used for listing and returning claim data in API responses.
- *
- * @author Team Mavericks
+
  */
 @Data
 public class ClaimListResponse {

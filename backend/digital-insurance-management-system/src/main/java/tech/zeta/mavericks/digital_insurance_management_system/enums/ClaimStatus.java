@@ -11,7 +11,7 @@ package tech.zeta.mavericks.digital_insurance_management_system.enums;
  * Usage: Used in Claim entity and related DTOs.
  */
 public enum ClaimStatus {
-    PENDING,    // Claim submitted and awaiting review
-    APPROVED,   // Claim reviewed and approved for payment
-    REJECTED    // Claim reviewed and denied
+    PENDING,
+    APPROVED,
+    REJECTED
 }

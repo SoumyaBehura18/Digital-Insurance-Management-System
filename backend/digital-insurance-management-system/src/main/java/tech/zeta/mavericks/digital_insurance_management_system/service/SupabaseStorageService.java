@@ -26,8 +26,6 @@ import java.util.UUID;
  * - Direct HTTP API integration with Supabase Storage
  * - Public URL generation for uploaded files
  * - Organized file structure by claim ID
- *
- * @author Team Mavericks
  */
 @Service
 public class SupabaseStorageService {

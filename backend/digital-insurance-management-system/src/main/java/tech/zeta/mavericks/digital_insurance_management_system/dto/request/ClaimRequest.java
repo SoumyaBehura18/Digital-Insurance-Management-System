@@ -11,8 +11,6 @@ import java.time.LocalDate;
  *
  * This DTO is used to capture and validate claim data from API requests
  * before processing in the service layer.
- *
- * @author Team Mavericks
  */
 @Data
 public class ClaimRequest {

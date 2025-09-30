@@ -5,7 +5,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice public class GlobalExceptionHandler {
+/**
+ * Global exception handler for the Digital Insurance Management System.
+ *
+ * Catches specific exceptions thrown across controllers and returns
+ * standardized HTTP responses with appropriate status codes.
+ *
+ * Handled exceptions:
+ * - UserNotFoundException       : Returns 404 NOT_FOUND
+ * - PolicyNotFoundException     : Returns 404 NOT_FOUND
+ * - ClaimNotFoundException      : Returns 404 NOT_FOUND
+ * - TicketNotFoundException     : Returns 404 NOT_FOUND
+ * - UserPolicyNotFoundException : Returns 404 NOT_FOUND
+ * - UserAlreadyExistException   : Returns 302 FOUND
+ */
+@RestControllerAdvice
+public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<String> handleUserNotFoundException(UserNotFoundException exception){
