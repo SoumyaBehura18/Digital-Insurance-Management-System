@@ -151,7 +151,7 @@
           type="submit"
           variant="primary"
           customClass="bg-indigo-600 hover:bg-indigo-700 flex-1"
-          :disabled="isSubmitting"
+          :disabled="isSubmitting || !isFormDirty"
         >
           {{
             props.ticket
@@ -191,18 +191,9 @@ const props = defineProps({
 });
 
 // Emits
-const emit = defineEmits(["ticket-created", "cancel"]);
+const emit = defineEmits(["ticket-created", "ticket-updated", "cancel"]);
 const store = useStore();
 
-// const policies = computed(() => store.getters["userPolicies/getPolicies"]);
-// const claims = computed(() => store.getters["userClaims/getClaims"]);
-const error = computed(() => store.getters["userPolicies/getError"]);
-
-console.log(
-  "The value of claims and policies are:",
-  props.claims,
-  props.policies
-);
 // Form state
 const form = reactive({
   subject: props.ticket?.subject || "",
@@ -211,18 +202,25 @@ const form = reactive({
   relatedClaim: props.ticket?.relatedClaim || "",
 });
 
-console.log("The form is: ", props.ticket);
+const isFormDirty = computed(() => {
+  if (!props.ticket) return true; // New ticket is always dirty
+  return (
+    form.subject !== props.ticket.subject ||
+    form.description !== props.ticket.description ||
+    form.relatedPolicy !== props.ticket.relatedPolicy ||
+    form.relatedClaim !== props.ticket.relatedClaim
+  );
+});
 
 watch(
   () => props.ticket,
   async () => {
     const response = await store.dispatch(
       "tickets/fetchTicketById",
-      props.ticket.id
+      props?.ticket?.id
     );
 
     if (response) {
-      console.log("The response is: ", response);
       form.subject = response.subject || "";
       form.description = response.description || "";
       form.relatedPolicy = response.policyId || "";
@@ -236,10 +234,14 @@ const isSubmitting = ref(false);
 
 // Methods
 const handleSubmit = async () => {
-  if (props.userId) {
-    isSubmitting.value = true;
+  if (!isFormDirty.value) {
+    alert("No changes detected. Nothing to update.");
+    return;
+  }
 
-    console.log("---", form.relatedClaim, form.relatedPolicy);
+  if (props.userId) {
+    if (form.subject === "" || form.description === "") return;
+    isSubmitting.value = true;
 
     try {
       // Create ticket object to emit
@@ -261,12 +263,10 @@ const handleSubmit = async () => {
         emit("ticket-updated");
       } else {
         const result = await store.dispatch("tickets/createTicket", newTicket);
-        console.log("Ticket created:", result);
         // Emit the new ticket to parent
         emit("ticket-created", newTicket);
       }
 
-      // Reset form after successful submission
       Object.keys(form).forEach((key) => {
         form[key] = "";
       });
