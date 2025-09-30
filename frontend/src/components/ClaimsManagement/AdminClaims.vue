@@ -7,9 +7,9 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
       <!-- Total Claims -->
-  <div class="bg-white rounded-lg border border-gray-200 p-6">
+  <div class="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-brand-textTheme text-sm">Total Claims</p>
@@ -24,7 +24,7 @@
       </div>
 
       <!-- Pending Claims -->
-      <div class="bg-white rounded-lg border border-gray-200 p-6">
+      <div class="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-brand-textTheme text-sm">Pending</p>
@@ -39,7 +39,7 @@
       </div>
 
       <!-- Approved Claims -->
-      <div class="bg-white rounded-lg border border-gray-200 p-6">
+      <div class="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-brand-textTheme text-sm">Approved</p>
@@ -54,7 +54,7 @@
       </div>
 
       <!-- Rejected Claims -->
-      <div class="bg-white rounded-lg border border-gray-200 p-6">
+      <div class="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-brand-textTheme text-sm">Rejected</p>
@@ -88,55 +88,59 @@
   <!-- Claims Table + Filters (always visible) -->
   <div v-else class="bg-white rounded-lg border border-gray-200 shadow-sm">
       <!-- Table Header with Filters -->
-      <div class="p-6 border-b border-gray-200">
+      <div class="p-4 md:p-6 border-b border-gray-200">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
           <h2 class="text-lg font-semibold text-gray-900">Claims ({{ filteredClaims.length }})</h2>
           
           <!-- Filter Tabs -->
-          <div class="flex items-center gap-2">
+          <div class="flex flex-wrap items-center gap-2">
             <button 
               @click="activeFilter = 'all'"
               :class="[
-                'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
+                'px-3 md:px-4 py-2 text-xs md:text-sm font-medium rounded-lg transition-colors',
                 activeFilter === 'all' 
                   ? 'bg-purple-100 text-brand-backgroundTheme border border-purple-200' 
                   : 'text-brand-textTheme hover:text-gray-900 hover:bg-brand-hover hover:text-white'
               ]"
             >
-              All Claims ({{ ($store.state.claims?.adminClaims || []).length }})
+              <span class="hidden sm:inline">All Claims ({{ ($store.state.claims?.adminClaims || []).length }})</span>
+              <span class="sm:hidden">All ({{ ($store.state.claims?.adminClaims || []).length }})</span>
             </button>
             <button 
               @click="activeFilter = 'pending'"
               :class="[
-                'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
+                'px-3 md:px-4 py-2 text-xs md:text-sm font-medium rounded-lg transition-colors',
                 activeFilter === 'pending' 
                   ? 'bg-purple-100 text-brand-backgroundTheme border border-purple-200' 
                   : 'text-brand-textTheme hover:text-gray-900 hover:bg-brand-hover hover:text-white'
               ]"
             >
-              Pending ({{ ($store.getters['claims/adminPendingClaims'] || []).length }})
+              <span class="hidden sm:inline">Pending ({{ ($store.getters['claims/adminPendingClaims'] || []).length }})</span>
+              <span class="sm:hidden">Pending ({{ ($store.getters['claims/adminPendingClaims'] || []).length }})</span>
             </button>
             <button 
               @click="activeFilter = 'approved'"
               :class="[
-                'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
+                'px-3 md:px-4 py-2 text-xs md:text-sm font-medium rounded-lg transition-colors',
                 activeFilter === 'approved' 
                   ? 'bg-purple-100 text-brand-backgroundTheme border border-purple-200' 
                   : 'text-brand-textTheme hover:text-gray-900 hover:bg-brand-hover hover:text-white'
               ]"
             >
-              Approved ({{ ($store.getters['claims/adminApprovedClaims'] || []).length }})
+              <span class="hidden sm:inline">Approved ({{ ($store.getters['claims/adminApprovedClaims'] || []).length }})</span>
+              <span class="sm:hidden">Approved ({{ ($store.getters['claims/adminApprovedClaims'] || []).length }})</span>
             </button>
             <button 
               @click="activeFilter = 'rejected'"
               :class="[
-                'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
+                'px-3 md:px-4 py-2 text-xs md:text-sm font-medium rounded-lg transition-colors',
                 activeFilter === 'rejected' 
                   ? 'bg-purple-100 text-brand-backgroundTheme border border-purple-200' 
                   : 'text-brand-textTheme hover:text-gray-900 hover:bg-brand-hover hover:text-white'
               ]"
             >
-              Rejected ({{ ($store.getters['claims/adminRejectedClaims'] || []).length }})
+              <span class="hidden sm:inline">Rejected ({{ ($store.getters['claims/adminRejectedClaims'] || []).length }})</span>
+              <span class="sm:hidden">Rejected ({{ ($store.getters['claims/adminRejectedClaims'] || []).length }})</span>
             </button>
           </div>
         </div>
@@ -164,7 +168,8 @@
         <p class="text-gray-500">No {{ activeFilter === 'all' ? '' : activeFilter }} claims to review at the moment</p>
       </div>
 
-      <div v-else class="overflow-x-auto">
+      <!-- Desktop Table View -->
+      <div class="hidden md:block overflow-x-auto">
         <table class="w-full text-sm">
           <thead class="bg-gray-50">
             <tr>
@@ -244,11 +249,94 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Mobile Card View -->
+      <div class="md:hidden space-y-4">
+        <div v-for="claim in filteredClaims" :key="claim.id" class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+          <!-- Card Header -->
+          <div class="flex justify-between items-start mb-3">
+            <div class="flex items-center space-x-2">
+              <span class="font-medium text-gray-900">#{{ claim.id }}</span>
+              <span 
+                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                :class="{
+                  'bg-yellow-100 text-yellow-800': claim.status === 'PENDING',
+                  'bg-green-100 text-green-800': claim.status === 'APPROVED',
+                  'bg-red-100 text-red-800': claim.status === 'REJECTED'
+                }"
+              >
+                <svg class="w-1.5 h-1.5 mr-1 rounded-full" :class="{
+                  'text-yellow-600': claim.status === 'PENDING',
+                  'text-green-600': claim.status === 'APPROVED', 
+                  'text-red-600': claim.status === 'REJECTED'
+                }" fill="currentColor" viewBox="0 0 8 8">
+                  <circle cx="4" cy="4" r="3"/>
+                </svg>
+                {{ claim.status === 'PENDING' ? 'Pending' : claim.status === 'APPROVED' ? 'Approved' : 'Rejected' }}
+              </span>
+            </div>
+            <span class="font-semibold text-lg text-gray-900">${{ formatAmount(claim.claimAmount) }}</span>
+          </div>
+
+          <!-- Card Content -->
+          <div class="space-y-2 mb-4">
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-500">Customer:</span>
+              <span class="text-sm text-gray-900 truncate max-w-40">{{ claim.userEmail || 'No email' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-500">Policy:</span>
+              <span class="text-sm text-gray-900 truncate max-w-40">{{ claim.policyName || '-' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-500">Date:</span>
+              <span class="text-sm text-gray-900">{{ formatDate(claim.claimDate) }}</span>
+            </div>
+          </div>
+
+          <!-- Card Actions -->
+          <div class="flex flex-wrap gap-2">
+            <button 
+              @click="openClaimModal(claim)"
+              class="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-md hover:bg-indigo-100 transition-colors"
+            >
+              <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+              </svg>
+              View Details
+            </button>
+            
+            <button 
+              v-if="claim.documentLink"
+              @click="downloadDocument(claim.documentLink, claim.id)"
+              class="inline-flex items-center px-3 py-2 text-sm font-medium text-green-600 bg-green-50 rounded-md hover:bg-green-100 transition-colors"
+              title="Download supporting document"
+            >
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Doc
+            </button>
+            
+            <span 
+              v-if="!claim.documentLink"
+              class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-400 bg-gray-50 rounded-md"
+              title="No document attached"
+            >
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              No doc
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Claim Details Modal -->
-    <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="closeModal">
-      <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4" @click.stop>
+    <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" @click="closeModal">
+      <div class="bg-white rounded-lg p-4 md:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto" @click.stop>
         <div class="flex justify-between items-start mb-6">
           <h3 class="text-xl font-bold text-gray-900">Claim Details - #{{ selectedClaim?.id }}</h3>
           <button @click="closeModal" class="text-gray-400 hover:text-gray-600 transition-colors">
@@ -259,7 +347,7 @@
         </div>
 
         <!-- Claim Info Grid -->
-        <div class="grid grid-cols-2 gap-6 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 mb-6">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Customer Email</label>
             <p class="text-gray-900">{{ selectedClaim?.userEmail || 'No email' }}</p>
@@ -352,10 +440,10 @@
         </div>
 
         <!-- Action Buttons (for pending claims) -->
-        <div v-if="selectedClaim?.status === 'PENDING'" class="flex gap-3">
+        <div v-if="selectedClaim?.status === 'PENDING'" class="flex flex-col sm:flex-row gap-3">
           <button 
             @click="updateClaimStatus(selectedClaim, 'APPROVED')"
-            class="flex-1 px-4 py-2 bg-brand-backgroundTheme text-white font-medium rounded-lg hover:bg-brand-hover transition-colors"
+            class="flex-1 px-4 py-3 bg-brand-backgroundTheme text-white font-medium rounded-lg hover:bg-brand-hover transition-colors"
           >
             <svg class="w-4 h-4 inline mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
@@ -364,7 +452,7 @@
           </button>
           <button 
             @click="updateClaimStatus(selectedClaim, 'REJECTED')"
-            class="flex-1 px-4 py-2 bg-red-500 text-white font-medium rounded-lg hover:bg-red-600 transition-colors"
+            class="flex-1 px-4 py-3 bg-red-500 text-white font-medium rounded-lg hover:bg-red-600 transition-colors"
           >
             <svg class="w-4 h-4 inline mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
