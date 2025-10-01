@@ -1,11 +1,6 @@
 <template>
   <div class="min-h-screen">
-    <HeaderLayout
-      :user="user"
-      :isCollapsed="isCollapsed"
-      :setIsCollapsed="setIsCollapsed"
-      class="w-full"
-    />
+    <HeaderLayout />
 
     <main class="w-full px-4 sm:px-6 lg:px-8 py-8">
       <div class="flex justify-between items-center mb-8">
@@ -126,11 +121,6 @@ const fetchPoliciesAndClaims = async () => {
 };
 
 const selectedTicket = ref(null);
-
-const user = ref({
-  name: "John Doe",
-  email: "somethin@mail.com",
-});
 
 const activeView = ref("tickets"); // 'tickets' | 'create'
 
