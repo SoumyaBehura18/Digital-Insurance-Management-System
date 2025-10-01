@@ -111,7 +111,7 @@ const actions = {
     const endDate = new Date(policy.endDate);
     const diffDays = (now - endDate) / (1000 * 60 * 60 * 24); // how many days since expiry
 
-    // Case 2️⃣: Expired but within 15 days → set RENEW_PENDING
+    // Case : Expired but within 15 days → set RENEW_PENDING
     if (diffDays >= 0 && diffDays <= 15 && policy.status !== "RENEW_PENDING") {
       console.log(
         `Policy ${policy.id} expired ${diffDays.toFixed(
@@ -122,7 +122,7 @@ const actions = {
       continue;
     }
 
-    // Case 3️⃣: Expired for more than 15 days → mark EXPIRED
+    // Case : Expired for more than 15 days → mark EXPIRED
     if (diffDays > 15 && policy.status !== "EXPIRED") {
       console.log(
         `Policy ${policy.id} expired ${diffDays.toFixed(
