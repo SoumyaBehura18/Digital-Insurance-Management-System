@@ -1,11 +1,6 @@
 <template>
   <!-- <div class="min-h-screen bg-gray-50"> -->
-  <HeaderLayout
-    :user="adminUser"
-    :isCollapsed="isCollapsed"
-    :setIsCollapsed="setIsCollapsed"
-    class="w-full"
-  />
+  <HeaderLayout />
 
   <main class="container mx-auto py-8 px-4 space-y-8">
     <div
