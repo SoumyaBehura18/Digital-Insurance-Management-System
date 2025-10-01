@@ -40,7 +40,7 @@ const mutations = {
 }
 
 const actions = {
-  // 🔹 Fetch all policies available for a user
+  // Fetch all policies available for a user
   async fetchAllPolicies({ commit }, policyRequest) {
     commit('SET_LOADING', true)
     try {
@@ -59,7 +59,7 @@ const actions = {
     }
   },
 
-  // 🔹 Fetch only vehicle policies
+  // Fetch only vehicle policies
   async fetchVehiclePolicies({ commit }, policyRequest) {
     commit('SET_LOADING', true)
     try {
@@ -78,7 +78,7 @@ const actions = {
     }
   },
 
-  // 🔹 Fetch only life policies
+  // Fetch only life policies
   async fetchLifePolicies({ commit }, policyRequest) {
     commit('SET_LOADING', true)
     try {
@@ -97,7 +97,7 @@ const actions = {
     }
   },
 
-  // 🔹 Fetch only health policies
+  // Fetch only health policies
   async fetchHealthPolicies({ commit }, policyRequest) {
     commit('SET_LOADING', true)
     try {
