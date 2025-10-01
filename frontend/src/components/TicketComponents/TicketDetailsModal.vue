@@ -96,20 +96,27 @@
       </div>
 
       <!-- Additional Details -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div
+        v-if="ticket.policyId || ticket.claimId"
+        class="grid grid-cols-1 md:grid-cols-2 gap-6"
+      >
         <!-- Related Policy -->
-        <div v-if="ticket.relatedPolicy">
+        <div v-if="ticket.policyId">
           <h4 class="text-sm font-medium text-gray-900 mb-2">Related Policy</h4>
           <div class="bg-gray-50 rounded-lg p-3">
-            <p class="text-sm text-gray-700">{{ ticket.relatedPolicy }}</p>
+            <p class="text-sm font-medium text-gray-700">
+              Policy ID: {{ ticket.policyId }}
+            </p>
           </div>
         </div>
 
         <!-- Related Claim -->
-        <div v-if="ticket.relatedClaim">
+        <div v-if="ticket.claimId">
           <h4 class="text-sm font-medium text-gray-900 mb-2">Related Claim</h4>
           <div class="bg-gray-50 rounded-lg p-3">
-            <p class="text-sm text-gray-700">{{ ticket.relatedClaim }}</p>
+            <p class="text-sm font-medium text-gray-700">
+              Claim ID: {{ ticket.claimId }}
+            </p>
           </div>
         </div>
       </div>
@@ -426,7 +433,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed  } from "vue";
 import BaseModal from "@/components/BaseModal.vue";
 import BaseButton from "@/components/BaseButton.vue";
 import {
